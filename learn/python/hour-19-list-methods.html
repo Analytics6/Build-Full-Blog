@@ -1,0 +1,209 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 19: List Methods | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 19</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 19 of 45 — 45-Hour Python Sprint</p>
+        <h1>List Methods</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> append(), insert(), extend(), remove(), pop(), clear(), index(), count(), sort(), sorted(), reverse(), reversed(), copy()</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-19-list-methods.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Growing, Shrinking, Reordering</h2>
+      <p>Real datasets change constantly: new records arrive, bad rows get dropped, results get sorted for reports. List <strong>methods</strong> handle all of it. One crucial pattern to internalize: most list methods work <strong>in place</strong> and return <code>None</code> — writing <code>data = data.sort()</code> silently destroys your list. This hour covers each method individually, including the in-place vs copy distinction.</p>
+
+      <h2>Adding Elements</h2>
+      <p><code>append(item)</code> adds a single item to the end of the list — the most used list method in Python, and the standard way to build a list inside a loop.</p>
+      <div class="code-block"><div class="code-header">list.append() — add one item to the end</div><pre><code>cart = [<span class="string">&quot;SKU-0042&quot;</span>]
+
+cart.append(<span class="string">&quot;SKU-0018&quot;</span>)
+cart.append(<span class="string">&quot;SKU-0077&quot;</span>)
+
+print(cart)   <span class="comment"># Output: ['SKU-0042', 'SKU-0018', 'SKU-0077']</span></code></pre></div>
+
+      <p><code>insert(index, item)</code> places an item at a specific position, shifting everything after it to the right.</p>
+      <div class="code-block"><div class="code-header">list.insert() — add at a position</div><pre><code>cart = [<span class="string">&quot;SKU-0042&quot;</span>, <span class="string">&quot;SKU-0018&quot;</span>]
+
+cart.insert(0, <span class="string">&quot;SKU-0099&quot;</span>)     <span class="comment"># priority item goes first</span>
+
+print(cart)   <span class="comment"># Output: ['SKU-0099', 'SKU-0042', 'SKU-0018']</span></code></pre></div>
+
+      <p><code>extend(iterable)</code> appends <em>every element</em> of another iterable. Compare with <code>append()</code>, which would add the whole list as a single nested element — a classic mix-up.</p>
+      <div class="code-block"><div class="code-header">list.extend() — merge another list</div><pre><code>morning_txns = [<span class="string">&quot;TXN-001&quot;</span>, <span class="string">&quot;TXN-002&quot;</span>]
+evening_txns = [<span class="string">&quot;TXN-003&quot;</span>, <span class="string">&quot;TXN-004&quot;</span>]
+
+morning_txns.extend(evening_txns)
+print(morning_txns)
+<span class="comment"># Output: ['TXN-001', 'TXN-002', 'TXN-003', 'TXN-004']</span>
+
+<span class="comment"># append() would nest instead:</span>
+batch = [<span class="string">&quot;TXN-001&quot;</span>]
+batch.append([<span class="string">&quot;TXN-002&quot;</span>, <span class="string">&quot;TXN-003&quot;</span>])
+print(batch)   <span class="comment"># Output: ['TXN-001', ['TXN-002', 'TXN-003']] — nested!</span></code></pre></div>
+
+      <h2>Removing Elements</h2>
+      <p><code>remove(value)</code> deletes the <em>first occurrence</em> of a value. If the value is absent it raises <code>ValueError</code>, so check membership first when unsure.</p>
+      <div class="code-block"><div class="code-header">list.remove() — delete by value</div><pre><code>customer_ids = [<span class="string">&quot;C-101&quot;</span>, <span class="string">&quot;C-102&quot;</span>, <span class="string">&quot;C-101&quot;</span>, <span class="string">&quot;C-103&quot;</span>]
+
+customer_ids.remove(<span class="string">&quot;C-101&quot;</span>)    <span class="comment"># only the FIRST C-101 goes</span>
+
+print(customer_ids)   <span class="comment"># Output: ['C-102', 'C-101', 'C-103']</span>
+<span class="comment"># customer_ids.remove(&quot;C-999&quot;)  &lt;-- ValueError: not in list</span></code></pre></div>
+
+      <p><code>pop(index)</code> removes an item by position <em>and returns it</em> — the only removal method that gives the value back. With no argument it pops the last item.</p>
+      <div class="code-block"><div class="code-header">list.pop() — remove by index and return it</div><pre><code>queue = [<span class="string">&quot;TXN-001&quot;</span>, <span class="string">&quot;TXN-002&quot;</span>, <span class="string">&quot;TXN-003&quot;</span>]
+
+last = queue.pop()        <span class="comment"># no index = last item</span>
+first = queue.pop(0)      <span class="comment"># index 0 = first item</span>
+
+print(last)     <span class="comment"># Output: TXN-003</span>
+print(first)    <span class="comment"># Output: TXN-001</span>
+print(queue)    <span class="comment"># Output: ['TXN-002']</span></code></pre></div>
+
+      <p><code>clear()</code> empties the list in place, leaving an empty list rather than deleting the variable.</p>
+      <div class="code-block"><div class="code-header">list.clear() — empty the list</div><pre><code>batch = [<span class="string">&quot;TXN-001&quot;</span>, <span class="string">&quot;TXN-002&quot;</span>, <span class="string">&quot;TXN-003&quot;</span>]
+
+batch.clear()             <span class="comment"># after a successful bulk insert</span>
+
+print(batch)       <span class="comment"># Output: []</span>
+print(len(batch))  <span class="comment"># Output: 0</span></code></pre></div>
+
+      <h2>Querying</h2>
+      <p><code>index(value)</code> returns the position of the first match — or raises <code>ValueError</code> if the value is missing (like <code>str.index()</code>).</p>
+      <div class="code-block"><div class="code-header">list.index() — find a position</div><pre><code>skus = [<span class="string">&quot;SKU-001&quot;</span>, <span class="string">&quot;SKU-002&quot;</span>, <span class="string">&quot;SKU-003&quot;</span>]
+
+print(skus.index(<span class="string">&quot;SKU-002&quot;</span>))    <span class="comment"># Output: 1</span>
+<span class="comment"># skus.index(&quot;SKU-999&quot;)         &lt;-- ValueError: not in list</span></code></pre></div>
+
+      <p><code>count(value)</code> returns how many times a value appears — a one-line duplicate detector.</p>
+      <div class="code-block"><div class="code-header">list.count() — count occurrences</div><pre><code>customer_ids = [<span class="string">&quot;C-101&quot;</span>, <span class="string">&quot;C-102&quot;</span>, <span class="string">&quot;C-101&quot;</span>, <span class="string">&quot;C-103&quot;</span>]
+
+print(customer_ids.count(<span class="string">&quot;C-101&quot;</span>))   <span class="comment"># Output: 2 — duplicate found</span>
+print(customer_ids.count(<span class="string">&quot;C-999&quot;</span>))   <span class="comment"># Output: 0 — no error for missing</span></code></pre></div>
+
+      <h2>Reordering</h2>
+      <p><code>sort()</code> orders the list <strong>in place</strong> (ascending by default, <code>reverse=True</code> for descending) and returns <code>None</code>. The original order is lost.</p>
+      <div class="code-block"><div class="code-header">list.sort() — sort in place</div><pre><code>amounts = [150, 320, 89, 450, 210]
+
+amounts.sort()
+print(amounts)               <span class="comment"># Output: [89, 150, 210, 320, 450]</span>
+
+amounts.sort(reverse=<span class="keyword">True</span>)
+print(amounts)               <span class="comment"># Output: [450, 320, 210, 150, 89]</span></code></pre></div>
+
+      <p>The built-in <code>sorted()</code> function returns a <em>new</em> sorted list and leaves the original untouched — the safe choice when you still need the original order.</p>
+      <div class="code-block"><div class="code-header">sorted() — sorted copy, original preserved</div><pre><code>amounts = [150, 320, 89, 450, 210]
+
+ranked = sorted(amounts, reverse=<span class="keyword">True</span>)
+
+print(ranked)     <span class="comment"># Output: [450, 320, 210, 150, 89]</span>
+print(amounts)    <span class="comment"># Output: [150, 320, 89, 450, 210] — unchanged</span></code></pre></div>
+
+      <p><code>reverse()</code> flips the current element order in place — it does <em>not</em> sort, it just mirrors the list.</p>
+      <div class="code-block"><div class="code-header">list.reverse() — flip order in place</div><pre><code>log_lines = [<span class="string">&quot;09:00 open&quot;</span>, <span class="string">&quot;12:30 audit&quot;</span>, <span class="string">&quot;17:00 close&quot;</span>]
+
+log_lines.reverse()          <span class="comment"># newest first for display</span>
+
+print(log_lines)
+<span class="comment"># Output: ['17:00 close', '12:30 audit', '09:00 open']</span></code></pre></div>
+
+      <p>The built-in <code>reversed()</code> returns an iterator over the list backwards without modifying it — wrap it in <code>list()</code> to materialize, or loop over it directly.</p>
+      <div class="code-block"><div class="code-header">reversed() — reversed view, original preserved</div><pre><code>log_lines = [<span class="string">&quot;09:00 open&quot;</span>, <span class="string">&quot;12:30 audit&quot;</span>, <span class="string">&quot;17:00 close&quot;</span>]
+
+<span class="keyword">for</span> line <span class="keyword">in</span> reversed(log_lines):
+    print(line)
+
+<span class="comment"># Output:</span>
+<span class="comment"># 17:00 close</span>
+<span class="comment"># 12:30 audit</span>
+<span class="comment"># 09:00 open</span>
+
+print(log_lines[0])   <span class="comment"># Output: 09:00 open — original untouched</span></code></pre></div>
+
+      <h2>Copying</h2>
+      <p><code>copy()</code> creates a shallow copy — a new list with the same elements — so you can mutate the copy without touching the source. Equivalent to <code>lst[:]</code>.</p>
+      <div class="code-block"><div class="code-header">list.copy() — independent shallow copy</div><pre><code>price_list = [29.99, 49.99, 15.50]
+
+working = price_list.copy()
+working[0] = 19.99             <span class="comment"># discount applied to the copy only</span>
+
+print(price_list)   <span class="comment"># Output: [29.99, 49.99, 15.5] — unchanged</span>
+print(working)      <span class="comment"># Output: [19.99, 49.99, 15.5]</span></code></pre></div>
+
+      <h2>Edge Cases &amp; Gotchas</h2>
+      <p>The number-one list bug: in-place methods return <code>None</code>. Assigning their result throws your data away.</p>
+      <div class="code-block"><div class="code-header">Gotcha — in-place methods return None</div><pre><code>amounts = [150, 320, 89]
+
+amounts = amounts.sort()     <span class="comment"># WRONG — sort() returns None</span>
+print(amounts)               <span class="comment"># Output: None — the list is gone!</span>
+
+<span class="comment"># Correct: either mutate in place OR take sorted()'s return value</span>
+amounts = [150, 320, 89]
+amounts.sort()               <span class="comment"># option 1: in place, no assignment</span>
+ranked = sorted(amounts)     <span class="comment"># option 2: new list from sorted()</span>
+print(amounts, ranked)       <span class="comment"># Output: [89, 150, 320] [89, 150, 320]</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>ETL</strong> — <code>append()</code> builds row buffers; <code>extend()</code> merges daily batches; <code>clear()</code> resets the buffer after each bulk insert.</li>
+        <li><strong>Analytics</strong> — <code>sorted(amounts, reverse=True)[:3]</code> produces a top-3 report without disturbing the source data.</li>
+        <li><strong>Data quality</strong> — <code>count()</code> flags duplicate customer IDs before they reach the database.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Build a cart with three <code>append()</code> calls, then <code>insert()</code> a priority item at index 0.</li>
+        <li>Merge two transaction lists with <code>extend()</code>; show what <code>append()</code> would have done instead.</li>
+        <li>Use <code>pop()</code> to process and remove items one at a time until the list is empty.</li>
+        <li>Sort a list of amounts descending twice: once with <code>sort(reverse=True)</code>, once with <code>sorted()</code> — compare what happens to the original.</li>
+        <li>Reproduce the <code>data = data.sort()</code> bug, then fix it.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>Add: <code>append</code> (one item), <code>insert</code> (at position), <code>extend</code> (merge iterable).</li>
+        <li>Remove: <code>remove</code> (by value, first match), <code>pop</code> (by index, returns the item), <code>clear</code> (empty all).</li>
+        <li>Query: <code>index</code> raises on missing; <code>count</code> returns 0 safely.</li>
+        <li><code>sort()</code>/<code>reverse()</code> mutate in place and return <code>None</code>; <code>sorted()</code>/<code>reversed()</code> leave the original intact.</li>
+        <li><code>copy()</code> (or <code>[:]</code>) makes an independent shallow copy for safe experimentation.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-19-list-methods.html">Hour 19 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-18-lists-basics.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Lists Basics</span></a><a href="hour-20-list-indexing-and-slicing.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">List Indexing &amp; Slicing →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

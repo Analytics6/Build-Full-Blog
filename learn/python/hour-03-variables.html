@@ -1,0 +1,143 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 3: Variables | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 3</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 3 of 45 — 45-Hour Python Sprint</p>
+        <h1>Variables</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> Variable creation, naming rules, dynamic typing, re-assignment</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-03-variables.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>What a Variable Really Is</h2>
+      <p>A variable in Python is a <strong>name that points to an object in memory</strong> — a label, not a box. When you write <code>price = 49.99</code>, Python creates a float object and binds the name <code>price</code> to it. This mental model matters: assignment never copies data, it only attaches another label. Two names can point to the very same object, which becomes important when you work with lists and dictionaries later in the course.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <h3>Creating Variables</h3>
+      <p>Python creates a variable the moment you assign a value with <code>=</code>. There is no declaration keyword and no type annotation required — this is <strong>dynamic typing</strong>. The type lives on the <em>object</em>, not on the name.</p>
+
+      <h3>Naming Rules</h3>
+      <ul>
+        <li>Must start with a letter (a–z, A–Z) or an underscore <code>_</code>.</li>
+        <li>Cannot start with a digit — <code>2price = 10</code> raises <code>SyntaxError</code>.</li>
+        <li>Case-sensitive: <code>total_sales</code> and <code>Total_Sales</code> are two different variables.</li>
+        <li>Reserved keywords (<code>if</code>, <code>for</code>, <code>class</code>, <code>return</code>, ...) cannot be used as names.</li>
+        <li>Convention: use <strong>snake_case</strong> for variables — <code>transaction_amount</code>, <code>customer_id</code>.</li>
+      </ul>
+      <p><strong>Common pitfall:</strong> Python will happily let you overwrite built-in names like <code>list</code>, <code>sum</code>, or <code>type</code>. Writing <code>sum = 100</code> works — until three cells later <code>sum([1, 2, 3])</code> fails with <code>TypeError: 'int' object is not callable</code>. Avoid built-in names entirely.</p>
+
+      <h3>Re-assignment &amp; Multiple Assignment</h3>
+      <p>A name can be rebound to a new object at any time — even one of a different type. Python also supports assigning several names at once through <em>tuple unpacking</em>, which enables the famous one-line swap.</p>
+
+      <h2>Syntax Reference</h2>
+      <div class="code-block"><div class="code-header">Example — Product inventory variables</div><pre><code><span class="comment"># Describe one product from a retail catalog</span>
+product_name = <span class="string">&quot;Wireless Keyboard&quot;</span>   <span class="comment"># str</span>
+unit_price = 49.99                    <span class="comment"># float</span>
+quantity_in_stock = 120               <span class="comment"># int</span>
+is_discontinued = <span class="keyword">False</span>               <span class="comment"># bool</span>
+
+<span class="comment"># Derive a new value from existing variables</span>
+total_value = unit_price * quantity_in_stock
+
+print(<span class="string">f&quot;{product_name}: ${total_value:,.2f} in stock&quot;</span>)
+<span class="comment"># Output: Wireless Keyboard: $5,998.80 in stock</span></code></pre></div>
+
+      <div class="code-block"><div class="code-header">Example — Dynamic typing in action</div><pre><code><span class="comment"># The same name can point to different types over time</span>
+account_balance = 15000.50
+print(type(account_balance))   <span class="comment"># Output: &lt;class 'float'&gt;</span>
+
+account_balance = <span class="string">&quot;FROZEN&quot;</span>     <span class="comment"># legal — the name now points to a string</span>
+print(type(account_balance))   <span class="comment"># Output: &lt;class 'str'&gt;</span>
+
+<span class="comment"># Flexibility cuts both ways: downstream code expecting a number</span>
+<span class="comment"># will now crash. Keep a variable's type stable in real projects.</span></code></pre></div>
+
+      <div class="code-block"><div class="code-header">Example — Multiple assignment in one line</div><pre><code><span class="comment"># Assign three related values in one statement</span>
+debit, credit, balance = 500, 1200, 8700
+
+print(debit)      <span class="comment"># Output: 500</span>
+print(credit)     <span class="comment"># Output: 1200</span>
+print(balance)    <span class="comment"># Output: 8700</span></code></pre></div>
+
+      <p>The same unpacking mechanism enables Python's famous one-line swap — no temporary variable required.</p>
+      <div class="code-block"><div class="code-header">Example — Swapping two variables</div><pre><code>checking = 3200
+savings = 9800
+
+checking, savings = savings, checking   <span class="comment"># swap in one line</span>
+
+print(checking)   <span class="comment"># Output: 9800</span>
+print(savings)    <span class="comment"># Output: 3200</span></code></pre></div>
+
+      <div class="code-block"><div class="code-header">Example — Bank customer snapshot</div><pre><code><span class="comment"># Combine several variables into one formatted report line</span>
+customer_id = <span class="string">&quot;CUS-20481&quot;</span>
+loyalty_tier = <span class="string">&quot;gold&quot;</span>
+account_balance = 15420.50
+txn_count_30d = 12                <span class="comment"># transactions in the last 30 days</span>
+
+print(<span class="string">f&quot;{customer_id}: {loyalty_tier} tier, &quot;</span>
+      <span class="string">f&quot;balance ${account_balance:,.2f}, {txn_count_30d} recent txns&quot;</span>)
+<span class="comment"># Output: CUS-20481: gold tier, balance $15,420.50, 12 recent txns</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>ETL scripts</strong> — variables hold file paths, row counts, and connection strings: <code>source_path = &quot;/data/bank_transactions.csv&quot;</code>.</li>
+        <li><strong>Notebook analysis</strong> — intermediate metrics like <code>avg_balance</code> and <code>txn_count_30d</code> get named so later cells can reuse them.</li>
+        <li><strong>Configuration</strong> — constants by convention use UPPER_CASE: <code>MAX_RETRIES = 3</code>, <code>TAX_RATE = 0.18</code>. Python doesn't enforce it, but every reader understands the intent.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Declare variables for a product's name, price, and quantity; compute and print the total cost.</li>
+        <li>Swap two variables in one line with <code>a, b = b, a</code> and verify the result.</li>
+        <li>Try <code>2price = 10</code> and read the <code>SyntaxError</code> message carefully.</li>
+        <li>Reassign an int variable to a string; print <code>type()</code> before and after.</li>
+        <li>Assign <code>sum = 5</code>, then try <code>sum([1, 2, 3])</code> — observe the error, then restart the kernel.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>Variables are name-to-object bindings created by <code>=</code>; assignment attaches a label, it does not copy data.</li>
+        <li>Use snake_case; names cannot start with digits or shadow keywords — and avoid shadowing built-ins like <code>sum</code> and <code>list</code>.</li>
+        <li>Dynamic typing lets a name point to a new type at any time; use that power sparingly to keep code predictable.</li>
+        <li>Tuple unpacking assigns multiple names at once: <code>x, y = 1, 2</code>, and <code>a, b = b, a</code> swaps in place.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-03-variables.html">Hour 3 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-02-python-syntax.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Python Syntax</span></a><a href="hour-04-data-types-overview.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Data Types Overview →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

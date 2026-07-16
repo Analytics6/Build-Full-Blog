@@ -1,0 +1,149 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 1: Python Introduction | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 1</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 1 of 45 — 45-Hour Python Sprint</p>
+        <h1>Python Introduction</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> What is Python, history, uses, setup, Jupyter installation</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-01-python-introduction.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Why Learn Python?</h2>
+      <p>Welcome to the <strong>45-Hour Python Sprint</strong>. Python is one of the most widely used programming languages in the world, and it dominates data analytics, automation, and scripting. Its greatest strength is <em>readability</em>: Python code often reads almost like plain English, which means you spend your energy on solving problems rather than fighting syntax.</p>
+      <p>By the end of this hour you will understand what Python is, how it came to be, where it is used, and how to set up a Jupyter environment so you can run every example in this course yourself.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <h3>What is Python?</h3>
+      <p>Python is an <strong>interpreted, high-level, general-purpose</strong> programming language created by Guido van Rossum and first released in 1991. Four properties define how it behaves:</p>
+      <ul>
+        <li><strong>Interpreted</strong> — Python executes your source code line by line through an interpreter. There is no separate compile step, which makes experimentation fast: type a line, run it, see the result.</li>
+        <li><strong>Dynamically typed</strong> — You never declare a variable's type. Python figures out at runtime whether a value is a number, text, or something else. This speeds up writing code, but it also means type errors surface at runtime rather than compile time — a trade-off you will learn to manage.</li>
+        <li><strong>Garbage-collected</strong> — Memory is managed automatically. When no variable refers to an object any more, Python reclaims the memory for you.</li>
+        <li><strong>Multi-paradigm</strong> — Python supports procedural code (simple top-to-bottom scripts), object-oriented programming (classes, covered in Hours 35–38), and functional patterns (lambdas and comprehensions, Hour 28).</li>
+      </ul>
+
+      <h3>A Brief History</h3>
+      <p>Python 1.0 arrived in 1994. Version 2.x dominated the 2000s, and Python 3 (released in 2008) cleaned up long-standing inconsistencies — most famously turning <code>print</code> from a statement into a function. Python 2 reached end of life in 2020; everything you learn in this course is modern Python 3. The name comes from the comedy group <em>Monty Python</em>, not the snake — though the snake logo stuck anyway.</p>
+
+      <h3>Where Python Is Used</h3>
+      <table>
+        <thead><tr><th>Domain</th><th>Typical Use</th></tr></thead>
+        <tbody>
+          <tr><td>Data analytics</td><td>Exploring datasets, computing metrics, building reports with Pandas</td></tr>
+          <tr><td>Data engineering</td><td>ETL pipelines that move and transform data between systems</td></tr>
+          <tr><td>Web &amp; APIs</td><td>Backend services with Flask, Django, and FastAPI</td></tr>
+          <tr><td>Automation</td><td>Scheduled scripts for file handling, reporting, and clean-up jobs</td></tr>
+          <tr><td>Machine learning</td><td>Model training with scikit-learn, PyTorch, TensorFlow</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Setting Up Your Environment</h3>
+      <p>Install <strong>Anaconda</strong> (a Python distribution that bundles data libraries) or the lighter <strong>Miniconda</strong>, then launch <strong>Jupyter Notebook</strong> or JupyterLab. Jupyter is the standard workspace for data work because it mixes two kinds of cells:</p>
+      <ul>
+        <li><strong>Markdown cells</strong> — formatted notes, headings, and explanations.</li>
+        <li><strong>Code cells</strong> — executable Python whose output appears directly beneath the cell.</li>
+      </ul>
+      <table>
+        <thead><tr><th>Shortcut</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td><code>Shift + Enter</code></td><td>Run cell and move to next</td></tr>
+          <tr><td><code>Ctrl + Enter</code></td><td>Run cell, stay in place</td></tr>
+          <tr><td><code>M</code> (command mode)</td><td>Convert cell to Markdown</td></tr>
+          <tr><td><code>Y</code> (command mode)</td><td>Convert cell to Code</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Common pitfall:</strong> beginners often type Python code into a Markdown cell and wonder why nothing runs. Check the cell type in the toolbar — code cells show an <code>In [ ]:</code> prompt on the left.</p>
+
+      <h2>Syntax Reference</h2>
+      <p>Your first Python program prints text to the console with the built-in <code>print()</code> function. Comments start with <code>#</code> and are ignored by the interpreter — use them to explain <em>why</em> the code does what it does.</p>
+
+      <div class="code-block"><div class="code-header">Example — Your first Python script</div><pre><code><span class="comment"># A first script for a retail analytics team</span>
+<span class="comment"># print() writes text to the console — the simplest form of output</span>
+print(<span class="string">&quot;Hello, retail analytics!&quot;</span>)
+print(<span class="string">&quot;Starting store_sales ETL pipeline...&quot;</span>)
+
+<span class="comment"># Output:</span>
+<span class="comment"># Hello, retail analytics!</span>
+<span class="comment"># Starting store_sales ETL pipeline...</span></code></pre></div>
+
+      <div class="code-block"><div class="code-header">Example — Python as a calculator</div><pre><code><span class="comment"># Quick arithmetic checks on daily store numbers</span>
+stores_reporting = 125        <span class="comment"># stores that sent sales files today</span>
+avg_transactions = 8          <span class="comment"># average transactions per store per hour</span>
+
+print(stores_reporting * avg_transactions)   <span class="comment"># Output: 1000</span>
+print(stores_reporting + 25)                 <span class="comment"># Output: 150</span>
+print(stores_reporting / 5)                  <span class="comment"># Output: 25.0 — division gives a float</span></code></pre></div>
+
+      <div class="code-block"><div class="code-header">Example — Markdown vs code cells in Jupyter</div><pre><code><span class="comment"># In a MARKDOWN cell (not a code cell), you would write notes like:</span>
+<span class="comment">#</span>
+<span class="comment">#   # My Learning Goals</span>
+<span class="comment">#   - Build data pipelines for retail inventory</span>
+<span class="comment">#   - Analyze monthly store_sales trends</span>
+<span class="comment">#</span>
+<span class="comment"># In a CODE cell, you write executable Python:</span>
+account_balance = 5000.00
+print(<span class="string">f&quot;Opening balance: {account_balance}&quot;</span>)   <span class="comment"># Output: Opening balance: 5000.0</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <p>Python sits at the center of most modern data workflows:</p>
+      <ul>
+        <li><strong>ETL</strong> — Orchestration tools like Apache Airflow are written in and scripted with Python; nightly jobs ingest files, transform rows, and load warehouses.</li>
+        <li><strong>Analytics</strong> — Pandas (Hours 41–43) turns raw CSVs into aggregated insights in a few lines of code.</li>
+        <li><strong>Services</strong> — Frameworks like FastAPI expose data through web APIs, backed by the same Python skills you start learning today.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Create a Markdown cell with your name as an H1 heading and a bulleted list of your learning goals.</li>
+        <li>Write <code>print('Welcome to Python programming!')</code> in a code cell and run it with <code>Shift + Enter</code>.</li>
+        <li>Calculate <code>125 * 8</code> in a code cell and confirm the output is <code>1000</code>.</li>
+        <li>Add a <code>#</code> comment above each cell explaining what it does.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>Python is an interpreted, dynamically typed, garbage-collected language designed for readability.</li>
+        <li>Python 3 is the modern standard; Python 2 is end-of-life and should not be used.</li>
+        <li>Jupyter Notebook combines Markdown notes and executable code cells in one workspace — ideal for learning and data analysis.</li>
+        <li><code>print()</code> and <code>#</code> comments are your first tools for producing output and documenting intent.</li>
+        <li>Run cells with <code>Shift + Enter</code>; check the cell type if code refuses to execute.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-01-python-introduction.html">Hour 1 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><div class="flex-1"></div><a href="hour-02-python-syntax.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Python Syntax →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

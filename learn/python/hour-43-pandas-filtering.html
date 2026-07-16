@@ -1,0 +1,119 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 43: Pandas Filtering | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 43</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 43 of 45 — 45-Hour Python Sprint</p>
+        <h1>Pandas Filtering</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> Selecting columns, selecting rows, conditional selection (Boolean indexing), loc (label-based) and iloc (integer position-based) indexers, combining multiple conditions (&amp;, |)</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-43-pandas-filtering.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Filtering DataFrames Like SQL WHERE</h2>
+      <p>Pandas boolean indexing mirrors SQL <code>WHERE</code> clauses. Filter <code>store_sales</code> for amounts above $1000, select customers with lifetime spend &gt; $5,000, or isolate high-risk transactions — all with <code>df[condition]</code>, <code>.loc</code>, and <code>.iloc</code>.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <h3>Boolean Indexing</h3>
+      <p><code>df[df["amount"] &gt; 1000]</code> keeps rows where the condition is True. Combine with <code>&amp;</code>, <code>|</code>, <code>~</code> — wrap each condition in parentheses.</p>
+      <h3>.loc vs .iloc</h3>
+      <ul>
+        <li><code>.loc</code> — label-based selection by row/column names</li>
+        <li><code>.iloc</code> — integer position-based selection (0-indexed)</li>
+      </ul>
+
+      <h2>Syntax Reference</h2>
+      <p>Select one column with <code>df["col"]</code> (returns a Series) or several with a list of names (returns a DataFrame).</p>
+      <div class="code-block"><div class="code-header">Selecting columns — one or several</div><pre><code>amounts = df[<span class="string">&quot;amount&quot;</span>]                            <span class="comment"># Series</span>
+pair = df[[<span class="string">&quot;transaction_id&quot;</span>, <span class="string">&quot;amount&quot;</span>]]          <span class="comment"># DataFrame with 2 columns</span>
+
+print(type(amounts).__name__)    <span class="comment"># Output: Series</span>
+print(type(pair).__name__)       <span class="comment"># Output: DataFrame</span></code></pre></div>
+
+      <p>Boolean indexing keeps only the rows where a condition is <code>True</code> — the pandas equivalent of SQL <code>WHERE</code>.</p>
+      <div class="code-block"><div class="code-header">Boolean indexing — filter rows by condition</div><pre><code>high_sales = df[df[<span class="string">&quot;amount&quot;</span>] &gt; 1000]
+
+print(len(df))            <span class="comment"># Output (example): 14230 — all rows</span>
+print(len(high_sales))    <span class="comment"># Output (example): 892 — rows above $1000</span></code></pre></div>
+
+      <p>Combine conditions with <code>&amp;</code> (and), <code>|</code> (or), and <code>~</code> (not). Each condition must be wrapped in parentheses — using Python's <code>and</code>/<code>or</code> here raises an error.</p>
+      <div class="code-block"><div class="code-header">Combining conditions — &amp; and |</div><pre><code>electronics = df[(df[<span class="string">&quot;category&quot;</span>] == <span class="string">&quot;Electronics&quot;</span>) &amp; (df[<span class="string">&quot;amount&quot;</span>] &gt; 500)]
+big_or_food = df[(df[<span class="string">&quot;amount&quot;</span>] &gt; 5000) | (df[<span class="string">&quot;category&quot;</span>] == <span class="string">&quot;Groceries&quot;</span>)]
+
+print(len(electronics))    <span class="comment"># Output (example): 214</span>
+print(len(big_or_food))    <span class="comment"># Output (example): 3105</span></code></pre></div>
+
+      <p><code>.loc</code> selects by labels: a row condition plus a list of column names in one step.</p>
+      <div class="code-block"><div class="code-header">.loc — label-based selection</div><pre><code>subset = df.loc[df[<span class="string">&quot;amount&quot;</span>] &gt; 1000, [<span class="string">&quot;transaction_id&quot;</span>, <span class="string">&quot;amount&quot;</span>]]
+
+print(subset.head(2))
+<span class="comment"># Output (example):</span>
+<span class="comment">#     transaction_id   amount</span>
+<span class="comment"># 17          T-0018  1250.00</span>
+<span class="comment"># 42          T-0043  3999.99</span></code></pre></div>
+
+      <p><code>.iloc</code> selects by integer position — row and column ranges follow the same exclusive-stop rule as list slicing.</p>
+      <div class="code-block"><div class="code-header">.iloc — position-based selection</div><pre><code>first_five = df.iloc[0:5, 0:3]    <span class="comment"># rows 0-4, columns 0-2</span>
+
+print(first_five.shape)    <span class="comment"># Output: (5, 3)</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>Analytics dashboards</strong> — Filter products by price range and category for store managers.</li>
+        <li><strong>Fraud detection</strong> — Isolate transactions above threshold in foreign countries.</li>
+        <li><strong>reports</strong> — Extract customers with lifetime spend &gt; $5,000 who shopped in Q4.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Filter transactions above $1000 in the Electronics category.</li>
+        <li>Select rows 10—20 with Name and Price columns using <code>.loc</code>.</li>
+        <li>Grab the first 5 rows and 2 columns with <code>.iloc</code>.</li>
+        <li>Combine two conditions with <code>&amp;</code> to filter by join year and balance.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li><code>df[df["col"] &gt; val]</code> — boolean indexing.</li>
+        <li>Use <code>&amp;</code>, <code>|</code>, <code>~</code> (not <code>and</code>/<code>or</code>) for compound filters.</li>
+        <li><code>.loc</code> = labels; <code>.iloc</code> = integer positions.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-43-pandas-filtering.html">Hour 43 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-42-pandas-data-cleaning.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Pandas Data Cleaning</span></a><a href="hour-44-mini-project.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Mini Project →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

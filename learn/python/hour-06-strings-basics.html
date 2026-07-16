@@ -1,0 +1,157 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 6: Strings Basics | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 6</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 6 of 45 — 45-Hour Python Sprint</p>
+        <h1>Strings Basics</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> String creation, single/double/triple quotes, string concatenation, replication, len()</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-06-strings-basics.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Text Is Everywhere</h2>
+      <p>Names, addresses, product codes, log messages, file paths — a huge share of the data you will ever process is text, and in Python text lives in <strong>strings</strong>. A string is an ordered sequence of Unicode characters. This hour covers every way to create a string, why strings cannot be modified in place, and the basic operations that combine, repeat, and measure them.</p>
+
+      <h2>Creating Strings</h2>
+      <p>Single quotes <code>'...'</code> and double quotes <code>&quot;...&quot;</code> are completely interchangeable. Pick one style and stay consistent; switch to the other when the text itself contains a quote character.</p>
+      <div class="code-block"><div class="code-header">Quotes — single and double are equivalent</div><pre><code>product_a = <span class="string">'Wireless Mouse'</span>          <span class="comment"># single quotes</span>
+product_b = <span class="string">&quot;Wireless Keyboard&quot;</span>       <span class="comment"># double quotes — same type</span>
+
+print(type(product_a))    <span class="comment"># Output: &lt;class 'str'&gt;</span>
+print(type(product_b))    <span class="comment"># Output: &lt;class 'str'&gt;</span></code></pre></div>
+
+      <p>When the text contains an apostrophe or a quotation mark, wrap it in the <em>other</em> quote style — or escape the character with a backslash.</p>
+      <div class="code-block"><div class="code-header">Quotes inside quotes — mixing styles</div><pre><code>note_1 = <span class="string">&quot;Customer's preferred branch: Downtown&quot;</span>   <span class="comment"># ' inside &quot; &quot;</span>
+note_2 = <span class="string">'She said &quot;deliver by Friday&quot;'</span>             <span class="comment"># &quot; inside ' '</span>
+note_3 = <span class="string">'Customer\'s order shipped'</span>                <span class="comment"># or escape with \</span>
+
+print(note_1)   <span class="comment"># Output: Customer's preferred branch: Downtown</span>
+print(note_2)   <span class="comment"># Output: She said &quot;deliver by Friday&quot;</span></code></pre></div>
+
+      <p>Triple quotes <code>&quot;&quot;&quot;...&quot;&quot;&quot;</code> create strings that span multiple lines, preserving the line breaks exactly as written. They also serve as docstrings.</p>
+      <div class="code-block"><div class="code-header">Triple quotes — multiline strings</div><pre><code>product_description = <span class="string">&quot;&quot;&quot;Wireless Bluetooth Mouse
+SKU: ELEC-4421 — in stock at 12 warehouses.
+Unit price: $29.99.&quot;&quot;&quot;</span>
+
+print(product_description)
+<span class="comment"># Output:</span>
+<span class="comment"># Wireless Bluetooth Mouse</span>
+<span class="comment"># SKU: ELEC-4421 — in stock at 12 warehouses.</span>
+<span class="comment"># Unit price: $29.99.</span></code></pre></div>
+
+      <h2>Escape Sequences &amp; Raw Strings</h2>
+      <p>A backslash gives the next character special meaning: <code>\n</code> is a newline, <code>\t</code> a tab, <code>\\</code> a literal backslash.</p>
+      <div class="code-block"><div class="code-header">Escape sequences — \n and \t</div><pre><code>receipt = <span class="string">&quot;Item:\tWireless Mouse\nPrice:\t$29.99&quot;</span>
+
+print(receipt)
+<span class="comment"># Output:</span>
+<span class="comment"># Item:   Wireless Mouse</span>
+<span class="comment"># Price:  $29.99</span></code></pre></div>
+
+      <p>Raw strings (prefix <code>r</code>) turn escapes off, keeping every backslash literal. They are essential for Windows file paths — without the prefix, <code>\t</code> in a path silently becomes a tab character.</p>
+      <div class="code-block"><div class="code-header">Raw strings — r&quot;...&quot; for file paths</div><pre><code>inventory_path = <span class="string">r&quot;C:\etl\retail\inventory_2026.csv&quot;</span>   <span class="comment"># backslashes kept</span>
+data_path = <span class="string">&quot;C:\\etl\\banking\\transactions.csv&quot;</span>       <span class="comment"># or escape each one</span>
+
+print(inventory_path)   <span class="comment"># Output: C:\etl\retail\inventory_2026.csv</span>
+print(data_path)        <span class="comment"># Output: C:\etl\banking\transactions.csv</span></code></pre></div>
+
+      <h2>Combining &amp; Measuring Strings</h2>
+      <p>The <code>+</code> operator joins strings end to end. It only joins strings with strings — mixing in a number raises <code>TypeError</code> unless you cast with <code>str()</code>.</p>
+      <div class="code-block"><div class="code-header">Concatenation — joining with +</div><pre><code>first_name = <span class="string">&quot;Priya&quot;</span>
+last_name = <span class="string">&quot;Sharma&quot;</span>
+
+full_name = first_name + <span class="string">&quot; &quot;</span> + last_name
+print(full_name)   <span class="comment"># Output: Priya Sharma</span>
+
+order_id = 1001
+label = <span class="string">&quot;Order #&quot;</span> + str(order_id)      <span class="comment"># cast the number first</span>
+print(label)       <span class="comment"># Output: Order #1001</span></code></pre></div>
+
+      <p>The <code>*</code> operator repeats a string a whole number of times — handy for separators and simple text bars in console reports.</p>
+      <div class="code-block"><div class="code-header">Replication — repeating with *</div><pre><code>divider = <span class="string">&quot;-&quot;</span> * 30
+print(divider)          <span class="comment"># Output: ------------------------------</span>
+
+print(<span class="string">&quot;SKU-&quot;</span> * 3)       <span class="comment"># Output: SKU-SKU-SKU-</span>
+print(<span class="string">&quot;=&quot;</span> * 10)         <span class="comment"># Output: ==========</span></code></pre></div>
+
+      <p><code>len()</code> returns the number of characters in a string, counting spaces and punctuation. It is one of the most used functions in all of Python.</p>
+      <div class="code-block"><div class="code-header">len() — string length</div><pre><code>account_code = <span class="string">&quot;ACC-8842-01&quot;</span>
+
+print(len(account_code))     <span class="comment"># Output: 11</span>
+print(len(<span class="string">&quot;&quot;</span>))               <span class="comment"># Output: 0 — the empty string</span>
+print(len(<span class="string">&quot;a b&quot;</span>))            <span class="comment"># Output: 3 — the space counts too</span></code></pre></div>
+
+      <h2>Edge Cases &amp; Gotchas</h2>
+      <p>Strings are <strong>immutable</strong>: once created, they can never be changed. Every operation that seems to modify a string actually builds a new one, which is why method results must be assigned back to a variable.</p>
+      <div class="code-block"><div class="code-header">Gotcha — strings are immutable</div><pre><code>account_code = <span class="string">&quot;ACC-8842&quot;</span>
+
+<span class="comment"># account_code[0] = &quot;B&quot;     &lt;-- TypeError: 'str' object does not support item assignment</span>
+
+<span class="comment"># &quot;Changing&quot; a string really means building a new one</span>
+account_code = <span class="string">&quot;B&quot;</span> + account_code[1:]
+print(account_code)           <span class="comment"># Output: BCC-8842</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>ETL</strong> — raw strings hold Windows paths to <code>store_sales</code> and <code>order_items</code> CSV files without escape bugs.</li>
+        <li><strong>Reporting</strong> — concatenated name fields feed customer-facing letters; <code>&quot;-&quot; * 40</code> draws separators in console reports.</li>
+        <li><strong>Validation</strong> — <code>len()</code> checks that account codes and phone numbers have the expected number of characters.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Create a multiline account-statement template with triple quotes and print it.</li>
+        <li>Concatenate first, middle, and last name into a full name.</li>
+        <li>Print a Windows file path twice: once as a raw string, once with escaped backslashes.</li>
+        <li>Replicate <code>'SKU-'</code> five times with <code>*</code>.</li>
+        <li>Try <code>&quot;Order #&quot; + 1001</code>, read the <code>TypeError</code>, then fix it with <code>str()</code>.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>Single and double quotes are equivalent; triple quotes handle multiline text.</li>
+        <li>Use the <code>r</code> prefix for file paths so backslashes stay literal.</li>
+        <li><code>+</code> joins, <code>*</code> repeats, <code>len()</code> measures.</li>
+        <li>Strings are immutable — every &quot;change&quot; creates a new string, so assign results back.</li>
+        <li>Numbers must be cast with <code>str()</code> before concatenation.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-06-strings-basics.html">Hour 6 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-05-numbers.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Numbers</span></a><a href="hour-07-string-indexing.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">String Indexing →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Common Table Expressions | Edukron</title>
+ <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+ <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+ <nav class="nav">
+ <a href="../../blog/index.html" >Blog</a>
+ <a href="../../learn/python/index.html" >Python</a>
+ <a href="../../learn/sql/index.html" class="active">SQL</a>
+ <a href="../../assignments/index.html" >Assignments</a>
+ </nav>
+ </div></header>
+<main class="page"><div class="container">
+ <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Sql Path</a><span>/</span><span class="current">Topic 26</span></nav>
+ <div class="lesson-layout">
+ <article class="prose">
+ <header class="article-header">
+ <p class="article-meta">Sql · Topic 26 of 30 · 35 min</p>
+ <h1>Common Table Expressions</h1>
+ <p class="article-excerpt">Readable queries with WITH clauses — break complex logic into named, reusable steps.</p>
+ <p style="margin-top:1rem;"><a href="../../assignments/sql-26-cte.html" class="btn btn-outline">Go to Assignment →</a></p>
+ </header>
+
+ <h2>CTEs: Named Subqueries at the Top</h2>
+ <p>A <strong>Common Table Expression (CTE)</strong> is a temporary named result set defined with <code>WITH</code> and referenced in the main query. Instead of a 200-line nested subquery, you can write readable pipelines: first aggregate by group, then rank the results, then filter to the top rows.</p>
+
+ <h2>Theory &amp; Concepts</h2>
+ <div class="code-block"><div class="code-header">SQL — Basic CTE structure</div><pre><code><span class="keyword">WITH</span> cte_name <span class="keyword">AS</span> (
+    <span class="keyword">SELECT</span> ...
+    <span class="keyword">FROM</span> ...
+)
+<span class="keyword">SELECT</span> *
+<span class="keyword">FROM</span> cte_name
+<span class="keyword">WHERE</span> ...;</code></pre></div>
+ <p>Multiple CTEs chain with commas:</p>
+ <div class="code-block"><div class="code-header">SQL — Chained CTEs</div><pre><code><span class="keyword">WITH</span>
+step_one <span class="keyword">AS</span> (<span class="keyword">SELECT</span> ...),
+step_two <span class="keyword">AS</span> (<span class="keyword">SELECT</span> ... <span class="keyword">FROM</span> step_one)
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> step_two;</code></pre></div>
+ <p>CTEs improve readability and can be referenced multiple times in the same query. They are not automatically materialized — the optimizer may inline them.</p>
+
+ <h2>Example: Multi-Step Aggregation</h2>
+ <div class="code-block"><div class="code-header">SQL — Store performance with CTE pipeline</div><pre><code><span class="keyword">WITH</span>
+dept_totals <span class="keyword">AS</span> (
+    <span class="keyword">SELECT</span>
+        department_id,
+        <span class="keyword">SUM</span>(department_id * salary) <span class="keyword">AS</span> revenue
+    <span class="keyword">FROM</span> hr.employees
+    <span class="keyword">WHERE</span> hire_date &gt;= <span class="string">'2026-01-01'</span>
+    <span class="keyword">GROUP BY</span> department_id
+),
+dept_ranked <span class="keyword">AS</span> (
+    <span class="keyword">SELECT</span>
+        sr.department_id,
+        d.department_name,
+        sr.total_amount,
+        <span class="keyword">RANK</span>() <span class="keyword">OVER</span> (<span class="keyword">ORDER BY</span> sr.total_amount <span class="keyword">DESC</span>) <span class="keyword">AS</span> amount_rank
+    <span class="keyword">FROM</span> dept_totals sr
+    <span class="keyword">JOIN</span> hr.departments s <span class="keyword">ON</span> s.department_id = sr.department_id
+)
+<span class="keyword">SELECT</span> department_name, total_amount, amount_rank
+<span class="keyword">FROM</span> dept_ranked
+<span class="keyword">WHERE</span> amount_rank &lt;= 10;</code></pre></div>
+
+ <h2>Example: High-Value Employee Summary</h2>
+ <div class="code-block"><div class="code-header">SQL — High-value employees with recent activity</div><pre><code><span class="keyword">WITH</span>
+employee_totals <span class="keyword">AS</span> (
+    <span class="keyword">SELECT</span>
+        employee_id,
+        <span class="keyword">SUM</span>(salary) <span class="keyword">AS</span> total_volume,
+        <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> history_count,
+        <span class="keyword">MAX</span>(hire_date) <span class="keyword">AS</span> last_activity
+    <span class="keyword">FROM</span> hr.job_history
+    <span class="keyword">GROUP BY</span> employee_id
+),
+high_value <span class="keyword">AS</span> (
+    <span class="keyword">SELECT</span> *
+    <span class="keyword">FROM</span> employee_totals
+    <span class="keyword">WHERE</span> total_volume &gt; 100000
+)
+<span class="keyword">SELECT</span>
+    a.employee_id,
+    a.last_name,
+    hv.total_volume,
+    hv.history_count,
+    hv.last_activity
+<span class="keyword">FROM</span> high_value hv
+<span class="keyword">JOIN</span> hr.employees a <span class="keyword">ON</span> a.employee_id = hv.employee_id
+<span class="keyword">WHERE</span> hv.last_activity &gt;= <span class="keyword">CURRENT_DATE</span> - <span class="keyword">INTERVAL</span> <span class="string">'30 days'</span>
+<span class="keyword">ORDER BY</span> hv.total_volume <span class="keyword">DESC</span>;</code></pre></div>
+
+ <h2></h2>
+ 
+
+ <h2>Real-World Notes</h2>
+ <ul>
+ <li><strong>dbt models</strong> — Each dbt model is essentially a persisted CTE; the <code>ref()</code> function chains them like <code>WITH</code> blocks.</li>
+ <li><strong>Readability</strong> — Name CTEs after what they represent: <code>monthly_totals</code>, not <code>temp1</code>.</li>
+ <li><strong>Reuse in one query</strong> — Unlike subqueries, a CTE can be referenced multiple times without duplicating logic.</li>
+ <li><strong>Materialized CTEs</strong> — PostgreSQL supports <code>MATERIALIZED</code> hint when the optimizer re-scans a CTE expensively.</li>
+ </ul>
+
+ <h2>Key Takeaways</h2>
+ <ul>
+ <li>CTEs are named temporary result sets defined with <code>WITH ... AS</code>.</li>
+ <li>Chain multiple CTEs to build readable multi-step pipelines.</li>
+ <li>Prefer descriptive CTE names that document each transformation step.</li>
+ <li>Foundation for recursive CTEs (Topic 27) and modern analytics SQL.</li>
+ </ul>
+
+ <h2>Practice Before Assignment</h2>
+ <p>Refactor a nested subquery from an earlier lesson into a two-step CTE pipeline. Then complete the <a href="../../assignments/sql-26-cte.html">Topic 26 assignment</a>.</p>
+
+ </article>
+ </div>
+ <div class="lesson-nav-buttons"><a href="25-window-lag-lead.html" class="nav-btn"><span class="label">Previous</span><span class="title">Window Functions — LAG and LEAD</span></a><a href="27-recursive-cte.html" class="nav-btn next"><span class="label">Next</span><span class="title">Recursive CTEs</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+ <p>&copy; 2026 Edukron — Learn, build, share.</p>
+ <div class="footer-links">
+ <a href="../../learn/python/index.html">Python Path</a>
+ <a href="../../learn/sql/index.html">SQL Path</a>
+ <a href="../../assignments/index.html">Assignments</a>
+ </div>
+ </div></footer>
+ <script src="../../js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Sorting &amp; LIMIT Practice | Edukron</title>
+ <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+ <header class="site-header"><div class="container header-inner">
+ <a href="../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+ <nav class="nav"><a href="../blog/index.html">Blog</a><a href="../learn/python/index.html">Python</a><a href="../learn/sql/index.html">SQL</a><a href="index.html" class="active">Assignments</a></nav>
+ </div></header>
+ <main class="page"><div class="container container-narrow">
+ <nav class="breadcrumb"><a href="../index.html">Home</a><span>/</span><a href="index.html">Assignments</a><span>/</span><span class="current">Sorting &amp; LIMIT</span></nav>
+ <article>
+ <header class="article-header">
+ <span class="card-badge badge-sql">SQL</span>
+ <p class="article-meta">Beginner · Topic 3 — Sorting and Limiting</p>
+ <h1>Sorting &amp; LIMIT Practice</h1>
+ <p class="article-excerpt">Practice ORDER BY, LIMIT, and OFFSET for sorted and paginated results.</p>
+ </header>
+ <div class="prose">
+ <p><strong>Related tutorial:</strong> <a href="../learn/sql/03-sorting-and-limiting.html">Sorting and Limiting Results</a></p>
+ <h2>Tasks</h2>
+ <p>Using the jobs table from the previous assignment, write queries for:</p>
+ <div class="notebook notebook-sql"><div class="notebook-cell">
+ <div class="cell-header"><span class="cell-prompt">In [1]:</span></div>
+ <div class="cell-body">
+ <p class="cell-question">All the jobs table sorted by salary (lowest salary first).</p>
+ <div class="cell-workspace">
+ <span class="cell-hint">-- Write your SQL query here</span>
+ </div>
+ </div>
+</div><div class="notebook-cell">
+ <div class="cell-header"><span class="cell-prompt">In [2]:</span></div>
+ <div class="cell-body">
+ <p class="cell-question">Top 3 most expensive the jobs table.</p>
+ <div class="cell-workspace">
+ <span class="cell-hint">-- Write your SQL query here</span>
+ </div>
+ </div>
+</div><div class="notebook-cell">
+ <div class="cell-header"><span class="cell-prompt">In [3]:</span></div>
+ <div class="cell-body">
+ <p class="cell-question">the jobs table sorted by category, then salary descending within each category.</p>
+ <div class="cell-workspace">
+ <span class="cell-hint">-- Write your SQL query here</span>
+ </div>
+ </div>
+</div><div class="notebook-cell">
+ <div class="cell-header"><span class="cell-prompt">In [4]:</span></div>
+ <div class="cell-body">
+ <p class="cell-question">Page 2 of results (4 per page), sorted alphabetically by name. Use <code>LIMIT</code> and <code>OFFSET</code>.</p>
+ <div class="cell-workspace">
+ <span class="cell-hint">-- Write your SQL query here</span>
+ </div>
+ </div>
+</div><div class="notebook-cell">
+ <div class="cell-header"><span class="cell-prompt">In [5]:</span></div>
+ <div class="cell-body">
+ <p class="cell-question">Top 5 the jobs table by the jobs table value (<code>salary * stock</code>).</p>
+ <div class="cell-workspace">
+ <span class="cell-hint">-- Write your SQL query here</span>
+ </div>
+ </div>
+</div></div>
+ <h2>Example</h2>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="comment">-- Top 3 highest min_salary jobs</span>
+<span class="keyword">SELECT</span> name, salary
+<span class="keyword">FROM</span> hr.jobs
+<span class="keyword">ORDER BY</span> salary <span class="keyword">DESC</span>
+<span class="keyword">LIMIT</span> <span class="number">3</span>;</code></pre></div>
+ <h2>Submission</h2>
+ <p>Save as <code>sorting_practice.sql</code>.</p>
+ </div>
+ </article>
+ </div></main>
+ <footer class="site-footer"><div class="container footer-inner"><p>&copy; 2026 Edukron — Learn, build, share.</p></div></footer>
+ <script src="../js/auth.js"></script>
+</body>
+</html>

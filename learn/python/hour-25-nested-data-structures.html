@@ -1,0 +1,150 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 25: Nested Data Structures | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 25</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 25 of 45 — 45-Hour Python Sprint</p>
+        <h1>Nested Data Structures</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> List of dictionaries, dictionary of lists, dictionary of dictionaries, deep indexing</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-25-nested-data-structures.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Real Data Is Nested</h2>
+      <p>Flat lists and dicts model simple data, but the payloads you meet in practice — JSON API responses, configuration files, report structures — are containers <em>inside</em> containers: a list of order dicts, a dict mapping branches to lists of accounts. The skill of this hour is <strong>deep indexing</strong>: chaining <code>[key]</code> and <code>[index]</code> steps from the outermost container inward, one hop at a time.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <h3>The Three Common Shapes</h3>
+      <table>
+        <thead><tr><th>Shape</th><th>Models</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td>List of dicts</td><td>Table rows</td><td>Orders, transactions, CSV records</td></tr>
+          <tr><td>Dict of lists</td><td>Grouped data</td><td>Accounts grouped by branch</td></tr>
+          <tr><td>Dict of dicts</td><td>Keyed records</td><td>Products indexed by SKU</td></tr>
+        </tbody>
+      </table>
+      <p><strong>How to read a deep index:</strong> evaluate left to right. <code>data[&quot;stores&quot;][1][&quot;daily_sales&quot;][0]</code> means: take <code>data</code>, get its <code>&quot;stores&quot;</code> list, take element 1, get that dict's <code>&quot;daily_sales&quot;</code> list, take element 0. When lost, print each intermediate step.</p>
+
+      <h2>Syntax Reference</h2>
+      <p>A <strong>list of dicts</strong> is Python's version of a database table: each dict is one row with named fields.</p>
+      <div class="code-block"><div class="code-header">List of dicts — table rows</div><pre><code>orders = [
+    {<span class="string">&quot;order_id&quot;</span>: <span class="string">&quot;ORD-101&quot;</span>, <span class="string">&quot;items&quot;</span>: [<span class="string">&quot;SKU-1&quot;</span>, <span class="string">&quot;SKU-2&quot;</span>], <span class="string">&quot;total&quot;</span>: 1500},
+    {<span class="string">&quot;order_id&quot;</span>: <span class="string">&quot;ORD-102&quot;</span>, <span class="string">&quot;items&quot;</span>: [<span class="string">&quot;SKU-3&quot;</span>], <span class="string">&quot;total&quot;</span>: 450},
+]
+
+print(orders[0][<span class="string">&quot;order_id&quot;</span>])    <span class="comment"># Output: ORD-101 — row 0, column order_id</span>
+print(orders[0][<span class="string">&quot;items&quot;</span>][1])    <span class="comment"># Output: SKU-2 — second item of the first order</span>
+print(orders[1][<span class="string">&quot;total&quot;</span>])       <span class="comment"># Output: 450</span></code></pre></div>
+
+      <p>A <strong>dict of lists</strong> groups records under a key — here, accounts per branch.</p>
+      <div class="code-block"><div class="code-header">Dict of lists — grouped records</div><pre><code>branches = {
+    <span class="string">&quot;Mumbai&quot;</span>: [{<span class="string">&quot;account_id&quot;</span>: <span class="string">&quot;ACC-1&quot;</span>, <span class="string">&quot;balance&quot;</span>: 5000}],
+    <span class="string">&quot;Delhi&quot;</span>:  [{<span class="string">&quot;account_id&quot;</span>: <span class="string">&quot;ACC-2&quot;</span>, <span class="string">&quot;balance&quot;</span>: 3200}],
+}
+
+print(branches[<span class="string">&quot;Delhi&quot;</span>][0][<span class="string">&quot;balance&quot;</span>])   <span class="comment"># Output: 3200</span>
+print(len(branches[<span class="string">&quot;Mumbai&quot;</span>]))            <span class="comment"># Output: 1 — accounts in Mumbai</span></code></pre></div>
+
+      <p>A <strong>dict of dicts</strong> gives each record a lookup key — like a table with a primary key.</p>
+      <div class="code-block"><div class="code-header">Dict of dicts — records by key</div><pre><code>catalog = {
+    <span class="string">&quot;SKU-1&quot;</span>: {<span class="string">&quot;name&quot;</span>: <span class="string">&quot;Mouse&quot;</span>, <span class="string">&quot;price&quot;</span>: 29.99},
+    <span class="string">&quot;SKU-2&quot;</span>: {<span class="string">&quot;name&quot;</span>: <span class="string">&quot;Keyboard&quot;</span>, <span class="string">&quot;price&quot;</span>: 49.99},
+}
+
+print(catalog[<span class="string">&quot;SKU-2&quot;</span>][<span class="string">&quot;price&quot;</span>])    <span class="comment"># Output: 49.99 — straight to the record</span>
+print(catalog[<span class="string">&quot;SKU-1&quot;</span>][<span class="string">&quot;name&quot;</span>])     <span class="comment"># Output: Mouse</span></code></pre></div>
+
+      <p>Deeper structures combine all three shapes. Read the chain hop by hop — and loop the outer container to process every inner record.</p>
+      <div class="code-block"><div class="code-header">Deep indexing — a realistic nested payload</div><pre><code>region_sales = {
+    <span class="string">&quot;region&quot;</span>: <span class="string">&quot;North&quot;</span>,
+    <span class="string">&quot;stores&quot;</span>: [
+        {<span class="string">&quot;id&quot;</span>: <span class="string">&quot;STR-001&quot;</span>, <span class="string">&quot;daily_sales&quot;</span>: [8500, 9200, 7800]},
+        {<span class="string">&quot;id&quot;</span>: <span class="string">&quot;STR-002&quot;</span>, <span class="string">&quot;daily_sales&quot;</span>: [9200, 8800, 9500]},
+    ],
+}
+
+<span class="comment"># Hop by hop: dict -&gt; list -&gt; dict -&gt; list -&gt; value</span>
+value = region_sales[<span class="string">&quot;stores&quot;</span>][1][<span class="string">&quot;daily_sales&quot;</span>][0]
+print(value)     <span class="comment"># Output: 9200 — store 2, day 1</span>
+
+<span class="comment"># Loop the outer list; compute per-store averages from the inner lists</span>
+<span class="keyword">for</span> store <span class="keyword">in</span> region_sales[<span class="string">&quot;stores&quot;</span>]:
+    avg = sum(store[<span class="string">&quot;daily_sales&quot;</span>]) / len(store[<span class="string">&quot;daily_sales&quot;</span>])
+    print(<span class="string">f&quot;{store['id']}: {avg:.1f}&quot;</span>)
+
+<span class="comment"># Output:</span>
+<span class="comment"># STR-001: 8500.0</span>
+<span class="comment"># STR-002: 9166.7</span></code></pre></div>
+
+      <h2>Edge Cases &amp; Gotchas</h2>
+      <p>One missing key or short list anywhere along a chain crashes the whole expression. Chain <code>.get()</code> with default containers to navigate defensively when data may be incomplete.</p>
+      <div class="code-block"><div class="code-header">Gotcha — safe navigation with get() chains</div><pre><code>payload = {<span class="string">&quot;customer&quot;</span>: {<span class="string">&quot;name&quot;</span>: <span class="string">&quot;Priya&quot;</span>}}    <span class="comment"># no &quot;address&quot; key at all</span>
+
+<span class="comment"># payload[&quot;customer&quot;][&quot;address&quot;][&quot;city&quot;]     &lt;-- KeyError: 'address'</span>
+
+city = payload.get(<span class="string">&quot;customer&quot;</span>, {}).get(<span class="string">&quot;address&quot;</span>, {}).get(<span class="string">&quot;city&quot;</span>, <span class="string">&quot;UNKNOWN&quot;</span>)
+print(city)     <span class="comment"># Output: UNKNOWN — no crash, each hop falls back to {}</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>APIs</strong> — payment and CRM responses arrive as nested JSON; deep indexing extracts the fields your tables need.</li>
+        <li><strong>Reports</strong> — dict-of-lists groupings power per-branch and per-region summaries.</li>
+        <li><strong>ETL</strong> — flattening a list of nested orders into one row per order item is a daily transformation task.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Build a list of three order dicts and print each order's first item.</li>
+        <li>Group five accounts into a dict of lists by branch; print one branch's total balance.</li>
+        <li>Create a catalog dict-of-dicts keyed by SKU; look up a price directly.</li>
+        <li>Given the <code>region_sales</code> structure, compute each store's average with a loop.</li>
+        <li>Break a deep chain on purpose (missing key), then rewrite it with chained <code>.get()</code> calls.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>Nested structures combine lists and dicts; read index chains left to right, one hop at a time.</li>
+        <li>List of dicts = table rows; dict of lists = grouped data; dict of dicts = keyed records.</li>
+        <li>Loop the outer container and access inner fields to process every record.</li>
+        <li>Chained <code>.get(..., {})</code> calls navigate incomplete data without crashing.</li>
+        <li>Nested JSON handling is a core ETL skill — this structure <em>is</em> the API world.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-25-nested-data-structures.html">Hour 25 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-24-dictionary-methods.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Dictionary Methods</span></a><a href="hour-26-functions-basics.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Functions Basics →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

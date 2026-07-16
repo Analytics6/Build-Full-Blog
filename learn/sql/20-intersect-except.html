@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>INTERSECT and EXCEPT | Edukron</title>
+ <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+ <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+ <nav class="nav">
+ <a href="../../blog/index.html" >Blog</a>
+ <a href="../../learn/python/index.html" >Python</a>
+ <a href="../../learn/sql/index.html" class="active">SQL</a>
+ <a href="../../assignments/index.html" >Assignments</a>
+ </nav>
+ </div></header>
+<main class="page"><div class="container">
+ <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Sql Path</a><span>/</span><span class="current">Topic 20</span></nav>
+ <div class="lesson-layout">
+ <article class="prose">
+ <header class="article-header">
+ <p class="article-meta">Sql · Topic 20 of 30 · 25 min</p>
+ <h1>INTERSECT and EXCEPT</h1>
+ <p class="article-excerpt">Set operations for finding overlaps and gaps — identify the employees table who appear in both source systems, or the employees table present in source but missing from the warehouse.</p>
+ <p style="margin-top:1rem;"><a href="../../assignments/sql-20-intersect-except.html" class="btn btn-outline">Go to Assignment →</a></p>
+ </header>
+
+ <h2>Set Logic for Data Reconciliation</h2>
+ <p>After UNION stacks result sets, <code>INTERSECT</code> and <code>EXCEPT</code> answer set-theory questions: which keys appear in <em>both</em> result sets, and which keys exist in one source but not another. These operations are essential in data quality and reconciliation workflows.</p>
+
+ <h2>Theory &amp; Concepts</h2>
+ <table>
+ <thead><tr><th>Operator</th><th>Set meaning</th><th>SQL equivalent</th></tr></thead>
+ <tbody>
+ <tr><td><code>INTERSECT</code></td><td>A ∩ B — rows in both queries</td><td>Inner join on all columns, or <code>WHERE id IN (subquery)</code></td></tr>
+ <tr><td><code>EXCEPT</code></td><td>A − B — rows in first query not in second</td><td><code>WHERE id NOT IN (subquery)</code> or anti-join</td></tr>
+ </tbody>
+ </table>
+ <p>PostgreSQL also supports <code>INTERSECT ALL</code> and <code>EXCEPT ALL</code> (with duplicate counting). SQLite supports <code>INTERSECT</code> and <code>EXCEPT</code>. SQL Server uses <code>EXCEPT</code> but calls intersection <code>INTERSECT</code> as well.</p>
+
+ <h2>Example: Cross-system record overlap</h2>
+ <div class="code-block"><div class="code-header">SQL — Employees present in both datasets</div><pre><code><span class="keyword">SELECT</span> employee_id
+<span class="keyword">FROM</span> hr.job_history
+<span class="keyword">WHERE</span> status = <span class="string">'COMPLETED'</span>
+
+<span class="keyword">INTERSECT</span>
+
+<span class="keyword">SELECT</span> employee_id
+<span class="keyword">FROM</span> hr.employees
+<span class="keyword">WHERE</span> employee_id <span class="keyword">IS NOT NULL</span>;</code></pre></div>
+
+ <div class="code-block"><div class="code-header">SQL — Job roles in one dataset but not another</div><pre><code><span class="keyword">SELECT</span> <span class="keyword">DISTINCT</span> oi.job_id
+<span class="keyword">FROM</span> hr.job_history oi
+<span class="keyword">JOIN</span> hr.job_history o <span class="keyword">ON</span> o.history_id = oi.history_id
+
+<span class="keyword">EXCEPT</span>
+
+<span class="keyword">SELECT</span> <span class="keyword">DISTINCT</span> job_id
+<span class="keyword">FROM</span> hr.employees;</code></pre></div>
+
+ <h2>Example: Reconciliation Gaps</h2>
+ <div class="code-block"><div class="code-header">SQL — hr.employees in core but missing from warehouse</div><pre><code><span class="keyword">SELECT</span> employee_id
+<span class="keyword">FROM</span> hr.employees
+
+<span class="keyword">EXCEPT</span>
+
+<span class="keyword">SELECT</span> employee_id
+<span class="keyword">FROM</span> hr.employees;</code></pre></div>
+
+ <div class="code-block"><div class="code-header">SQL — Rows in both result sets</div><pre><code><span class="keyword">SELECT</span> employee_id
+<span class="keyword">FROM</span> hr.employees
+<span class="keyword">WHERE</span> job_title = <span class="string">'CHECKING'</span>
+
+<span class="keyword">INTERSECT</span>
+
+<span class="keyword">SELECT</span> employee_id
+<span class="keyword">FROM</span> hr.employees
+<span class="keyword">WHERE</span> job_title = <span class="string">'SAVINGS'</span>;</code></pre></div>
+
+ <h2>Set Operation Visual</h2>
+ 
+
+ <h2>Real-World Notes</h2>
+ <ul>
+ <li><strong>Reconciliation jobs</strong> — Nightly EXCEPT queries between source and target tables catch ETL drift before dashboards go stale.</li>
+ <li><strong>NULL handling</strong> — Set operators treat NULLs as distinct values; two NULLs in the same column payrollition may not match as expected. Filter <code>IS NOT NULL</code> first.</li>
+ <li><strong>Performance</strong> — On large tables, <code>NOT EXISTS</code> anti-joins often outperform EXCEPT; use EXCEPT for readability in ad-hoc analysis.</li>
+ <li><strong>Data integration</strong> — INTERSECT finds record overlap: entities present in both source systems.</li>
+ </ul>
+
+ <h2>Key Takeaways</h2>
+ <ul>
+ <li><code>INTERSECT</code> returns rows appearing in both query results.</li>
+ <li><code>EXCEPT</code> returns rows from the first query absent from the second.</li>
+ <li>Ideal for reconciliation, cohort overlap, and gap detection.</li>
+ <li>Column count and compatible types required, same as UNION.</li>
+ </ul>
+
+ <h2>Practice Before Assignment</h2>
+ <p>Find job titles present in the jobs table but never referenced in employees or job_history. Then complete the <a href="../../assignments/sql-20-intersect-except.html">Topic 20 assignment</a>.</p>
+
+ </article>
+ </div>
+ <div class="lesson-nav-buttons"><a href="19-union.html" class="nav-btn"><span class="label">Previous</span><span class="title">UNION and UNION ALL</span></a><a href="21-self-join-advanced.html" class="nav-btn next"><span class="label">Next</span><span class="title">Self Joins Advanced</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+ <p>&copy; 2026 Edukron — Learn, build, share.</p>
+ <div class="footer-links">
+ <a href="../../learn/python/index.html">Python Path</a>
+ <a href="../../learn/sql/index.html">SQL Path</a>
+ <a href="../../assignments/index.html">Assignments</a>
+ </div>
+ </div></footer>
+ <script src="../../js/auth.js"></script>
+</body>
+</html>

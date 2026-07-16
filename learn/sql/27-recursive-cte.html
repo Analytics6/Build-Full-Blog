@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Recursive CTEs | Edukron</title>
+ <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+ <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+ <nav class="nav">
+ <a href="../../blog/index.html" >Blog</a>
+ <a href="../../learn/python/index.html" >Python</a>
+ <a href="../../learn/sql/index.html" class="active">SQL</a>
+ <a href="../../assignments/index.html" >Assignments</a>
+ </nav>
+ </div></header>
+<main class="page"><div class="container">
+ <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Sql Path</a><span>/</span><span class="current">Topic 27</span></nav>
+ <div class="lesson-layout">
+ <article class="prose">
+ <header class="article-header">
+ <p class="article-meta">Sql · Topic 27 of 30 · 40 min</p>
+ <h1>Recursive CTEs</h1>
+ <p class="article-excerpt">Query hierarchical data like org charts and category trees — traverse multi-level department hierarchies and management chains in SQL.</p>
+ <p style="margin-top:1rem;"><a href="../../assignments/sql-27-recursive-cte.html" class="btn btn-outline">Go to Assignment →</a></p>
+ </header>
+
+ <h2>Beyond One-Level Self Joins</h2>
+ <p>A manager's manager's manager requires traversing multiple levels. Recursive CTEs solve this in SQL by combining an <strong>anchor</strong> query (the starting point) with a <strong>recursive</strong> query that keeps joining until no new rows appear. HR chains use them for category trees, bill-of-materials, and organizational hierarchies.</p>
+
+ <h2>Theory &amp; Concepts</h2>
+ <div class="code-block"><div class="code-header">SQL — Recursive CTE template</div><pre><code><span class="keyword">WITH RECURSIVE</span> cte_name <span class="keyword">AS</span> (
+    <span class="comment">-- Anchor: starting rows</span>
+    <span class="keyword">SELECT</span> id, parent_id, name, 1 <span class="keyword">AS</span> depth
+    <span class="keyword">FROM</span> hierarchy
+    <span class="keyword">WHERE</span> parent_id <span class="keyword">IS NULL</span>
+
+    <span class="keyword">UNION ALL</span>
+
+    <span class="comment">-- Recursive: join to previous iteration</span>
+    <span class="keyword">SELECT</span> h.id, h.parent_id, h.name, c.depth + 1
+    <span class="keyword">FROM</span> hierarchy h
+    <span class="keyword">JOIN</span> cte_name c <span class="keyword">ON</span> h.parent_id = c.id
+)
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> cte_name;</code></pre></div>
+ <p>Key rules:</p>
+ <ul>
+ <li>Must use <code>WITH RECURSIVE</code> (in PostgreSQL and SQLite).</li>
+ <li>Anchor and recursive parts connected by <code>UNION ALL</code>.</li>
+ <li>Recursive part references the CTE name — that's the recursion.</li>
+ <li>Always include a transfer condition to avoid infinite loops.</li>
+ </ul>
+
+ <h2>Example: Organizational Hierarchy</h2>
+ <div class="code-block"><div class="code-header">SQL — All category levels with depth</div><pre><code><span class="keyword">WITH RECURSIVE</span> category_tree <span class="keyword">AS</span> (
+    <span class="keyword">SELECT</span>
+        category_id,
+        category_name,
+        parent_category_id,
+        category_name <span class="keyword">AS</span> path,
+        1 <span class="keyword">AS</span> depth
+    <span class="keyword">FROM</span> hr.departments
+    <span class="keyword">WHERE</span> parent_category_id <span class="keyword">IS NULL</span>
+
+    <span class="keyword">UNION ALL</span>
+
+    <span class="keyword">SELECT</span>
+        c.category_id,
+        c.category_name,
+        c.parent_category_id,
+        ct.path || <span class="string">' > '</span> || c.category_name,
+        ct.depth + 1
+    <span class="keyword">FROM</span> hr.departments c
+    <span class="keyword">JOIN</span> category_tree ct <span class="keyword">ON</span> c.parent_category_id = ct.category_id
+)
+<span class="keyword">SELECT</span> category_id, path, depth
+<span class="keyword">FROM</span> category_tree
+<span class="keyword">ORDER BY</span> path;</code></pre></div>
+
+ <h2>Example: Manager Chain</h2>
+ <div class="code-block"><div class="code-header">SQL — All reports under a branch manager</div><pre><code><span class="keyword">WITH RECURSIVE</span> org_chart <span class="keyword">AS</span> (
+    <span class="comment">-- Start with the branch manager</span>
+    <span class="keyword">SELECT</span>
+        employee_id,
+        last_name,
+        manager_id,
+        1 <span class="keyword">AS</span> level
+    <span class="keyword">FROM</span> hr.employees
+    <span class="keyword">WHERE</span> employee_id = 42  <span class="comment">-- branch manager</span>
+
+    <span class="keyword">UNION ALL</span>
+
+    <span class="keyword">SELECT</span>
+        e.employee_id,
+        e.last_name,
+        e.manager_id,
+        oc.level + 1
+    <span class="keyword">FROM</span> hr.employees e
+    <span class="keyword">JOIN</span> org_chart oc <span class="keyword">ON</span> e.manager_id = oc.employee_id
+)
+<span class="keyword">SELECT</span> employee_id, last_name, level
+<span class="keyword">FROM</span> org_chart
+<span class="keyword">ORDER BY</span> level, last_name;</code></pre></div>
+
+ <div class="code-block"><div class="code-header">SQL — Generate a number sequence (non-hierarchy use)</div><pre><code><span class="keyword">WITH RECURSIVE</span> nums <span class="keyword">AS</span> (
+    <span class="keyword">SELECT</span> 1 <span class="keyword">AS</span> n
+    <span class="keyword">UNION ALL</span>
+    <span class="keyword">SELECT</span> n + 1 <span class="keyword">FROM</span> nums <span class="keyword">WHERE</span> n &lt; 31
+)
+<span class="keyword">SELECT</span> n <span class="keyword">AS</span> day_of_month <span class="keyword">FROM</span> nums;</code></pre></div>
+
+ <h2>Recursive CTE Iteration</h2>
+ 
+
+ <h2>Real-World Notes</h2>
+ <ul>
+ <li><strong>Depth limits</strong> — Add <code>WHERE depth &lt; 10</code> as a safety guard against cyclic parent_id data.</li>
+ <li><strong>Cycle detection</strong> — PostgreSQL offers <code>CYCLE</code> clause; otherwise validate hierarchies in ETL before querying.</li>
+ <li><strong>Date spines</strong> — Recursive CTEs generate number/date sequences when no calendar table exists.</li>
+ <li><strong>Graph databases</strong> — Very deep or highly connected graphs may be better suited to Neo4j; recursive CTEs handle typical org and category trees well.</li>
+ </ul>
+
+ <h2>Key Takeaways</h2>
+ <ul>
+ <li>Recursive CTEs combine an anchor query with a self-referencing recursive step.</li>
+ <li>Ideal for hierarchies: org charts, categories, bill-of-materials.</li>
+ <li>Track <code>depth</code> or <code>level</code> to limit traversal and display indentation.</li>
+ <li>Also useful for generating sequences without a numbers table.</li>
+ </ul>
+
+ <h2>Practice Before Assignment</h2>
+ <p>Build the full department tree with a breadcrumb path string. Then complete the <a href="../../assignments/sql-27-recursive-cte.html">Topic 27 assignment</a>.</p>
+
+ </article>
+ </div>
+ <div class="lesson-nav-buttons"><a href="26-cte.html" class="nav-btn"><span class="label">Previous</span><span class="title">Common Table Expressions</span></a><a href="28-transactions.html" class="nav-btn next"><span class="label">Next</span><span class="title">Transactions and ACID</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+ <p>&copy; 2026 Edukron — Learn, build, share.</p>
+ <div class="footer-links">
+ <a href="../../learn/python/index.html">Python Path</a>
+ <a href="../../learn/sql/index.html">SQL Path</a>
+ <a href="../../assignments/index.html">Assignments</a>
+ </div>
+ </div></footer>
+ <script src="../../js/auth.js"></script>
+</body>
+</html>

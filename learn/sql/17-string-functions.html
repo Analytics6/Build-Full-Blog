@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>String Functions | Edukron</title>
+ <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+ <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+ <nav class="nav">
+ <a href="../../blog/index.html" >Blog</a>
+ <a href="../../learn/python/index.html" >Python</a>
+ <a href="../../learn/sql/index.html" class="active">SQL</a>
+ <a href="../../assignments/index.html" >Assignments</a>
+ </nav>
+ </div></header>
+<main class="page"><div class="container">
+ <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Sql Path</a><span>/</span><span class="current">Topic 17</span></nav>
+ <div class="lesson-layout">
+ <article class="prose">
+ <header class="article-header">
+ <p class="article-meta">Sql · Topic 17 of 30 · 25 min</p>
+ <h1>String Functions</h1>
+ <p class="article-excerpt">Clean, format, and search text with CONCAT, SUBSTR, UPPER, LOWER, and TRIM — essential for matching normalizing job titles and employee name fields.</p>
+ <p style="margin-top:1rem;"><a href="../../assignments/sql-17-string-functions.html" class="btn btn-outline">Go to Assignment →</a></p>
+ </header>
+
+ <h2>Text Cleaning in Pipelines</h2>
+ <p>Source systems export text fields with inconsistent casing; rows may store values with trailing spaces. Before JOINs and GROUP BYs work reliably, analysts normalize strings in SQL. String functions let you transform text <em>inside the database</em> without exporting to Python first.</p>
+
+ <h2>Theory &amp; Concepts</h2>
+ <table>
+ <thead><tr><th>Function</th><th>Action</th><th>Example</th></tr></thead>
+ <tbody>
+ <tr><td><code>CONCAT(a, b)</code> or <code>||</code></td><td>Join strings</td><td><code>'SKU-' || job_id</code></td></tr>
+ <tr><td><code>UPPER(s)</code> / <code>LOWER(s)</code></td><td>Change case</td><td>Case-insensitive search</td></tr>
+ <tr><td><code>TRIM(s)</code></td><td>Remove leading/trailing spaces</td><td>Clean imported names</td></tr>
+ <tr><td><code>SUBSTR(s, start, len)</code></td><td>Extract substring</td><td>Parse account prefix from IBAN</td></tr>
+ <tr><td><code>LENGTH(s)</code></td><td>Character count</td><td>Validate minimum password length</td></tr>
+ <tr><td><code>REPLACE(s, old, new)</code></td><td>Substitute text</td><td>Strip dashes from Manager numbers</td></tr>
+ </tbody>
+ </table>
+ <p>Syntax varies slightly by database: PostgreSQL uses <code>SUBSTRING</code> or <code>SUBSTR</code>; SQL Server uses <code>SUBSTRING</code>; SQLite supports all common forms. examples use portable syntax where payrollsible.</p>
+
+ <h2>Example: Normalize Product Data</h2>
+ <div class="code-block"><div class="code-header">SQL — Normalize text columns</div><pre><code><span class="keyword">SELECT</span>
+    job_id,
+    <span class="keyword">UPPER</span>(<span class="keyword">TRIM</span>(job_id)) <span class="keyword">AS</span> sku_normalized,
+    <span class="keyword">INITCAP</span>(<span class="keyword">LOWER</span>(<span class="keyword">TRIM</span>(job_title))) <span class="keyword">AS</span> product_name_clean,
+    <span class="keyword">SUBSTR</span>(job_id, 1, 3) <span class="keyword">AS</span> category_code
+<span class="keyword">FROM</span> hr.jobs
+<span class="keyword">WHERE</span> <span class="keyword">LENGTH</span>(<span class="keyword">TRIM</span>(job_id)) &gt;= 5;</code></pre></div>
+
+ <div class="code-block"><div class="code-header">SQL — Build a searchable label</div><pre><code><span class="keyword">SELECT</span>
+    job_id,
+    <span class="keyword">CONCAT</span>(job_id, <span class="string">' — '</span>, job_title, <span class="string">' ('</span>, category, <span class="string">')'</span>) <span class="keyword">AS</span> shelf_label
+<span class="keyword">FROM</span> hr.jobs
+<span class="keyword">ORDER BY</span> category, job_title;</code></pre></div>
+
+ <h2>Example: Parse and Match Account Data</h2>
+ <div class="code-block"><div class="code-header">SQL — Case-insensitive lookup</div><pre><code><span class="keyword">SELECT</span>
+    employee_id,
+    account_number,
+    last_name
+<span class="keyword">FROM</span> hr.employees
+<span class="keyword">WHERE</span> <span class="keyword">LOWER</span>(<span class="keyword">TRIM</span>(last_name)) = <span class="keyword">LOWER</span>(<span class="string">'  Priya Sharma  '</span>);</code></pre></div>
+
+ <div class="code-block"><div class="code-header">SQL — Extract branch code from transaction reference</div><pre><code><span class="comment">-- Reference format: TXN-BR042-20260716-001</span>
+<span class="keyword">SELECT</span>
+    employee_id,
+    email,
+    <span class="keyword">SUBSTR</span>(email, 5, 5) <span class="keyword">AS</span> branch_code,
+    <span class="keyword">REPLACE</span>(email, <span class="string">'-'</span>, <span class="string">''</span>) <span class="keyword">AS</span> reference_compact
+<span class="keyword">FROM</span> hr.job_history
+<span class="keyword">WHERE</span> email <span class="keyword">LIKE</span> <span class="string">'TXN-%'</span>;</code></pre></div>
+
+ <h2>String Transform Pipeline</h2>
+ 
+
+ <h2>Real-World Notes</h2>
+ <ul>
+ <li><strong>Fuzzy matching</strong> — <code>LOWER(TRIM(col))</code> on both sides of a JOIN handles casing and whitespace mismatches between the employees table and the jobs table.</li>
+ <li><strong>Performance</strong> — Applying functions on indexed columns prevents index use. Clean data at ingest time and store a normalized column.</li>
+ <li><strong>LIKE patterns</strong> — Combine <code>UPPER(name) LIKE '%ELECTRON%'</code> for flexible job title searches; prefer full-text indexes at scale.</li>
+ <li><strong>PII handling</strong> — Mask account numbers in reports: <code>SUBSTR(employee_id, 1, 4) || '****' || SUBSTR(employee_id, -4)</code>.</li>
+ </ul>
+
+ <h2>Key Takeaways</h2>
+ <ul>
+ <li>String functions clean and reshape text without leaving SQL.</li>
+ <li>Always <code>TRIM</code> imported names and codes before comparing or joining.</li>
+ <li><code>UPPER</code>/<code>LOWER</code> enable case-insensitive matching.</li>
+ <li><code>SUBSTR</code> and <code>REPLACE</code> parse fixed-format HR identifiers.</li>
+ </ul>
+
+ <h2>Practice Before Assignment</h2>
+ <p>Find all the jobs table whose cleaned name contains <code>Manager</code> (case-insensitive). Then complete the <a href="../../assignments/sql-17-string-functions.html">Topic 17 assignment</a>.</p>
+
+ </article>
+ </div>
+ <div class="lesson-nav-buttons"><a href="16-null-functions.html" class="nav-btn"><span class="label">Previous</span><span class="title">COALESCE and NULLIF</span></a><a href="18-date-functions.html" class="nav-btn next"><span class="label">Next</span><span class="title">Date and Time Functions</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+ <p>&copy; 2026 Edukron — Learn, build, share.</p>
+ <div class="footer-links">
+ <a href="../../learn/python/index.html">Python Path</a>
+ <a href="../../learn/sql/index.html">SQL Path</a>
+ <a href="../../assignments/index.html">Assignments</a>
+ </div>
+ </div></footer>
+ <script src="../../js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Subqueries | Edukron</title>
+ <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+ <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+ <nav class="nav">
+ <a href="../../blog/index.html" >Blog</a>
+ <a href="../../learn/python/index.html" >Python</a>
+ <a href="../../learn/sql/index.html" class="active">SQL</a>
+ <a href="../../assignments/index.html" >Assignments</a>
+ </nav>
+ </div></header>
+<main class="page"><div class="container">
+ <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Sql Path</a><span>/</span><span class="current">Topic 13</span></nav>
+ <div class="lesson-layout">
+ <article class="prose">
+ <header class="article-header">
+ <p class="article-meta">Sql · Topic 13 of 30 · 35 min</p>
+ <h1>Subqueries</h1>
+ <p class="article-excerpt">Nest SELECT inside another query — filter, compute, and compare using inline result sets.</p>
+ <p style="margin-top:1rem;"><a href="../../assignments/sql-13-subqueries.html" class="btn btn-outline">Go to Assignment →</a></p>
+ </header>
+
+ <p>A subquery is a SELECT nested inside another statement. Use it when you need an intermediate result — the average transaction salary, the list of qualifying IDs, or the groups exceeding an aggregate threshold — before the outer query can finish.</p>
+
+ <h2>Subquery execution flow</h2>
+ 
+
+ <h2>Subquery in WHERE with IN</h2>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="comment">-- Sales to premium hr.employees</span>
+<span class="keyword">SELECT</span> employee_id, employee_id, salary
+<span class="keyword">FROM</span> hr.employees
+<span class="keyword">WHERE</span> employee_id <span class="keyword">IN</span> (
+  <span class="keyword">SELECT</span> employee_id
+  <span class="keyword">FROM</span> hr.employees
+  <span class="keyword">WHERE</span> department_id = '50'
+);
+
+<span class="comment">-- hr.jobs never sold (anti-pattern via NOT IN)</span>
+<span class="keyword">SELECT</span> job_title
+<span class="keyword">FROM</span> hr.jobs
+<span class="keyword">WHERE</span> job_id <span class="keyword">NOT IN</span> (
+  <span class="keyword">SELECT DISTINCT</span> job_id <span class="keyword">FROM</span> hr.job_history
+);</code></pre></div>
+
+ <h2>Scalar subquery — single value</h2>
+ <p>Returns one row, one column. Use in SELECT list or WHERE comparisons.</p>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="comment">-- Sales above the overall average</span>
+<span class="keyword">SELECT</span> employee_id, salary
+<span class="keyword">FROM</span> hr.employees
+<span class="keyword">WHERE</span> salary &gt; (
+  <span class="keyword">SELECT</span> <span class="keyword">AVG</span>(salary) <span class="keyword">FROM</span> hr.employees
+);
+
+<span class="comment">-- Include average in each row for comparison</span>
+<span class="keyword">SELECT</span> employee_id, salary,
+       salary - (<span class="keyword">SELECT</span> <span class="keyword">AVG</span>(salary) <span class="keyword">FROM</span> hr.job_history) <span class="keyword">AS</span> diff_from_avg
+<span class="keyword">FROM</span> hr.job_history;</code></pre></div>
+
+ <h2>Subquery in FROM (derived table)</h2>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="comment">-- Revenue per store, then filter high performers</span>
+<span class="keyword">SELECT</span> department_id, revenue
+<span class="keyword">FROM</span> (
+  <span class="keyword">SELECT</span> department_id, <span class="keyword">SUM</span>(salary) <span class="keyword">AS</span> revenue
+  <span class="keyword">FROM</span> hr.employees
+  <span class="keyword">GROUP BY</span> department_id
+) <span class="keyword">AS</span> store_totals
+<span class="keyword">WHERE</span> revenue &gt; 100000;</code></pre></div>
+ <p>Derived tables in FROM require an alias. CTEs (Lesson 26) offer cleaner syntax for the same pattern.</p>
+
+ <h2>EXISTS — test for matching rows</h2>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="comment">-- hr.employees who have at least one loan application</span>
+<span class="keyword">SELECT</span> c.employee_id, c.last_name
+<span class="keyword">FROM</span> hr.employees <span class="keyword">AS</span> c
+<span class="keyword">WHERE EXISTS</span> (
+  <span class="keyword">SELECT</span> 1
+  <span class="keyword">FROM</span> hr.job_history <span class="keyword">AS</span> la
+  <span class="keyword">WHERE</span> la.employee_id = c.employee_id
+);</code></pre></div>
+ <p>EXISTS stops at the first match — often faster than IN on large subquery results.</p>
+
+ <h2>Real-world context</h2>
+ <ul>
+ <li><strong>Threshold filtering</strong> — Find the jobs table priced above category average for markdown analysis.</li>
+ <li><strong>Cohort analysis</strong> — Subquery identifies the employees table with &gt; 5 the job_history table, outer query analyzes their behavior.</li>
+ <li><strong>Data validation</strong> — Find job_history rows whose employee_id is NOT IN the employees table (orphan check).</li>
+ </ul>
+
+ <h2>Practice</h2>
+ <ol>
+ <li>Find the job_history table with salary greater than the average deposit salary.</li>
+ <li>List the jobs table in categories that have more than 20 items (subquery + IN).</li>
+ <li>Rewrite an IN subquery using EXISTS for the employees table with sales.</li>
+ </ol>
+
+ <h2>Key takeaways</h2>
+ <ul>
+ <li>Subqueries nest SELECT inside WHERE, FROM, or SELECT clauses.</li>
+ <li>Scalar subqueries return a single value; IN/EXISTS test membership.</li>
+ <li>Derived tables in FROM require aliases and enable filtering on aggregates.</li>
+ <li>Prefer EXISTS over IN for large result sets; use JOINs when readability matters.</li>
+ </ul>
+
+ </article>
+ </div>
+ <div class="lesson-nav-buttons"><a href="12-views.html" class="nav-btn"><span class="label">Previous</span><span class="title">Views</span></a><a href="14-correlated-subqueries.html" class="nav-btn next"><span class="label">Next</span><span class="title">Correlated Subqueries</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+ <p>&copy; 2026 Edukron — Learn, build, share.</p>
+ <div class="footer-links">
+ <a href="../../learn/python/index.html">Python Path</a>
+ <a href="../../learn/sql/index.html">SQL Path</a>
+ <a href="../../assignments/index.html">Assignments</a>
+ </div>
+ </div></footer>
+ <script src="../../js/auth.js"></script>
+</body>
+</html>

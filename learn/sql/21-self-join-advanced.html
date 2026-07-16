@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Self Joins Advanced | Edukron</title>
+ <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+ <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+ <nav class="nav">
+ <a href="../../blog/index.html" >Blog</a>
+ <a href="../../learn/python/index.html" >Python</a>
+ <a href="../../learn/sql/index.html" class="active">SQL</a>
+ <a href="../../assignments/index.html" >Assignments</a>
+ </nav>
+ </div></header>
+<main class="page"><div class="container">
+ <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Sql Path</a><span>/</span><span class="current">Topic 21</span></nav>
+ <div class="lesson-layout">
+ <article class="prose">
+ <header class="article-header">
+ <p class="article-meta">Sql · Topic 21 of 30 · 30 min</p>
+ <h1>Self Joins Advanced</h1>
+ <p class="article-excerpt">Join a table to itself — traverse department hierarchies and org charts, and manager-employee relationships within a single table.</p>
+ <p style="margin-top:1rem;"><a href="../../assignments/sql-21-self-join-advanced.html" class="btn btn-outline">Go to Assignment →</a></p>
+ </header>
+
+ <h2>When the Relationship Lives in One Table</h2>
+ <p>Not every relationship needs a second table. In a sample schema, the employees table has a <code>manager_id</code> pointing to another row in the same table. the departments table may have <code>parent_id</code>. A <strong>self join</strong> aliases the table twice so each row can relate to another row in itself.</p>
+
+ <h2>Theory &amp; Concepts</h2>
+ <p>A self join is a regular JOIN — you simply use two (or more) aliases for the same table:</p>
+ <div class="code-block"><div class="code-header">SQL — Self join pattern</div><pre><code><span class="keyword">SELECT</span>
+    child.column,
+    parent.column
+<span class="keyword">FROM</span> my_table <span class="keyword">AS</span> child
+<span class="keyword">JOIN</span> my_table <span class="keyword">AS</span> parent
+  <span class="keyword">ON</span> child.parent_id = parent.id;</code></pre></div>
+ <p>Common patterns:</p>
+ <ul>
+ <li><strong>Hierarchy</strong> — parent/child categories, org charts</li>
+ <li><strong>Sequential events</strong> — compare consecutive rows per group</li>
+ <li><strong>Pairwise comparison</strong> — find the jobs table in the same category</li>
+ </ul>
+
+ <h2>Example: Category Hierarchy</h2>
+ <div class="code-block"><div class="code-header">SQL — Parent and child categories</div><pre><code><span class="keyword">SELECT</span>
+    child.category_id,
+    child.category_name <span class="keyword">AS</span> subcategory,
+    parent.category_name <span class="keyword">AS</span> parent_category
+<span class="keyword">FROM</span> hr.departments child
+<span class="keyword">LEFT JOIN</span> hr.departments parent
+  <span class="keyword">ON</span> child.parent_category_id = parent.category_id
+<span class="keyword">ORDER BY</span> parent.category_name, child.category_name;</code></pre></div>
+
+ <div class="code-block"><div class="code-header">SQL — hr.jobs with their parent category</div><pre><code><span class="keyword">SELECT</span>
+    p.job_id,
+    p.job_title,
+    cat.category_name,
+    parent_cat.category_name <span class="keyword">AS</span> department
+<span class="keyword">FROM</span> hr.jobs p
+<span class="keyword">JOIN</span> hr.departments cat <span class="keyword">ON</span> p.category_id = cat.category_id
+<span class="keyword">LEFT JOIN</span> hr.departments parent_cat
+  <span class="keyword">ON</span> cat.parent_category_id = parent_cat.category_id;</code></pre></div>
+
+ <h2>Example: Manager Hierarchy</h2>
+ <div class="code-block"><div class="code-header">SQL — employee and their manager</div><pre><code><span class="keyword">SELECT</span>
+    e.employee_id,
+    e.last_name <span class="keyword">AS</span> employee,
+    m.last_name <span class="keyword">AS</span> manager,
+    e.department_id
+<span class="keyword">FROM</span> hr.employees e
+<span class="keyword">LEFT JOIN</span> hr.employees m
+  <span class="keyword">ON</span> e.manager_id = m.employee_id
+<span class="keyword">ORDER BY</span> m.last_name, e.last_name;</code></pre></div>
+
+ <div class="code-block"><div class="code-header">SQL — Consecutive hr.job_history per account</div><pre><code><span class="keyword">SELECT</span>
+    curr.employee_id,
+    curr.employee_id,
+    curr.salary <span class="keyword">AS</span> current_amount,
+    prev.salary <span class="keyword">AS</span> previous_amount,
+    curr.hire_date
+<span class="keyword">FROM</span> hr.job_history curr
+<span class="keyword">LEFT JOIN</span> hr.job_history prev
+  <span class="keyword">ON</span> curr.employee_id = prev.employee_id
+ <span class="keyword">AND</span> prev.hire_date = (
+    <span class="keyword">SELECT</span> <span class="keyword">MAX</span>(hire_date)
+    <span class="keyword">FROM</span> hr.job_history
+    <span class="keyword">WHERE</span> employee_id = curr.employee_id
+      <span class="keyword">AND</span> hire_date &lt; curr.hire_date
+ )
+<span class="keyword">ORDER BY</span> curr.employee_id, curr.hire_date;</code></pre></div>
+
+ <h2>Self Join Structure</h2>
+ 
+
+ <h2>Real-World Notes</h2>
+ <ul>
+ <li><strong>Shallow hierarchies</strong> — Self joins work well for one level (employee → manager). Deeper trees need recursive CTEs (Topic 27).</li>
+ <li><strong>Cartesian risk</strong> — Pairwise self joins without careful ON clauses explode row counts; always constrain the relationship.</li>
+ <li><strong>Window functions alternative</strong> — For "previous row" comparisons, <code>LAG()</code> (Topic 25) is often cleaner than a self join.</li>
+ <li><strong>Indexing</strong> — Index <code>parent_id</code> and <code>manager_id</code> foreign-key-like columns for fast hierarchy traversals.</li>
+ </ul>
+
+ <h2>Key Takeaways</h2>
+ <ul>
+ <li>A self join uses two aliases on the same table.</li>
+ <li>Ideal for hierarchies, manager chains, and row-to-row comparisons.</li>
+ <li>Use meaningful aliases (<code>child</code>/<code>parent</code>, <code>curr</code>/<code>prev</code>) for readability.</li>
+ <li>For multi-level trees, graduate to recursive CTEs.</li>
+ </ul>
+
+ <h2>Practice Before Assignment</h2>
+ <p>List every employee with their manager's name and branch. Then complete the <a href="../../assignments/sql-21-self-join-advanced.html">Topic 21 assignment</a>.</p>
+
+ </article>
+ </div>
+ <div class="lesson-nav-buttons"><a href="20-intersect-except.html" class="nav-btn"><span class="label">Previous</span><span class="title">INTERSECT and EXCEPT</span></a><a href="22-cross-join.html" class="nav-btn next"><span class="label">Next</span><span class="title">Cross Join</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+ <p>&copy; 2026 Edukron — Learn, build, share.</p>
+ <div class="footer-links">
+ <a href="../../learn/python/index.html">Python Path</a>
+ <a href="../../learn/sql/index.html">SQL Path</a>
+ <a href="../../assignments/index.html">Assignments</a>
+ </div>
+ </div></footer>
+ <script src="../../js/auth.js"></script>
+</body>
+</html>

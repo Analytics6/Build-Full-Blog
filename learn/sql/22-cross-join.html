@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Cross Join | Edukron</title>
+ <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+ <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+ <nav class="nav">
+ <a href="../../blog/index.html" >Blog</a>
+ <a href="../../learn/python/index.html" >Python</a>
+ <a href="../../learn/sql/index.html" class="active">SQL</a>
+ <a href="../../assignments/index.html" >Assignments</a>
+ </nav>
+ </div></header>
+<main class="page"><div class="container">
+ <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Sql Path</a><span>/</span><span class="current">Topic 22</span></nav>
+ <div class="lesson-layout">
+ <article class="prose">
+ <header class="article-header">
+ <p class="article-meta">Sql · Topic 22 of 30 · 20 min</p>
+ <h1>Cross Join</h1>
+ <p class="article-excerpt">Generate every combination of rows — build combination grids and calendar spines for reports, and understand when Cartesian products help or hurt.</p>
+ <p style="margin-top:1rem;"><a href="../../assignments/sql-22-cross-join.html" class="btn btn-outline">Go to Assignment →</a></p>
+ </header>
+
+ <h2>The Cartesian Product</h2>
+ <p>A <strong>CROSS JOIN</strong> pairs every row from table A with every row from table B. If table A has 100 rows and table B has 50 rows, the result has 5,000 rows. Used deliberately, cross joins power combination grids and date spines. Used accidentally — by forgetting an ON clause — they melt production queries.</p>
+
+ <h2>Theory &amp; Concepts</h2>
+ <div class="code-block"><div class="code-header">SQL — Explicit and implicit cross join</div><pre><code><span class="comment">-- Explicit CROSS JOIN</span>
+<span class="keyword">SELECT</span> p.job_id, d.department_name
+<span class="keyword">FROM</span> hr.jobs p
+<span class="keyword">CROSS JOIN</span> hr.departments s;
+
+<span class="comment">-- Implicit (comma syntax) — same result, avoid in production</span>
+<span class="keyword">SELECT</span> p.job_id, d.department_name
+<span class="keyword">FROM</span> hr.jobs p, hr.departments s;</code></pre></div>
+ <p>Row count formula: <code>|A| × |B|</code>. No join condition is evaluated. Every combination appears exactly once.</p>
+
+ <h2>Example: Cross Join Grid Example</h2>
+ <div class="code-block"><div class="code-header">SQL — Department × job grid</div><pre><code><span class="keyword">SELECT</span>
+    s.department_id,
+    d.department_name,
+    p.job_id,
+    p.job_title,
+    <span class="keyword">COALESCE</span>(i.stock_on_hand, 0) <span class="keyword">AS</span> qty
+<span class="keyword">FROM</span> hr.departments s
+<span class="keyword">CROSS JOIN</span> hr.jobs p
+<span class="keyword">LEFT JOIN</span> hr.jobs i
+  <span class="keyword">ON</span> i.department_id = s.department_id
+ <span class="keyword">AND</span> i.job_id = p.job_id
+<span class="keyword">WHERE</span> p.category = <span class="string">'Grocery'</span>
+<span class="keyword">ORDER BY</span> d.department_name, p.job_title;</code></pre></div>
+ <p>This pattern creates a complete grid, then LEFT JOINs actual data to reveal gaps (departments with no matching rows).</p>
+
+ <h2>Example: Date Spine for Time Series</h2>
+ <div class="code-block"><div class="code-header">SQL — Daily account salary scaffold</div><pre><code><span class="comment">-- date_spine has one row per calendar day</span>
+<span class="keyword">SELECT</span>
+    d.calendar_date,
+    a.employee_id,
+    d.department_name
+<span class="keyword">FROM</span> date_spine d
+<span class="keyword">CROSS JOIN</span> hr.employees a
+<span class="keyword">WHERE</span> a.status = <span class="string">'ACTIVE'</span>
+  <span class="keyword">AND</span> d.calendar_date BETWEEN <span class="string">'2026-07-01'</span> <span class="keyword">AND</span> <span class="string">'2026-07-31'</span>
+<span class="keyword">ORDER BY</span> a.employee_id, d.calendar_date;</code></pre></div>
+ <p>Cross joining a date dimension with a fact table gives analysts a row for every employee-day, even when no transaction occurred — useful for zero-fill time series.</p>
+
+ <h2>Cross Join vs Inner Join</h2>
+ 
+
+ <h2>Real-World Notes</h2>
+ <ul>
+ <li><strong>Scaffold tables</strong> — Data warehouses build "spine" tables (dates × entities) via cross joins, then left-join facts to fill gaps with zeros.</li>
+ <li><strong>Accidental cross joins</strong> — The #1 cause of queries returning billions of rows is a missing or wrong JOIN condition. Always verify row counts.</li>
+ <li><strong>Filter early</strong> — Apply WHERE on each table before cross joining to keep the product manageable.</li>
+ <li><strong>Alternatives</strong> — For pairwise comparisons within one table, self joins are more appropriate than cross joins.</li>
+ </ul>
+
+ <h2>Key Takeaways</h2>
+ <ul>
+ <li>CROSS JOIN produces every combination of rows from both tables.</li>
+ <li>Result size is the product of row counts — use with caution.</li>
+ <li>Valuable for scaffolds, combination grids, and date-account spines.</li>
+ <li>Always check for accidental cross joins when a query returns too many rows.</li>
+ </ul>
+
+ <h2>Practice Before Assignment</h2>
+ <p>Build a grid of all departments × top 10 jobs, showing quantity (0 if missing) (0 if missing). Then complete the <a href="../../assignments/sql-22-cross-join.html">Topic 22 assignment</a>.</p>
+
+ </article>
+ </div>
+ <div class="lesson-nav-buttons"><a href="21-self-join-advanced.html" class="nav-btn"><span class="label">Previous</span><span class="title">Self Joins Advanced</span></a><a href="23-window-row-number.html" class="nav-btn next"><span class="label">Next</span><span class="title">Window Functions — ROW_NUMBER</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+ <p>&copy; 2026 Edukron — Learn, build, share.</p>
+ <div class="footer-links">
+ <a href="../../learn/python/index.html">Python Path</a>
+ <a href="../../learn/sql/index.html">SQL Path</a>
+ <a href="../../assignments/index.html">Assignments</a>
+ </div>
+ </div></footer>
+ <script src="../../js/auth.js"></script>
+</body>
+</html>

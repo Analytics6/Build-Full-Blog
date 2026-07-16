@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 32: CSV Handling | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 32</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 32 of 45 — 45-Hour Python Sprint</p>
+        <h1>CSV Handling</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> CSV file structure, csv module, reader(), writer(), DictReader, DictWriter</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-32-csv-handling.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Why CSV Handling Matters in Data Analytics</h2>
+      <p>CSV is the lingua franca of data exchange. Organizations email daily sales CSVs; banks export transaction summaries; Systems export transaction summaries and systems export POS sales — all comma-separated. Python's <code>csv</code> module handles quoting, delimiters, and headers correctly so your ETL scripts don't break on product names containing commas.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <ul>
+        <li><code>csv.reader</code> — yields each row as a <strong>list</strong> of strings.</li>
+        <li><code>csv.DictReader</code> — yields each row as a <strong>dict</strong> keyed by column header — preferred for readable ETL code.</li>
+        <li><code>csv.writer</code> / <code>DictWriter</code> — write rows to CSV files.</li>
+        <li>Always use <code>newline=''</code> when opening files for writing on Windows.</li>
+      </ul>
+
+      <h2>Syntax Reference</h2>
+      <p><code>csv.reader</code> yields each row as a plain list — you access fields by position. Fine for quick scripts, fragile when column order changes.</p>
+      <div class="code-block"><div class="code-header">csv.reader — rows as lists</div><pre><code><span class="keyword">import</span> csv
+
+<span class="keyword">with</span> open(<span class="string">&quot;store_sales.csv&quot;</span>, <span class="string">&quot;r&quot;</span>) <span class="keyword">as</span> f:
+    reader = csv.reader(f)
+    header = next(reader)            <span class="comment"># first row is the header</span>
+    <span class="keyword">for</span> row <span class="keyword">in</span> reader:
+        print(row)
+
+<span class="comment"># Output (example):</span>
+<span class="comment"># ['101', 'P42', '29.99']</span>
+<span class="comment"># ['102', 'P17', '49.99']</span></code></pre></div>
+
+      <p><code>csv.DictReader</code> yields each row as a dict keyed by the header — code reads by column <em>name</em>, which survives column reordering. This is the preferred interface.</p>
+      <div class="code-block"><div class="code-header">csv.DictReader — rows as dicts</div><pre><code><span class="keyword">import</span> csv
+
+<span class="keyword">with</span> open(<span class="string">&quot;store_sales.csv&quot;</span>, <span class="string">&quot;r&quot;</span>) <span class="keyword">as</span> f:
+    reader = csv.DictReader(f)
+    total_revenue = 0
+    <span class="keyword">for</span> row <span class="keyword">in</span> reader:
+        total_revenue += float(row[<span class="string">&quot;amount&quot;</span>])   <span class="comment"># CSV values are strings — cast!</span>
+
+print(<span class="string">f&quot;Total: ${total_revenue:,.2f}&quot;</span>)
+<span class="comment"># Output (example): Total: $79.98</span></code></pre></div>
+
+      <p><code>csv.writer</code> writes rows from lists; <code>writerow()</code> takes one row, <code>writerows()</code> takes many.</p>
+      <div class="code-block"><div class="code-header">csv.writer — write rows from lists</div><pre><code><span class="keyword">import</span> csv
+
+<span class="keyword">with</span> open(<span class="string">&quot;daily_totals.csv&quot;</span>, <span class="string">&quot;w&quot;</span>, newline=<span class="string">&quot;&quot;</span>) <span class="keyword">as</span> f:
+    writer = csv.writer(f)
+    writer.writerow([<span class="string">&quot;store_id&quot;</span>, <span class="string">&quot;total&quot;</span>])          <span class="comment"># header</span>
+    writer.writerows([[<span class="string">&quot;S1&quot;</span>, 4500], [<span class="string">&quot;S2&quot;</span>, 3800]])  <span class="comment"># data rows</span>
+
+<span class="comment"># daily_totals.csv now contains:</span>
+<span class="comment"># store_id,total</span>
+<span class="comment"># S1,4500</span>
+<span class="comment"># S2,3800</span></code></pre></div>
+
+      <p><code>csv.DictWriter</code> writes rows from dicts, with an explicit column order via <code>fieldnames</code> and a one-call header.</p>
+      <div class="code-block"><div class="code-header">csv.DictWriter — write rows from dicts</div><pre><code><span class="keyword">import</span> csv
+
+fieldnames = [<span class="string">&quot;transaction_id&quot;</span>, <span class="string">&quot;account_id&quot;</span>, <span class="string">&quot;amount&quot;</span>, <span class="string">&quot;txn_type&quot;</span>]
+rows = [
+    {<span class="string">&quot;transaction_id&quot;</span>: <span class="string">&quot;TXN-001&quot;</span>, <span class="string">&quot;account_id&quot;</span>: <span class="string">&quot;ACC-8842&quot;</span>, <span class="string">&quot;amount&quot;</span>: <span class="string">&quot;1500.00&quot;</span>, <span class="string">&quot;txn_type&quot;</span>: <span class="string">&quot;DEBIT&quot;</span>},
+    {<span class="string">&quot;transaction_id&quot;</span>: <span class="string">&quot;TXN-002&quot;</span>, <span class="string">&quot;account_id&quot;</span>: <span class="string">&quot;ACC-9103&quot;</span>, <span class="string">&quot;amount&quot;</span>: <span class="string">&quot;250.00&quot;</span>, <span class="string">&quot;txn_type&quot;</span>: <span class="string">&quot;CREDIT&quot;</span>},
+]
+
+<span class="keyword">with</span> open(<span class="string">&quot;transactions_export.csv&quot;</span>, <span class="string">&quot;w&quot;</span>, newline=<span class="string">&quot;&quot;</span>) <span class="keyword">as</span> f:
+    writer = csv.DictWriter(f, fieldnames=fieldnames)
+    writer.writeheader()
+    writer.writerows(rows)
+
+<span class="comment"># transactions_export.csv now has a header line plus two data rows.</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>ETL</strong> — Nightly Airflow task reads <code>order_items.csv</code> from SFTP, validates types, loads to PostgreSQL.</li>
+        <li><strong>Data systems</strong> — Export monthly transaction summary as CSV for branch manager review.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Create a CSV with columns Name, Grade, City and three sample customer rows.</li>
+        <li>Read it with <code>DictReader</code> and print names where City is <code>"New York"</code>.</li>
+        <li>Add a <code>Status</code> column defaulting to <code>"Enrolled"</code> using <code>DictWriter</code>.</li>
+        <li>Compare accessing data via index (<code>reader</code>) vs column name (<code>DictReader</code>).</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li><code>DictReader</code>/<code>DictWriter</code> are the cleanest CSV interface for named columns.</li>
+        <li>CSV values are always strings — cast before arithmetic.</li>
+        <li>Use <code>newline=''</code> when writing CSV on Windows.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-32-csv-handling.html">Hour 32 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-31-file-handling.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← File Handling</span></a><a href="hour-33-modules.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Modules →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

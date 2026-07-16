@@ -1,0 +1,146 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 8: String Slicing | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 8</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 8 of 45 — 45-Hour Python Sprint</p>
+        <h1>String Slicing</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> Slice syntax [start:stop:step], omitting start/stop, reversing strings</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-08-string-slicing.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Extracting Substrings</h2>
+      <p>Where indexing grabs one character, <strong>slicing</strong> extracts a whole range: the date out of a timestamp, the domain out of an email, the category code out of a SKU. The syntax is <code>string[start:stop:step]</code>, and its single most important rule is that <strong>start is inclusive, stop is exclusive</strong> — the character at <code>stop</code> is never included.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <h3>The Three Slice Parameters</h3>
+      <table>
+        <thead><tr><th>Parameter</th><th>Default</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>start</code></td><td><code>0</code></td><td>First index included</td></tr>
+          <tr><td><code>stop</code></td><td>end of string</td><td>First index <em>excluded</em></td></tr>
+          <tr><td><code>step</code></td><td><code>1</code></td><td>Distance between picked characters; negative walks backwards</td></tr>
+        </tbody>
+      </table>
+      <p>A helpful consequence of the inclusive/exclusive rule: the slice length is simply <code>stop - start</code>, and adjacent slices like <code>s[:5]</code> and <code>s[5:]</code> fit together with no overlap and no gap.</p>
+
+      <h3>Why Slicing Never Crashes</h3>
+      <p>Unlike indexing, slicing is forgiving: out-of-bounds values are <em>clipped</em> to the string's ends. <code>&quot;abc&quot;[1:99]</code> quietly returns <code>&quot;bc&quot;</code> instead of raising <code>IndexError</code>. That is convenient, but it also means a typo in a slice bound produces wrong data silently — double-check bounds when parsing fixed-width records.</p>
+
+      <h3>Reversing with a Negative Step</h3>
+      <p><code>s[::-1]</code> walks the whole string backwards, producing a reversed copy. With a negative step the defaults flip: start defaults to the end and stop to the beginning.</p>
+
+      <h2>Syntax Reference</h2>
+      <div class="code-block"><div class="code-header">Example — Parsing a pipe-delimited transaction log</div><pre><code><span class="comment"># Fixed positions in a transaction log line</span>
+txn_log = <span class="string">&quot;2026-07-16T14:32:01|TXN-88421|DEBIT|4500.00&quot;</span>
+
+txn_date = txn_log[0:10]     <span class="comment"># chars 0-9 — stop index 10 is excluded</span>
+txn_time = txn_log[11:19]    <span class="comment"># the HH:MM:SS portion</span>
+txn_id = txn_log[20:29]      <span class="comment"># the TXN reference</span>
+
+print(txn_date)   <span class="comment"># Output: 2026-07-16</span>
+print(txn_time)   <span class="comment"># Output: 14:32:01</span>
+print(txn_id)     <span class="comment"># Output: TXN-88421</span></code></pre></div>
+
+      <div class="code-block"><div class="code-header">Example — Omitting start and stop</div><pre><code><span class="comment"># Split an email into username and domain</span>
+email = <span class="string">&quot;priya.sharma@firstnational.com&quot;</span>
+at_index = email.index(<span class="string">&quot;@&quot;</span>)          <span class="comment"># position of the @ separator</span>
+
+username = email[:at_index]           <span class="comment"># from the beginning up to @</span>
+domain = email[at_index + 1:]         <span class="comment"># from after @ to the end</span>
+
+print(username)   <span class="comment"># Output: priya.sharma</span>
+print(domain)     <span class="comment"># Output: firstnational.com</span></code></pre></div>
+
+      <div class="code-block"><div class="code-header">Example — SKU parsing with negative indices</div><pre><code><span class="comment"># Retail SKU convention: RET-&lt;category&gt;-&lt;id&gt;-&lt;color&gt;</span>
+sku = <span class="string">&quot;RET-ELEC-0042-BLK&quot;</span>
+
+prefix = sku[:3]          <span class="comment"># Output slice: RET</span>
+category = sku[4:8]       <span class="comment"># Output slice: ELEC</span>
+variant = sku[-3:]        <span class="comment"># last three chars — works for any SKU length</span>
+
+print(<span class="string">f&quot;{prefix} / {category} / {variant}&quot;</span>)
+<span class="comment"># Output: RET / ELEC / BLK</span></code></pre></div>
+
+      <p>A step of 2 picks every other character; any positive step skips through the string at that interval.</p>
+      <div class="code-block"><div class="code-header">Example — Step values with [::2]</div><pre><code>reference = <span class="string">&quot;TXN-8842&quot;</span>
+
+print(reference[::2])     <span class="comment"># Output: TN88 — every second character</span>
+print(reference[1::2])    <span class="comment"># Output: X-42 — every second, starting at index 1</span></code></pre></div>
+
+      <p>A step of <code>-1</code> walks the string backwards, producing a reversed copy — the standard Python idiom for reversal.</p>
+      <div class="code-block"><div class="code-header">Example — Reversing with [::-1]</div><pre><code>reference = <span class="string">&quot;TXN-8842&quot;</span>
+
+print(reference[::-1])    <span class="comment"># Output: 2488-NXT — fully reversed</span>
+print(<span class="string">&quot;level&quot;</span>[::-1])      <span class="comment"># Output: level — palindromes read the same</span></code></pre></div>
+
+      <p>Unlike indexing, slicing clips out-of-range bounds instead of raising an error. Convenient — but a typo in a bound produces wrong data silently.</p>
+      <div class="code-block"><div class="code-header">Example — Out-of-range slices are clipped</div><pre><code>reference = <span class="string">&quot;TXN-8842&quot;</span>
+
+print(reference[4:99])    <span class="comment"># Output: 8842 — no IndexError</span>
+print(reference[99:])     <span class="comment"># Output: (empty string)</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>ETL</strong> — fixed-width mainframe exports are parsed by slicing each field out of the line at known offsets.</li>
+        <li><strong>Data cleaning</strong> — <code>timestamp[:10]</code> extracts just the date for daily grouping.</li>
+        <li><strong>Retail analytics</strong> — slicing store and category codes out of SKU strings enables regional sales grouping.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>From <code>&quot;2026-07-16T14:32:01&quot;</code>, slice out the year, the month, and the time.</li>
+        <li>Split an email into username and domain using <code>.index(&quot;@&quot;)</code> and two slices.</li>
+        <li>Reverse your own name with <code>[::-1]</code>.</li>
+        <li>Verify that <code>s[:5] + s[5:] == s</code> for any string you choose.</li>
+        <li>Slice with a deliberately huge stop value and confirm no error occurs.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li><code>[start:stop:step]</code> — start is inclusive, stop is exclusive, so the slice length is <code>stop - start</code>.</li>
+        <li>Omitted bounds default to the ends of the string: <code>s[:n]</code> and <code>s[n:]</code> partition the string cleanly.</li>
+        <li>Negative indices in slices count from the end; <code>s[-3:]</code> grabs the last three characters of any string.</li>
+        <li><code>[::-1]</code> reverses; <code>[::2]</code> takes every other character.</li>
+        <li>Slicing clips out-of-bounds values silently — convenient, but check your offsets when parsing fixed-width data.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-08-string-slicing.html">Hour 8 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-07-string-indexing.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← String Indexing</span></a><a href="hour-09-string-methods.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">String Methods →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

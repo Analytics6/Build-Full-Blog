@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Date and Time Functions | Edukron</title>
+ <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+ <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+ <nav class="nav">
+ <a href="../../blog/index.html" >Blog</a>
+ <a href="../../learn/python/index.html" >Python</a>
+ <a href="../../learn/sql/index.html" class="active">SQL</a>
+ <a href="../../assignments/index.html" >Assignments</a>
+ </nav>
+ </div></header>
+<main class="page"><div class="container">
+ <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Sql Path</a><span>/</span><span class="current">Topic 18</span></nav>
+ <div class="lesson-layout">
+ <article class="prose">
+ <header class="article-header">
+ <p class="article-meta">Sql · Topic 18 of 30 · 30 min</p>
+ <h1>Date and Time Functions</h1>
+ <p class="article-excerpt">Extract, format, and compare dates — slice relational data by week and compute job history record aging for reconciliation dashboards.</p>
+ <p style="margin-top:1rem;"><a href="../../assignments/sql-18-date-functions.html" class="btn btn-outline">Go to Assignment →</a></p>
+ </header>
+
+ <h2>Time Is a First-Class Dimension</h2>
+ <p>Every fact table has a time column: <code>the job_history table.hire_date</code>, <code>the job_history table.hire_date</code>, <code>the employees table.hire_date</code>. Date functions let analysts answer "How much did we sell last quarter?" and let engineers filter incremental ETL loads with <code>WHERE updated_at &gt; :last_run</code>.</p>
+
+ <h2>Theory &amp; Concepts</h2>
+ <table>
+ <thead><tr><th>Category</th><th>Functions</th><th>Use case</th></tr></thead>
+ <tbody>
+ <tr><td>Current timestamp</td><td><code>CURRENT_DATE</code>, <code>CURRENT_TIMESTAMP</code>, <code>NOW()</code></td><td>Audit columns, relative filters</td></tr>
+ <tr><td>Extraction</td><td><code>EXTRACT(YEAR FROM d)</code>, <code>DATE_PART</code></td><td>Group sales by month</td></tr>
+ <tr><td>Truncation</td><td><code>DATE_TRUNC('month', d)</code></td><td>Monthly date buckets</td></tr>
+ <tr><td>Arithmetic</td><td><code>d + INTERVAL '7 days'</code></td><td>SLA deadlines, aging</td></tr>
+ <tr><td>Formatting</td><td><code>TO_CHAR(d, 'YYYY-MM')</code></td><td>Report labels</td></tr>
+ <tr><td>Difference</td><td><code>DATEDIFF</code>, <code>AGE</code>, subtraction</td><td>Days since last order</td></tr>
+ </tbody>
+ </table>
+ <p>Store timestamps in UTC at the database layer; convert to local time only in presentation layers. Always use unambiguous formats (<code>'2026-07-16'</code>) in literals.</p>
+
+ <h2>Example: Sales by Period</h2>
+ <div class="code-block"><div class="code-header">SQL — Monthly totals from dated rows</div><pre><code><span class="keyword">SELECT</span>
+    <span class="keyword">DATE_TRUNC</span>(<span class="string">'month'</span>, hire_date) <span class="keyword">AS</span> report_month,
+    <span class="keyword">SUM</span>(department_id * salary) <span class="keyword">AS</span> revenue
+<span class="keyword">FROM</span> hr.employees
+<span class="keyword">WHERE</span> hire_date &gt;= <span class="string">'2026-01-01'</span>
+<span class="keyword">GROUP BY</span> 1
+<span class="keyword">ORDER BY</span> 1;</code></pre></div>
+
+ <div class="code-block"><div class="code-header">SQL — hr.employees inactive for 90+ days</div><pre><code><span class="keyword">SELECT</span>
+    c.employee_id,
+    c.email,
+    <span class="keyword">MAX</span>(o.hire_date) <span class="keyword">AS</span> last_order,
+    <span class="keyword">CURRENT_DATE</span> - <span class="keyword">MAX</span>(o.hire_date::<span class="keyword">date</span>) <span class="keyword">AS</span> days_since_order
+<span class="keyword">FROM</span> hr.employees c
+<span class="keyword">LEFT JOIN</span> hr.job_history o <span class="keyword">ON</span> o.employee_id = c.employee_id
+<span class="keyword">GROUP BY</span> c.employee_id, c.email
+<span class="keyword">HAVING</span> <span class="keyword">MAX</span>(o.hire_date) &lt; <span class="keyword">CURRENT_DATE</span> - <span class="keyword">INTERVAL</span> <span class="string">'90 days'</span>
+    <span class="keyword">OR</span> <span class="keyword">MAX</span>(o.hire_date) <span class="keyword">IS NULL</span>;</code></pre></div>
+
+ <h2>Example: Transaction Aging</h2>
+ <div class="code-block"><div class="code-header">SQL — Pending hr.job_history older than 3 business days</div><pre><code><span class="keyword">SELECT</span>
+    employee_id,
+    employee_id,
+    salary,
+    hire_date,
+    <span class="keyword">EXTRACT</span>(<span class="keyword">DAY FROM</span> (<span class="keyword">CURRENT_TIMESTAMP</span> - hire_date)) <span class="keyword">AS</span> age_days
+<span class="keyword">FROM</span> hr.job_history
+<span class="keyword">WHERE</span> status = <span class="string">'PENDING'</span>
+  <span class="keyword">AND</span> hire_date &lt; <span class="keyword">CURRENT_TIMESTAMP</span> - <span class="keyword">INTERVAL</span> <span class="string">'3 days'</span>
+<span class="keyword">ORDER BY</span> hire_date;</code></pre></div>
+
+ <div class="code-block"><div class="code-header">SQL — Daily transaction volume report</div><pre><code><span class="keyword">SELECT</span>
+    <span class="keyword">TO_CHAR</span>(hire_date, <span class="string">'YYYY-MM-DD'</span>) <span class="keyword">AS</span> hire_date,
+    <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> history_count,
+    <span class="keyword">SUM</span>(salary) <span class="keyword">AS</span> salary
+<span class="keyword">FROM</span> hr.job_history
+<span class="keyword">WHERE</span> hire_date &gt;= <span class="keyword">DATE_TRUNC</span>(<span class="string">'week'</span>, <span class="keyword">CURRENT_DATE</span>)
+<span class="keyword">GROUP BY</span> 1
+<span class="keyword">ORDER BY</span> 1;</code></pre></div>
+
+ <h2>Date Filter Flow for Incremental Loads</h2>
+ 
+
+ <h2>Real-World Notes</h2>
+ <ul>
+ <li><strong>Timezone traps</strong> — A sale at 11 PM UTC may fall on a different calendar day in India; store UTC, display IST.</li>
+ <li><strong>Partitioning</strong> — Warehouse tables like the employees table are often partitioned by <code>hire_date</code>; always filter on the partition column for performance.</li>
+ <li><strong>Fiscal calendars</strong> — HR fiscal years may not align with calendar years; maintain a <code>date_dim</code> lookup table.</li>
+ <li><strong>Leap seconds &amp; DST</strong> — Avoid storing local time without offset; use <code>TIMESTAMPTZ</code> in PostgreSQL.</li>
+ </ul>
+
+ <h2>Key Takeaways</h2>
+ <ul>
+ <li>Date functions extract parts, truncate to periods, and compute differences.</li>
+ <li>Filter fact tables on date columns early to reduce scan size.</li>
+ <li>Use <code>DATE_TRUNC</code> for consistent monthly/weekly GROUP BY buckets.</li>
+ <li>Incremental ETL relies on timestamp watermarks and date arithmetic.</li>
+ </ul>
+
+ <h2>Practice Before Assignment</h2>
+ <p>Compute total payroll spend for the current calendar quarter, grouped by week. Then complete the <a href="../../assignments/sql-18-date-functions.html">Topic 18 assignment</a>.</p>
+
+ </article>
+ </div>
+ <div class="lesson-nav-buttons"><a href="17-string-functions.html" class="nav-btn"><span class="label">Previous</span><span class="title">String Functions</span></a><a href="19-union.html" class="nav-btn next"><span class="label">Next</span><span class="title">UNION and UNION ALL</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+ <p>&copy; 2026 Edukron — Learn, build, share.</p>
+ <div class="footer-links">
+ <a href="../../learn/python/index.html">Python Path</a>
+ <a href="../../learn/sql/index.html">SQL Path</a>
+ <a href="../../assignments/index.html">Assignments</a>
+ </div>
+ </div></footer>
+ <script src="../../js/auth.js"></script>
+</body>
+</html>

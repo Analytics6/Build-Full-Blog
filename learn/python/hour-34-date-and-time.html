@@ -1,0 +1,157 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 34: Date and Time | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 34</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 34 of 45 — 45-Hour Python Sprint</p>
+        <h1>Date and Time</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> datetime class, date, time, strftime (formatting dates), strptime (parsing dates), timedelta (date calculations)</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-34-date-and-time.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Why Date &amp; Time Matter in Data Analytics</h2>
+      <p>Every structured dataset is time-stamped: when a POS sale posted, when a transfer cleared, when a transfer cleared. The <code>datetime</code> module lets you create timestamps, format them for reports, parse messy date strings from CSV feeds, and compute durations with <code>timedelta</code> — essential for SLA tracking and incremental ETL loads.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <h3>Core Classes</h3>
+      <ul>
+        <li><code>datetime</code> — date + time combined (e.g., <code>2026-07-15 14:30:00</code>)</li>
+        <li><code>date</code> — date only</li>
+        <li><code>time</code> — time only</li>
+        <li><code>timedelta</code> — duration for addition/subtraction</li>
+      </ul>
+
+      <h3>strftime vs strptime</h3>
+      <ul>
+        <li><code>strftime</code> — datetime — formatted string (for reports/logs)</li>
+        <li><code>strptime</code> — string — datetime (for parsing CSV date columns)</li>
+      </ul>
+
+      <h3>Common Format Codes</h3>
+      <table>
+        <thead><tr><th>Code</th><th>Meaning</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td><code>%Y</code></td><td>4-digit year</td><td>2026</td></tr>
+          <tr><td><code>%m</code></td><td>Month (01—12)</td><td>07</td></tr>
+          <tr><td><code>%d</code></td><td>Day</td><td>15</td></tr>
+          <tr><td><code>%H:%M:%S</code></td><td>24-hour time</td><td>14:30:00</td></tr>
+          <tr><td><code>%A</code></td><td>Weekday name</td><td>Wednesday</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Syntax Reference</h2>
+      <p><code>datetime.now()</code> captures the current moment; <code>datetime(...)</code> builds a specific timestamp from components.</p>
+      <div class="code-block"><div class="code-header">datetime.now() — creating timestamps</div><pre><code><span class="keyword">from</span> datetime <span class="keyword">import</span> datetime
+
+now = datetime.now()
+print(now)              <span class="comment"># Output: e.g. 2026-07-15 14:30:00.123456</span>
+print(now.year)         <span class="comment"># Output: 2026 — components are attributes</span>
+
+run_start = datetime(2026, 7, 15, 2, 0, 0)   <span class="comment"># build a specific moment</span>
+print(run_start)        <span class="comment"># Output: 2026-07-15 02:00:00</span></code></pre></div>
+
+      <p><code>strftime()</code> turns a datetime into a formatted <em>string</em> — for reports, filenames, and logs. The format codes choose the layout.</p>
+      <div class="code-block"><div class="code-header">strftime() — datetime to formatted string</div><pre><code><span class="keyword">from</span> datetime <span class="keyword">import</span> datetime
+
+moment = datetime(2026, 7, 15, 14, 30, 0)
+
+print(moment.strftime(<span class="string">&quot;%Y-%m-%d %H:%M:%S&quot;</span>))   <span class="comment"># Output: 2026-07-15 14:30:00</span>
+print(moment.strftime(<span class="string">&quot;%A, %B %d, %Y&quot;</span>))       <span class="comment"># Output: Wednesday, July 15, 2026</span>
+print(moment.strftime(<span class="string">&quot;%d/%m/%Y&quot;</span>))            <span class="comment"># Output: 15/07/2026</span></code></pre></div>
+
+      <p><code>strptime()</code> goes the other way: it <em>parses</em> a string into a datetime, using a format string that must match the text exactly.</p>
+      <div class="code-block"><div class="code-header">strptime() — string to datetime</div><pre><code><span class="keyword">from</span> datetime <span class="keyword">import</span> datetime
+
+raw = <span class="string">&quot;15/07/2026 09:45:00&quot;</span>     <span class="comment"># a CSV date column, day-first format</span>
+
+txn_time = datetime.strptime(raw, <span class="string">&quot;%d/%m/%Y %H:%M:%S&quot;</span>)
+
+print(txn_time)         <span class="comment"># Output: 2026-07-15 09:45:00</span>
+print(txn_time.year)    <span class="comment"># Output: 2026 — now a real datetime, not text</span></code></pre></div>
+
+      <p><code>timedelta</code> represents a <em>duration</em>. Add or subtract it from datetimes to schedule and shift windows.</p>
+      <div class="code-block"><div class="code-header">timedelta — date arithmetic</div><pre><code><span class="keyword">from</span> datetime <span class="keyword">import</span> datetime, timedelta
+
+last_run = datetime(2026, 7, 10, 2, 0, 0)
+
+next_run = last_run + timedelta(days=1)
+print(next_run.date())          <span class="comment"># Output: 2026-07-11</span>
+
+one_week_ago = last_run - timedelta(weeks=1)
+print(one_week_ago.date())      <span class="comment"># Output: 2026-07-03</span></code></pre></div>
+
+      <p>Subtracting two datetimes yields a <code>timedelta</code> — the standard way to measure elapsed time or days remaining.</p>
+      <div class="code-block"><div class="code-header">Datetime subtraction — measuring gaps</div><pre><code><span class="keyword">from</span> datetime <span class="keyword">import</span> datetime
+
+initiated = datetime(2026, 7, 15, 9, 45)
+settled = datetime(2026, 7, 15, 14, 30)
+
+gap = settled - initiated
+print(gap)                              <span class="comment"># Output: 4:45:00</span>
+print(gap.total_seconds() / 3600)       <span class="comment"># Output: 4.75 — hours to settle</span>
+
+remaining = datetime(2026, 12, 31) - datetime(2026, 7, 15)
+print(remaining.days)                   <span class="comment"># Output: 169 — days to year end</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>Incremental ETL</strong> — Load only rows where <code>updated_at &gt; last_run</code> using datetime comparisons.</li>
+        <li><strong>Data analytics</strong> — Group sales by week using <code>strftime("%Y-W%W")</code>.</li>
+        <li><strong>Service SLAs</strong> — Compute hours between transaction initiation and settlement with <code>timedelta</code>.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Calculate days remaining until December 31 of the current year.</li>
+        <li>Format today's date as <code>"Wednesday, July 15, 2026"</code> using <code>strftime</code>.</li>
+        <li>Parse a birthday string and compute age in days using <code>strptime</code> and <code>timedelta</code>.</li>
+        <li>Add 7 days to a pipeline last-run datetime to schedule the next job.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li><code>datetime.now()</code> captures the current moment; <code>timedelta</code> handles date arithmetic.</li>
+        <li><code>strptime</code> parses strings; <code>strftime</code> formats datetime for output.</li>
+        <li>Consistent date parsing prevents silent ETL bugs from ambiguous formats.</li>
+        <li>Timestamps are the backbone of incremental loads and audit trails in analytics.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-34-date-and-time.html">Hour 34 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-33-modules.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Modules</span></a><a href="hour-35-oop-introduction.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">OOP Introduction →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

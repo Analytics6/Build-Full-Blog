@@ -1,0 +1,148 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 23: Dictionaries | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 23</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 23 of 45 — 45-Hour Python Sprint</p>
+        <h1>Dictionaries</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> Dictionary syntax, key-value pairs, accessing values by key, mutability, adding/updating items, in operator</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-23-dictionaries.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Labeled Data</h2>
+      <p>A list answers &quot;what is at position 3?&quot;; a <strong>dictionary</strong> answers &quot;what is the <em>price</em>?&quot; Dicts store <strong>key–value pairs</strong>, letting you look values up by meaningful names instead of positions. Every database row, JSON API response, and configuration file maps naturally onto a dict — which is why it is arguably the most important data structure in Python.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <ul>
+        <li><strong>Syntax</strong> — <code>{key: value, ...}</code>. Keys are usually strings, but any immutable (hashable) type works: numbers, tuples. Lists cannot be keys.</li>
+        <li><strong>Unique keys</strong> — writing a key twice keeps only the <em>last</em> value; there is no error.</li>
+        <li><strong>Ordered</strong> — since Python 3.7, dicts remember insertion order.</li>
+        <li><strong>Fast</strong> — key lookup is O(1) on average, regardless of size.</li>
+      </ul>
+
+      <h2>Syntax Reference</h2>
+      <p>Create a dict with braces and colons. Reading a value uses square brackets with the key.</p>
+      <div class="code-block"><div class="code-header">Creating a dict — key: value pairs</div><pre><code>product = {
+    <span class="string">&quot;product_id&quot;</span>: <span class="string">&quot;P-004821&quot;</span>,
+    <span class="string">&quot;product_name&quot;</span>: <span class="string">&quot;Wireless Keyboard&quot;</span>,
+    <span class="string">&quot;unit_price&quot;</span>: 49.99,
+    <span class="string">&quot;stock_qty&quot;</span>: 120,
+}
+
+print(product[<span class="string">&quot;product_name&quot;</span>])   <span class="comment"># Output: Wireless Keyboard</span>
+print(product[<span class="string">&quot;unit_price&quot;</span>])     <span class="comment"># Output: 49.99</span>
+print(len(product))               <span class="comment"># Output: 4 — number of pairs</span></code></pre></div>
+
+      <p>Dicts are mutable: assign to an existing key to update it, or to a new key to add a pair. The same bracket syntax does both.</p>
+      <div class="code-block"><div class="code-header">Updating and adding — bracket assignment</div><pre><code>product = {<span class="string">&quot;product_name&quot;</span>: <span class="string">&quot;Wireless Keyboard&quot;</span>, <span class="string">&quot;unit_price&quot;</span>: 49.99}
+
+product[<span class="string">&quot;unit_price&quot;</span>] = 44.99    <span class="comment"># existing key — value updated</span>
+product[<span class="string">&quot;discount&quot;</span>] = 0.10       <span class="comment"># new key — pair added</span>
+
+print(product)
+<span class="comment"># Output: {'product_name': 'Wireless Keyboard', 'unit_price': 44.99, 'discount': 0.1}</span></code></pre></div>
+
+      <p>Reading a key that does not exist raises <code>KeyError</code>. Test membership first with <code>in</code> — which checks <em>keys</em>, not values.</p>
+      <div class="code-block"><div class="code-header">in operator — does this key exist?</div><pre><code>txn = {<span class="string">&quot;transaction_id&quot;</span>: <span class="string">&quot;TXN-8842&quot;</span>, <span class="string">&quot;amount&quot;</span>: 1500.00}
+
+print(<span class="string">&quot;amount&quot;</span> <span class="keyword">in</span> txn)          <span class="comment"># Output: True</span>
+print(<span class="string">&quot;merchant_id&quot;</span> <span class="keyword">in</span> txn)     <span class="comment"># Output: False</span>
+print(1500.00 <span class="keyword">in</span> txn)           <span class="comment"># Output: False — in checks KEYS, not values</span>
+
+<span class="comment"># print(txn[&quot;merchant_id&quot;])     &lt;-- KeyError: 'merchant_id'</span></code></pre></div>
+
+      <p>Deleting a pair uses the <code>del</code> statement with the key.</p>
+      <div class="code-block"><div class="code-header">del — remove a key-value pair</div><pre><code>account = {<span class="string">&quot;account_id&quot;</span>: <span class="string">&quot;ACC-1001&quot;</span>, <span class="string">&quot;temp_flag&quot;</span>: <span class="keyword">True</span>}
+
+<span class="keyword">del</span> account[<span class="string">&quot;temp_flag&quot;</span>]
+
+print(account)   <span class="comment"># Output: {'account_id': 'ACC-1001'}</span></code></pre></div>
+
+      <p>Looping over a dict yields its keys; index into the dict to reach each value.</p>
+      <div class="code-block"><div class="code-header">Looping — iterate keys and values</div><pre><code>prices = {<span class="string">&quot;Mouse&quot;</span>: 29.99, <span class="string">&quot;Keyboard&quot;</span>: 49.99, <span class="string">&quot;Monitor&quot;</span>: 199.00}
+
+<span class="keyword">for</span> name <span class="keyword">in</span> prices:
+    print(<span class="string">f&quot;{name}: ${prices[name]}&quot;</span>)
+
+<span class="comment"># Output:</span>
+<span class="comment"># Mouse: $29.99</span>
+<span class="comment"># Keyboard: $49.99</span>
+<span class="comment"># Monitor: $199.0</span></code></pre></div>
+
+      <h2>Edge Cases &amp; Gotchas</h2>
+      <p>Duplicate keys in a literal do not raise an error — the last occurrence silently wins. Watch for this when assembling dicts from generated data.</p>
+      <div class="code-block"><div class="code-header">Gotcha — duplicate keys: last one wins</div><pre><code>settings = {<span class="string">&quot;retries&quot;</span>: 3, <span class="string">&quot;retries&quot;</span>: 5}    <span class="comment"># same key twice</span>
+
+print(settings)   <span class="comment"># Output: {'retries': 5} — the 3 is silently gone</span></code></pre></div>
+
+      <p>Only immutable types can be keys. A tuple key works; a list key raises <code>TypeError</code> because lists are unhashable.</p>
+      <div class="code-block"><div class="code-header">Gotcha — keys must be hashable</div><pre><code>daily_sales = {(<span class="string">&quot;S1&quot;</span>, <span class="string">&quot;2026-07-16&quot;</span>): 4500.00}    <span class="comment"># tuple key — fine</span>
+
+print(daily_sales[(<span class="string">&quot;S1&quot;</span>, <span class="string">&quot;2026-07-16&quot;</span>)])         <span class="comment"># Output: 4500.0</span>
+
+<span class="comment"># bad = {[&quot;S1&quot;, &quot;2026-07-16&quot;]: 4500.00}          &lt;-- TypeError: unhashable type: 'list'</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>ETL</strong> — <code>csv.DictReader</code> yields one dict per row, keyed by column names.</li>
+        <li><strong>APIs</strong> — JSON responses deserialize directly into dicts (and lists of dicts).</li>
+        <li><strong>Aggregation</strong> — <code>(store_id, date)</code> tuple keys map to daily totals for fast lookups.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Build a product dict with four fields; print two of them by key.</li>
+        <li>Update the price, add a discount key, then delete it with <code>del</code>.</li>
+        <li>Check for a missing key with <code>in</code> before reading it.</li>
+        <li>Loop over a price dict printing <code>name: price</code> lines.</li>
+        <li>Create a dict with a tuple key; try a list key and read the <code>TypeError</code>.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>Dicts map unique, hashable keys to values with <code>{key: value}</code> syntax; lookup is O(1).</li>
+        <li>Bracket assignment updates existing keys or adds new ones; <code>del</code> removes pairs.</li>
+        <li>Reading a missing key raises <code>KeyError</code> — check with <code>in</code> (which tests keys, not values).</li>
+        <li>Duplicate keys silently keep only the last value.</li>
+        <li>Dicts are the natural shape of database rows, JSON objects, and configs.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-23-dictionaries.html">Hour 23 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-22-sets.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Sets</span></a><a href="hour-24-dictionary-methods.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Dictionary Methods →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

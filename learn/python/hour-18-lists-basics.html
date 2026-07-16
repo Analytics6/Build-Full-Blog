@@ -1,0 +1,148 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 18: Lists Basics | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 18</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 18 of 45 — 45-Hour Python Sprint</p>
+        <h1>Lists Basics</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> List creation, accessing elements (indexing), updating elements, list length, mutability</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-18-lists-basics.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Ordered, Changeable Collections</h2>
+      <p>A <strong>list</strong> is Python's general-purpose container: an ordered sequence that can grow, shrink, and change after creation. Where a string holds characters, a list can hold anything — numbers, strings, booleans, even other lists. Lists keep insertion order, allow duplicates, and — unlike strings — are <strong>mutable</strong>: you can replace an element in place.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <h3>Three Properties to Remember</h3>
+      <ul>
+        <li><strong>Ordered</strong> — elements keep the position you gave them; index 0 is always the first item added (unless you reorder).</li>
+        <li><strong>Mutable</strong> — assignment like <code>items[2] = new_value</code> changes the list in place. This is the big difference from strings and tuples.</li>
+        <li><strong>Heterogeneous</strong> — mixed types are allowed, though in data work lists usually hold one consistent type per list.</li>
+      </ul>
+      <h3>Indexing Works Like Strings</h3>
+      <p>Everything you learned about string indexing transfers directly: zero-based positions, negative indices from the right, <code>IndexError</code> when out of range, and <code>len()</code> for the element count.</p>
+
+      <h2>Syntax Reference</h2>
+      <p>Create a list with square brackets and commas. An empty pair <code>[]</code> starts a list you will fill later.</p>
+      <div class="code-block"><div class="code-header">Creating lists — [ ] literals</div><pre><code>daily_sales = [1250.00, 980.50, 1430.75, 1100.00]   <span class="comment"># list of floats</span>
+skus = [<span class="string">&quot;SKU-001&quot;</span>, <span class="string">&quot;SKU-002&quot;</span>, <span class="string">&quot;SKU-003&quot;</span>]           <span class="comment"># list of strings</span>
+empty_batch = []                                     <span class="comment"># empty, to be filled</span>
+
+print(daily_sales)     <span class="comment"># Output: [1250.0, 980.5, 1430.75, 1100.0]</span>
+print(type(skus))      <span class="comment"># Output: &lt;class 'list'&gt;</span></code></pre></div>
+
+      <p>Access elements with zero-based indices; negative indices count from the end, so <code>[-1]</code> is always the most recent item.</p>
+      <div class="code-block"><div class="code-header">Indexing — accessing elements</div><pre><code>daily_sales = [1250.00, 980.50, 1430.75, 1100.00]
+
+print(daily_sales[0])     <span class="comment"># Output: 1250.0 — first element</span>
+print(daily_sales[2])     <span class="comment"># Output: 1430.75</span>
+print(daily_sales[-1])    <span class="comment"># Output: 1100.0 — last element</span>
+
+<span class="comment"># print(daily_sales[4])   &lt;-- IndexError: list index out of range</span></code></pre></div>
+
+      <p>Because lists are mutable, you can overwrite any position directly — for example, correcting a mistyped point-of-sale entry.</p>
+      <div class="code-block"><div class="code-header">Mutability — updating an element in place</div><pre><code>daily_sales = [1250.00, 980.50, 1430.75, 1100.00]
+
+daily_sales[1] = 995.00        <span class="comment"># correct the POS entry at index 1</span>
+
+print(daily_sales)
+<span class="comment"># Output: [1250.0, 995.0, 1430.75, 1100.0]</span></code></pre></div>
+
+      <p><code>len()</code> returns the number of elements. Combined with <code>sum()</code>, it gives you an average in one line.</p>
+      <div class="code-block"><div class="code-header">len() — how many elements</div><pre><code>daily_sales = [1250.00, 995.00, 1430.75, 1100.00]
+
+print(len(daily_sales))     <span class="comment"># Output: 4</span>
+
+average = sum(daily_sales) / len(daily_sales)
+print(<span class="string">f&quot;Avg daily revenue: ${average:,.2f}&quot;</span>)
+<span class="comment"># Output: Avg daily revenue: $1,193.94</span></code></pre></div>
+
+      <p>Lists can contain other lists. Index twice to reach the inner values — first the row, then the column.</p>
+      <div class="code-block"><div class="code-header">Nested lists — rows and columns</div><pre><code><span class="comment"># Units sold per store: each inner list is one store's [weekday, weekend]</span>
+sales_grid = [[120, 85], [95, 140], [110, 90]]
+
+print(sales_grid[1])        <span class="comment"># Output: [95, 140] — the second store's row</span>
+print(sales_grid[1][0])     <span class="comment"># Output: 95 — weekday units for that store</span>
+print(sales_grid[2][1])     <span class="comment"># Output: 90</span></code></pre></div>
+
+      <p>The <code>in</code> operator tests membership — the quick way to check whether a value is somewhere in the list.</p>
+      <div class="code-block"><div class="code-header">in operator — membership test</div><pre><code>skus = [<span class="string">&quot;SKU-001&quot;</span>, <span class="string">&quot;SKU-002&quot;</span>, <span class="string">&quot;SKU-003&quot;</span>]
+
+print(<span class="string">&quot;SKU-002&quot;</span> <span class="keyword">in</span> skus)        <span class="comment"># Output: True</span>
+print(<span class="string">&quot;SKU-999&quot;</span> <span class="keyword">in</span> skus)        <span class="comment"># Output: False</span>
+print(<span class="string">&quot;SKU-999&quot;</span> <span class="keyword">not</span> <span class="keyword">in</span> skus)    <span class="comment"># Output: True</span></code></pre></div>
+
+      <h2>Edge Cases &amp; Gotchas</h2>
+      <p>Assigning a list to a second variable does <em>not</em> copy it — both names point to the same object, so a change through one name shows up in the other. (Hour 20 covers proper copying.)</p>
+      <div class="code-block"><div class="code-header">Gotcha — assignment is not a copy</div><pre><code>original = [100, 200, 300]
+alias = original             <span class="comment"># both names point at ONE list</span>
+
+alias[0] = 999
+
+print(original)              <span class="comment"># Output: [999, 200, 300] — changed too!</span>
+print(alias)                 <span class="comment"># Output: [999, 200, 300]</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>ETL</strong> — scripts buffer incoming <code>transactions</code> rows in a list before a bulk database insert.</li>
+        <li><strong>Analytics</strong> — a list of daily totals feeds <code>sum()</code>, <code>len()</code>, <code>min()</code>, and <code>max()</code> for quick summary statistics.</li>
+        <li><strong>Retail</strong> — a shopping cart is naturally a list of SKUs: ordered, duplicable, and editable.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Create a list of five product prices; print the first, last, and middle elements.</li>
+        <li>Correct the second price with index assignment and reprint the list.</li>
+        <li>Compute the total and average with <code>sum()</code> and <code>len()</code>.</li>
+        <li>Build a 2×2 nested list and access each inner value.</li>
+        <li>Demonstrate the alias gotcha: assign, mutate through one name, print both.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>Lists are ordered, mutable sequences created with <code>[...]</code>; they allow duplicates and mixed types.</li>
+        <li>Indexing mirrors strings: zero-based, negative from the right, <code>IndexError</code> out of range.</li>
+        <li><code>lst[i] = value</code> updates in place — the key difference from immutable strings.</li>
+        <li><code>len()</code>, <code>sum()</code>, and <code>in</code> cover counting, totaling, and membership.</li>
+        <li>Plain assignment aliases a list; it never copies it.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-18-lists-basics.html">Hour 18 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-17-loop-control.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Loop Control</span></a><a href="hour-19-list-methods.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">List Methods →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Sorting and Limiting | Edukron</title><link rel="stylesheet" href="../../css/style.css"></head>
+<body>
+ <header class="site-header"><div class="container header-inner"><a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a><nav class="nav"><a href="../../blog/index.html">Blog</a><a href="../python/index.html">Python</a><a href="index.html" class="active" aria-current="page">SQL</a><a href="../../assignments/index.html">Assignments</a></nav></div></header>
+ <main class="page"><div class="container"><nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">SQL Path</a><span>/</span><span class="current">Sorting and Limiting</span></nav><div class="lesson-layout">
+ <article class="prose">
+ <header class="article-header">
+ <p class="article-meta">SQL Learning Path · Lesson 3 · 20 min</p>
+ <h1>Sorting and Limiting Results</h1>
+ <p class="article-excerpt">Control result order with ORDER BY and return only the rows you need with LIMIT and OFFSET — essential for top-N reports and paginated dashboards.</p>
+ </header>
+
+ <p>Without an explicit sort, SQL returns rows in an undefined order — often insertion order, but never guaranteed. On a large employees table with millions of rows, "top 10 departments by total salary" requires <code>ORDER BY</code> and <code>LIMIT</code>. Pagination in a dashboard uses the same pattern with <code>OFFSET</code>.</p>
+
+ <h2>Full SELECT execution order</h2>
+ 
+
+ <h2>Sort with ORDER BY</h2>
+ <p>Ascending (<code>ASC</code>) is the default. Add <code>DESC</code> for descending order.</p>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="comment">-- Lowest min_salary first</span>
+<span class="keyword">SELECT</span> job_title, salary
+<span class="keyword">FROM</span> hr.jobs
+<span class="keyword">ORDER BY</span> salary <span class="keyword">ASC</span>;
+
+<span class="comment">-- Largest hr.job_history first</span>
+<span class="keyword">SELECT</span> employee_id, salary, hire_date
+<span class="keyword">FROM</span> hr.job_history
+<span class="keyword">ORDER BY</span> salary <span class="keyword">DESC</span>;</code></pre></div>
+
+ <h2>Sort by multiple columns</h2>
+ <p>SQL applies sort columns left to right — the first column is primary; later columns break ties.</p>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="comment">-- Sales by store, then highest salary within each store</span>
+<span class="keyword">SELECT</span> department_id, hire_date, salary
+<span class="keyword">FROM</span> hr.employees
+<span class="keyword">ORDER BY</span> department_id <span class="keyword">ASC</span>, salary <span class="keyword">DESC</span>;
+
+<span class="comment">-- Loan applications: status, then oldest first</span>
+<span class="keyword">SELECT</span> application_id, status, submitted_at
+<span class="keyword">FROM</span> hr.job_history
+<span class="keyword">ORDER BY</span> status, submitted_at <span class="keyword">ASC</span>;</code></pre></div>
+ <table><thead><tr><th>Clause</th><th>Effect</th><th>Example</th></tr></thead><tbody><tr><td><code>ORDER BY name</code></td><td>alphabetical ascending</td><td>A → Z</td></tr><tr><td><code>ORDER BY salary DESC</code></td><td>numeric descending</td><td>highest first</td></tr><tr><td><code>ORDER BY department_id, name</code></td><td>sorts within groups</td><td>grouped alphabetically</td></tr></tbody></table>
+
+ <h2>Top-N with LIMIT</h2>
+ <p>Always place <code>LIMIT</code> after <code>ORDER BY</code> so you limit the sorted slice, not arbitrary rows.</p>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="comment">-- Top 5 highest-revenue sales</span>
+<span class="keyword">SELECT</span> employee_id, department_id, salary
+<span class="keyword">FROM</span> hr.employees
+<span class="keyword">ORDER BY</span> salary <span class="keyword">DESC</span>
+<span class="keyword">LIMIT</span> 5;
+
+<span class="comment">-- Most recent transaction per preview</span>
+<span class="keyword">SELECT</span> employee_id, hire_date, salary
+<span class="keyword">FROM</span> hr.job_history
+<span class="keyword">ORDER BY</span> hire_date <span class="keyword">DESC</span>
+<span class="keyword">LIMIT</span> 1;</code></pre></div>
+
+ <h2>Pagination with OFFSET</h2>
+ <p><code>OFFSET</code> skips rows before <code>LIMIT</code> returns its slice. Page 3 with 20 rows per page: <code>LIMIT 20 OFFSET 40</code>.</p>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="comment">-- Page 3 of hr.employees (20 per page), newest first</span>
+<span class="keyword">SELECT</span> employee_id, last_name, created_at
+<span class="keyword">FROM</span> hr.employees
+<span class="keyword">ORDER BY</span> created_at <span class="keyword">DESC</span>, employee_id <span class="keyword">DESC</span>
+<span class="keyword">LIMIT</span> 20 <span class="keyword">OFFSET</span> 40;</code></pre></div>
+ <p>Add a unique tie-breaker (like <code>employee_id</code>) to prevent rows from shifting between pages when sort keys collide.</p>
+
+ <h2>Real-world context</h2>
+ <ul>
+ <li><strong>Executive dashboards</strong> — "Top 10 job titles by units sold" uses <code>ORDER BY</code> + <code>LIMIT</code> on aggregated the job_history table.</li>
+ <li><strong>API pagination</strong> — The assignment API returns 50 rows per request with OFFSET-based paging (cursor-based paging is preferred at very large scale).</li>
+ <li><strong>Data sampling</strong> — Data scientists preview 1,000 random or recent rows before pulling a full training set.</li>
+ </ul>
+
+ <h2>Practice</h2>
+ <ol>
+ <li>Return the ten most recent the employees table rows, newest first.</li>
+ <li>List the jobs table items alphabetically by category, then by price descending.</li>
+ <li>Write the query for page 4 when each page contains 15 the employees table rows.</li>
+ </ol>
+
+ <h2>Key takeaways</h2>
+ <ul>
+ <li><code>ORDER BY</code> is the only way to guarantee result order.</li>
+ <li>Use multiple sort columns with a unique tie-breaker for stable pagination.</li>
+ <li>Apply <code>LIMIT</code> and <code>OFFSET</code> after sorting for reliable top-N and paging.</li>
+ <li>Sorting large tables is expensive — combine with WHERE filters to reduce work.</li>
+ </ul>
+ </article>
+ </div></div></main>
+ <footer class="site-footer"><div class="container footer-inner"><p>&copy; 2026 Edukron — Learn, build, share.</p><div class="footer-links"><a href="../python/index.html">Python Path</a><a href="index.html">SQL Path</a><a href="../../assignments/index.html">Assignments</a></div></div></footer>
+ <script src="../../js/auth.js"></script>
+</body></html>

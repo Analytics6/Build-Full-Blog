@@ -1,0 +1,107 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Transactions and ACID | Edukron</title>
+ <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+ <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+ <nav class="nav">
+ <a href="../../blog/index.html" >Blog</a>
+ <a href="../../learn/python/index.html" >Python</a>
+ <a href="../../learn/sql/index.html" class="active">SQL</a>
+ <a href="../../assignments/index.html" >Assignments</a>
+ </nav>
+ </div></header>
+<main class="page"><div class="container">
+ <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Sql Path</a><span>/</span><span class="current">Topic 28</span></nav>
+ <div class="lesson-layout">
+ <article class="prose">
+ <header class="article-header">
+ <p class="article-meta">Sql · Topic 28 of 30 · 35 min</p>
+ <h1>Transactions and ACID</h1>
+ <p class="article-excerpt">COMMIT, ROLLBACK, and data integrity — ensure salary updates and job_history inserts either fully succeed or fully fail.</p>
+ <p style="margin-top:1rem;"><a href="../../assignments/sql-28-transactions.html" class="btn btn-outline">Go to Assignment →</a></p>
+ </header>
+
+ <h2>All-or-Nothing Data Changes</h2>
+ <p>Updating related rows often requires multiple statements: change a value in one table, then insert a matching history row. If only the first statement succeeds, the database ends up in an inconsistent state. <strong>Transactions</strong> wrap multiple statements into one atomic unit — either every change commits together or none do.</p>
+
+ <h2>Theory: The ACID Properties</h2>
+ <table>
+ <thead><tr><th>Property</th><th>Meaning</th><th>Example</th></tr></thead>
+ <tbody>
+ <tr><td><strong>A</strong>tomicity</td><td>All or nothing</td><td>Both salary update and job_history insert succeed, or neither runs</td></tr>
+ <tr><td><strong>C</strong>onsistency</td><td>Valid state before and after</td><td>Employee record matches job history after promotion</td></tr>
+ <tr><td><strong>I</strong>solation</td><td>Concurrent transactions don't interfere</td><td>Two promotions don't read partial updates</td></tr>
+ <tr><td><strong>D</strong>urability</td><td>Committed data survives crashes</td><td>After COMMIT, promotion persists after reboot</td></tr>
+ </tbody>
+ </table>
+
+ <h2>Transaction Control Statements</h2>
+ <div class="code-block"><div class="code-header">SQL — Employee promotion with explicit transaction</div><pre><code><span class="keyword">BEGIN</span>;
+
+<span class="keyword">UPDATE</span> hr.employees
+<span class="keyword">SET</span> job_id = <span class="string">'SA_REP'</span>,
+    salary = 9500,
+    department_id = 80
+<span class="keyword">WHERE</span> employee_id = 143
+  <span class="keyword">AND</span> salary &lt; 9500;
+
+<span class="keyword">INSERT INTO</span> hr.job_history (employee_id, start_date, job_id, department_id)
+<span class="keyword">VALUES</span> (143, <span class="keyword">CURRENT_DATE</span>, <span class="string">'SA_REP'</span>, 80);
+
+<span class="keyword">COMMIT</span>;</code></pre></div>
+
+ <h2>Example: Department Transfer with Audit Trail</h2>
+ <div class="code-block"><div class="code-header">SQL — Transfer with job history log</div><pre><code><span class="keyword">BEGIN</span>;
+
+<span class="keyword">UPDATE</span> hr.employees
+<span class="keyword">SET</span> department_id = 90,
+    job_id = <span class="string">'IT_PROG'</span>
+<span class="keyword">WHERE</span> employee_id = 201;
+
+<span class="keyword">INSERT INTO</span> hr.job_history (employee_id, start_date, end_date, job_id, department_id)
+<span class="keyword">VALUES</span> (201, <span class="keyword">CURRENT_DATE</span>, <span class="keyword">NULL</span>, <span class="string">'IT_PROG'</span>, 90);
+
+<span class="keyword">COMMIT</span>;</code></pre></div>
+
+ <h2>When to ROLLBACK</h2>
+ <p>If a validation check fails mid-transaction, <code>ROLLBACK</code> undoes every change since <code>BEGIN</code>.</p>
+ <div class="code-block"><div class="code-header">SQL — Abort on failed budget check</div><pre><code><span class="keyword">BEGIN</span>;
+
+<span class="keyword">UPDATE</span> hr.employees
+<span class="keyword">SET</span> salary = salary + 5000
+<span class="keyword">WHERE</span> employee_id = 101;
+
+<span class="comment">-- Validation failed; undo the salary change</span>
+<span class="keyword">ROLLBACK</span>;</code></pre></div>
+
+ <h2>Key Takeaways</h2>
+ <ul>
+ <li>Transactions group statements into one atomic unit.</li>
+ <li>ACID: Atomicity, Consistency, Isolation, Durability.</li>
+ <li><code>COMMIT</code> saves changes; <code>ROLLBACK</code> undoes them.</li>
+ <li>Critical for promotions, job_history updates, and reliable ETL.</li>
+ </ul>
+
+ <h2>Practice Before Assignment</h2>
+ <p>Write a transaction that updates an employee row and inserts a matching job_history row in one atomic unit. Then complete the <a href="../../assignments/sql-28-transactions.html">Topic 28 assignment</a>.</p>
+ </article>
+ </div>
+ <div class="lesson-nav-buttons"><a href="27-recursive-cte.html" class="nav-btn"><span class="label">Previous</span><span class="title">Recursive CTEs</span></a><a href="29-normalization.html" class="nav-btn next"><span class="label">Next</span><span class="title">Database Normalization</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+ <p>&copy; 2026 Edukron — Learn, build, share.</p>
+ <div class="footer-links">
+ <a href="../../learn/python/index.html">Python Path</a>
+ <a href="../../learn/sql/index.html">SQL Path</a>
+ <a href="../../assignments/index.html">Assignments</a>
+ </div>
+ </div></footer>
+ <script src="../../js/auth.js"></script>
+</body>
+</html>

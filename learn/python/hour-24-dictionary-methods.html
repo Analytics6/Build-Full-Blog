@@ -1,0 +1,195 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 24: Dictionary Methods | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 24</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 24 of 45 — 45-Hour Python Sprint</p>
+        <h1>Dictionary Methods</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> keys(), values(), items(), get(), setdefault(), update(), pop(), popitem(), clear(), copy(), fromkeys(), dict comprehension</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-24-dictionary-methods.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Working with Dicts Safely</h2>
+      <p>Bracket access crashes on missing keys, and plain loops only see keys. Dictionary <strong>methods</strong> fill the gaps: safe reads with defaults, clean iteration over pairs, merging, and controlled removal. In production pipelines these methods are the difference between a script that survives messy input and one that dies on the first incomplete record.</p>
+
+      <h2>Viewing Contents</h2>
+      <p><code>keys()</code> returns a live view of all keys — loop over it, or convert to a list.</p>
+      <div class="code-block"><div class="code-header">dict.keys() — all keys</div><pre><code>txn = {<span class="string">&quot;transaction_id&quot;</span>: <span class="string">&quot;TXN-8842&quot;</span>, <span class="string">&quot;amount&quot;</span>: 1500.00, <span class="string">&quot;txn_type&quot;</span>: <span class="string">&quot;DEBIT&quot;</span>}
+
+print(list(txn.keys()))
+<span class="comment"># Output: ['transaction_id', 'amount', 'txn_type']</span></code></pre></div>
+
+      <p><code>values()</code> returns the matching view of all values — useful for totals and quick scans.</p>
+      <div class="code-block"><div class="code-header">dict.values() — all values</div><pre><code>daily_totals = {<span class="string">&quot;Mon&quot;</span>: 1250, <span class="string">&quot;Tue&quot;</span>: 980, <span class="string">&quot;Wed&quot;</span>: 1450}
+
+print(list(daily_totals.values()))   <span class="comment"># Output: [1250, 980, 1450]</span>
+print(sum(daily_totals.values()))    <span class="comment"># Output: 3680 — weekly total so far</span></code></pre></div>
+
+      <p><code>items()</code> yields <code>(key, value)</code> pairs — the idiomatic way to loop over a dict when you need both parts.</p>
+      <div class="code-block"><div class="code-header">dict.items() — key-value pairs</div><pre><code>prices = {<span class="string">&quot;Mouse&quot;</span>: 29.99, <span class="string">&quot;Keyboard&quot;</span>: 49.99}
+
+<span class="keyword">for</span> name, price <span class="keyword">in</span> prices.items():
+    print(<span class="string">f&quot;{name}: ${price}&quot;</span>)
+
+<span class="comment"># Output:</span>
+<span class="comment"># Mouse: $29.99</span>
+<span class="comment"># Keyboard: $49.99</span></code></pre></div>
+
+      <h2>Safe Access</h2>
+      <p><code>get(key, default)</code> reads a key <em>without</em> risking <code>KeyError</code> — it returns the default (or <code>None</code>) when the key is absent. The workhorse of defensive data code.</p>
+      <div class="code-block"><div class="code-header">dict.get() — read with a fallback</div><pre><code>etl_config = {<span class="string">&quot;source&quot;</span>: <span class="string">&quot;transactions.csv&quot;</span>, <span class="string">&quot;batch_size&quot;</span>: 1000}
+
+print(etl_config.get(<span class="string">&quot;batch_size&quot;</span>, 500))    <span class="comment"># Output: 1000 — key exists</span>
+print(etl_config.get(<span class="string">&quot;timeout_sec&quot;</span>, 30))    <span class="comment"># Output: 30 — default used</span>
+print(etl_config.get(<span class="string">&quot;timeout_sec&quot;</span>))        <span class="comment"># Output: None — default default</span></code></pre></div>
+
+      <p><code>setdefault(key, default)</code> reads like <code>get()</code>, but it also <em>inserts</em> the default into the dict when the key is missing. Existing keys are never overwritten.</p>
+      <div class="code-block"><div class="code-header">dict.setdefault() — insert only if missing</div><pre><code>account = {<span class="string">&quot;account_id&quot;</span>: <span class="string">&quot;ACC-1001&quot;</span>}
+
+account.setdefault(<span class="string">&quot;status&quot;</span>, <span class="string">&quot;ACTIVE&quot;</span>)       <span class="comment"># missing — inserted</span>
+account.setdefault(<span class="string">&quot;account_id&quot;</span>, <span class="string">&quot;NEW&quot;</span>)      <span class="comment"># exists — untouched</span>
+
+print(account)
+<span class="comment"># Output: {'account_id': 'ACC-1001', 'status': 'ACTIVE'}</span></code></pre></div>
+
+      <h2>Merging &amp; Removing</h2>
+      <p><code>update(other)</code> merges another dict in place: new keys are added, existing keys are overwritten by the incoming values.</p>
+      <div class="code-block"><div class="code-header">dict.update() — merge dicts</div><pre><code>profile = {<span class="string">&quot;name&quot;</span>: <span class="string">&quot;Priya&quot;</span>, <span class="string">&quot;email&quot;</span>: <span class="string">&quot;priya@bank.com&quot;</span>}
+changes = {<span class="string">&quot;phone&quot;</span>: <span class="string">&quot;9876543210&quot;</span>, <span class="string">&quot;email&quot;</span>: <span class="string">&quot;priya.new@bank.com&quot;</span>}
+
+profile.update(changes)
+
+print(profile)
+<span class="comment"># Output: {'name': 'Priya', 'email': 'priya.new@bank.com', 'phone': '9876543210'}</span>
+<span class="comment"># The email was overwritten; the phone was added.</span></code></pre></div>
+
+      <p><code>pop(key, default)</code> removes a key and returns its value. Pass a default to avoid <code>KeyError</code> on missing keys.</p>
+      <div class="code-block"><div class="code-header">dict.pop() — remove and return</div><pre><code>txn = {<span class="string">&quot;transaction_id&quot;</span>: <span class="string">&quot;TXN-8842&quot;</span>, <span class="string">&quot;temp_score&quot;</span>: 0.87}
+
+score = txn.pop(<span class="string">&quot;temp_score&quot;</span>)          <span class="comment"># removed AND returned</span>
+limit = txn.pop(<span class="string">&quot;credit_limit&quot;</span>, 0)     <span class="comment"># missing — default returned</span>
+
+print(score)   <span class="comment"># Output: 0.87</span>
+print(limit)   <span class="comment"># Output: 0</span>
+print(txn)     <span class="comment"># Output: {'transaction_id': 'TXN-8842'}</span></code></pre></div>
+
+      <p><code>popitem()</code> removes and returns the <em>last inserted</em> pair as a tuple — occasionally useful for draining a dict.</p>
+      <div class="code-block"><div class="code-header">dict.popitem() — remove the last pair</div><pre><code>queue = {<span class="string">&quot;job_1&quot;</span>: <span class="string">&quot;done&quot;</span>, <span class="string">&quot;job_2&quot;</span>: <span class="string">&quot;pending&quot;</span>}
+
+last_pair = queue.popitem()
+
+print(last_pair)   <span class="comment"># Output: ('job_2', 'pending')</span>
+print(queue)       <span class="comment"># Output: {'job_1': 'done'}</span></code></pre></div>
+
+      <p><code>clear()</code> removes every pair, leaving an empty dict.</p>
+      <div class="code-block"><div class="code-header">dict.clear() — empty the dict</div><pre><code>session_cache = {<span class="string">&quot;user&quot;</span>: <span class="string">&quot;priya&quot;</span>, <span class="string">&quot;expires&quot;</span>: <span class="string">&quot;17:00&quot;</span>}
+
+session_cache.clear()
+
+print(session_cache)   <span class="comment"># Output: {}</span></code></pre></div>
+
+      <h2>Copying &amp; Building</h2>
+      <p><code>copy()</code> makes a shallow copy so you can experiment without touching the original — same caveat as lists: nested objects are shared.</p>
+      <div class="code-block"><div class="code-header">dict.copy() — independent shallow copy</div><pre><code>base_config = {<span class="string">&quot;batch_size&quot;</span>: 1000, <span class="string">&quot;retries&quot;</span>: 3}
+
+test_config = base_config.copy()
+test_config[<span class="string">&quot;batch_size&quot;</span>] = 50        <span class="comment"># tweak the copy only</span>
+
+print(base_config)   <span class="comment"># Output: {'batch_size': 1000, 'retries': 3}</span>
+print(test_config)   <span class="comment"># Output: {'batch_size': 50, 'retries': 3}</span></code></pre></div>
+
+      <p><code>dict.fromkeys(keys, value)</code> builds a new dict where every key starts with the same value — handy for initializing counters.</p>
+      <div class="code-block"><div class="code-header">dict.fromkeys() — initialize many keys</div><pre><code>stores = [<span class="string">&quot;S1&quot;</span>, <span class="string">&quot;S2&quot;</span>, <span class="string">&quot;S3&quot;</span>]
+
+sales_counters = dict.fromkeys(stores, 0)
+
+print(sales_counters)
+<span class="comment"># Output: {'S1': 0, 'S2': 0, 'S3': 0}</span></code></pre></div>
+
+      <p>A <strong>dict comprehension</strong> builds a dict from any iterable in one line — the dictionary sibling of the list comprehension.</p>
+      <div class="code-block"><div class="code-header">Dict comprehension — build in one line</div><pre><code>prices = {<span class="string">&quot;Mouse&quot;</span>: 29.99, <span class="string">&quot;Keyboard&quot;</span>: 49.99, <span class="string">&quot;Monitor&quot;</span>: 199.00}
+
+<span class="comment"># Apply a 10% discount to every product</span>
+discounted = {name: round(p * 0.9, 2) <span class="keyword">for</span> name, p <span class="keyword">in</span> prices.items()}
+print(discounted)
+<span class="comment"># Output: {'Mouse': 26.99, 'Keyboard': 44.99, 'Monitor': 179.1}</span>
+
+<span class="comment"># Filter: keep only items under $50</span>
+budget = {name: p <span class="keyword">for</span> name, p <span class="keyword">in</span> prices.items() <span class="keyword">if</span> p &lt; 50}
+print(budget)
+<span class="comment"># Output: {'Mouse': 29.99, 'Keyboard': 49.99}</span></code></pre></div>
+
+      <h2>Edge Cases &amp; Gotchas</h2>
+      <p>Choose access styles deliberately: brackets crash loudly (good for required fields), <code>get()</code> degrades quietly (good for optional fields). Using <code>get()</code> everywhere can hide real data problems.</p>
+      <div class="code-block"><div class="code-header">Gotcha — [ ] vs get(): loud vs quiet failures</div><pre><code>row = {<span class="string">&quot;transaction_id&quot;</span>: <span class="string">&quot;TXN-8842&quot;</span>}    <span class="comment"># amount is missing!</span>
+
+amount = row.get(<span class="string">&quot;amount&quot;</span>, 0)            <span class="comment"># quiet — a fake $0 enters the report</span>
+print(amount)                             <span class="comment"># Output: 0</span>
+
+<span class="comment"># amount = row[&quot;amount&quot;]                 &lt;-- KeyError — loud, but the bug is visible</span>
+<span class="comment"># Rule of thumb: required field -&gt; brackets; optional field -&gt; get()</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>Configs</strong> — <code>config.get(&quot;DB_PORT&quot;, 5432)</code> supplies safe defaults; <code>update()</code> layers environment overrides on top of base settings.</li>
+        <li><strong>Aggregation</strong> — <code>fromkeys()</code> or <code>setdefault()</code> initialize per-store counters before a tally loop.</li>
+        <li><strong>Transformation</strong> — dict comprehensions reshape API payloads (rename keys, convert units) in one pass.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Print the keys, values, and items of a transaction dict.</li>
+        <li>Read an optional field with <code>get()</code> and a required field with brackets; observe both failure modes.</li>
+        <li>Merge a changes dict into a profile with <code>update()</code> and note which values were overwritten.</li>
+        <li>Initialize counters for three stores with <code>fromkeys()</code>, then increment one.</li>
+        <li>Write a dict comprehension applying a discount, and another that filters by price.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li><code>keys()</code>, <code>values()</code>, <code>items()</code> — views for iteration; <code>items()</code> unpacks into <code>for k, v in ...</code>.</li>
+        <li><code>get()</code> reads safely with a default; <code>setdefault()</code> additionally inserts the default.</li>
+        <li><code>update()</code> merges (incoming wins); <code>pop()</code>/<code>popitem()</code>/<code>clear()</code> remove with increasing scope.</li>
+        <li><code>copy()</code> is shallow; <code>fromkeys()</code> initializes many keys at once.</li>
+        <li>Dict comprehensions transform and filter dicts in a single readable line.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-24-dictionary-methods.html">Hour 24 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-23-dictionaries.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Dictionaries</span></a><a href="hour-25-nested-data-structures.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Nested Data Structures →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

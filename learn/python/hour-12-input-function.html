@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 12: Input Function | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 12</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 12 of 45 — 45-Hour Python Sprint</p>
+        <h1>Input Function</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> input() function, reading strings, type conversion of input (int(), float())</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-12-input-function.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Talking to Your Program</h2>
+      <p>So far your programs have only produced output. The <code>input()</code> function adds the other direction: it pauses the program, shows a prompt, and waits for the user to type something and press Enter. The single most important fact about it — the one behind countless beginner bugs — is that <strong><code>input()</code> always returns a string</strong>, no matter what the user typed.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <ul>
+        <li><code>input(prompt)</code> prints the prompt (no automatic newline), blocks until Enter, and returns the typed text as a <code>str</code>.</li>
+        <li>To do arithmetic, cast with <code>int()</code> or <code>float()</code> — an invalid cast raises <code>ValueError</code>.</li>
+        <li>Chain <code>.strip()</code> immediately to remove stray spaces users habitually type.</li>
+        <li>Production pipelines rarely use <code>input()</code>, but ad-hoc CLIs, admin tools, and training simulators rely on it heavily.</li>
+      </ul>
+
+      <h2>Syntax Reference</h2>
+      <p>The basic call: prompt, wait, receive a string.</p>
+      <div class="code-block"><div class="code-header">input() — read text from the user</div><pre><code>customer_id = input(<span class="string">&quot;Enter customer ID: &quot;</span>)   <span class="comment"># user types: C-20481</span>
+
+print(<span class="string">f&quot;Looking up {customer_id}...&quot;</span>)
+<span class="comment"># Output: Looking up C-20481...</span>
+
+print(type(customer_id))
+<span class="comment"># Output: &lt;class 'str'&gt; — ALWAYS a string</span></code></pre></div>
+
+      <p>Numeric input must be cast before math — otherwise <code>+</code> concatenates and <code>*</code> repeats, silently producing nonsense.</p>
+      <div class="code-block"><div class="code-header">int() around input() — numeric input</div><pre><code>birth_year = int(input(<span class="string">&quot;Birth year: &quot;</span>))   <span class="comment"># user types: 1998</span>
+
+age = 2026 - birth_year
+print(<span class="string">f&quot;Age: {age}&quot;</span>)   <span class="comment"># Output: Age: 28</span>
+
+<span class="comment"># Without int(): &quot;1998&quot; - 2026 would raise TypeError,</span>
+<span class="comment"># and &quot;1998&quot; * 2 would print 19981998.</span></code></pre></div>
+
+      <p>Use <code>float()</code> for amounts with decimals — the standard pattern for money and rates.</p>
+      <div class="code-block"><div class="code-header">float() around input() — decimal amounts</div><pre><code>income = float(input(<span class="string">&quot;Annual income: &quot;</span>))          <span class="comment"># user types: 850000</span>
+loan_amount = float(input(<span class="string">&quot;Requested loan: &quot;</span>))     <span class="comment"># user types: 300000</span>
+
+ratio = loan_amount / income
+print(<span class="string">f&quot;Debt-to-income ratio: {ratio:.2f}&quot;</span>)
+<span class="comment"># Output: Debt-to-income ratio: 0.35</span></code></pre></div>
+
+      <p>Chain string methods directly onto <code>input()</code> to clean the value in the same line — trimming whitespace and normalizing case.</p>
+      <div class="code-block"><div class="code-header">input() with .strip().title() — clean as you read</div><pre><code>name = input(<span class="string">&quot;Enter your name: &quot;</span>).strip().title()   <span class="comment"># user types: &quot;  priya sharma &quot;</span>
+
+print(<span class="string">f&quot;Welcome, {name}!&quot;</span>)
+<span class="comment"># Output: Welcome, Priya Sharma!</span></code></pre></div>
+
+      <h2>Edge Cases &amp; Gotchas</h2>
+      <p>If the user types something that is not a number, the cast raises <code>ValueError</code> and the program crashes. Guard with <code>.isdigit()</code> for whole numbers (full error handling arrives in Hour 30).</p>
+      <div class="code-block"><div class="code-header">Gotcha — invalid input crashes the cast</div><pre><code>raw = input(<span class="string">&quot;Quantity: &quot;</span>)          <span class="comment"># user types: twelve</span>
+
+<span class="comment"># quantity = int(raw)             &lt;-- ValueError: invalid literal for int()</span>
+
+<span class="keyword">if</span> raw.isdigit():                  <span class="comment"># pre-check before casting</span>
+    quantity = int(raw)
+    print(<span class="string">f&quot;Ordering {quantity} units&quot;</span>)
+<span class="keyword">else</span>:
+    print(<span class="string">&quot;Please enter a whole number&quot;</span>)
+
+<span class="comment"># Output: Please enter a whole number</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>Admin CLIs</strong> — scripts that let operations staff look up an account or trigger a pipeline rerun by typing an ID.</li>
+        <li><strong>Calculators</strong> — quick eligibility and pricing tools: read two numbers, print a ratio or total.</li>
+        <li><strong>Prototyping</strong> — before building a web form, an <code>input()</code> loop tests the underlying logic interactively.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Ask for a name and greet the user with it, cleaned by <code>.strip().title()</code>.</li>
+        <li>Read a birth year with <code>int(input(...))</code> and compute the age.</li>
+        <li>Build a two-input debt-to-income calculator with <code>float()</code>.</li>
+        <li>Type letters into a numeric prompt, read the <code>ValueError</code>, then add an <code>.isdigit()</code> guard.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li><code>input()</code> always returns a string — cast with <code>int()</code>/<code>float()</code> before any math.</li>
+        <li>Invalid casts raise <code>ValueError</code>; guard with <code>.isdigit()</code> or (later) try/except.</li>
+        <li>Chain <code>.strip()</code> onto <code>input()</code> to clean whitespace immediately.</li>
+        <li>Interactive scripts complement scheduled pipelines for ad-hoc operations work.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-12-input-function.html">Hour 12 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-11-operators.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Operators</span></a><a href="hour-13-conditional-statements.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Conditional Statements →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

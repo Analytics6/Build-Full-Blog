@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Window Functions — RANK | Edukron</title>
+ <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+ <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+ <nav class="nav">
+ <a href="../../blog/index.html" >Blog</a>
+ <a href="../../learn/python/index.html" >Python</a>
+ <a href="../../learn/sql/index.html" class="active">SQL</a>
+ <a href="../../assignments/index.html" >Assignments</a>
+ </nav>
+ </div></header>
+<main class="page"><div class="container">
+ <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Sql Path</a><span>/</span><span class="current">Topic 24</span></nav>
+ <div class="lesson-layout">
+ <article class="prose">
+ <header class="article-header">
+ <p class="article-meta">Sql · Topic 24 of 30 · 30 min</p>
+ <h1>Window Functions — RANK</h1>
+ <p class="article-excerpt">Rank rows with ties using RANK and DENSE_RANK — ranked reports for top rows within each partition.</p>
+ <p style="margin-top:1rem;"><a href="../../assignments/sql-24-window-rank.html" class="btn btn-outline">Go to Assignment →</a></p>
+ </header>
+
+ <h2>Ranking with Ties</h2>
+ <p>When two employees have exactly ₹50,000, should they both be rank 1? <code>RANK</code> says yes — and skips rank 2. <code>DENSE_RANK</code> also gives both rank 1 but does <em>not</em> skip the next number. Choosing the right ranking function affects ranked results within each group.</p>
+
+ <h2>Theory &amp; Concepts</h2>
+ <table>
+ <thead><tr><th>Function</th><th>Tied values</th><th>After ties</th><th>Example (scores: 100, 100, 90)</th></tr></thead>
+ <tbody>
+ <tr><td><code>ROW_NUMBER()</code></td><td>Different numbers</td><td>Sequential</td><td>1, 2, 3</td></tr>
+ <tr><td><code>RANK()</code></td><td>Same rank</td><td>Skips numbers</td><td>1, 1, 3</td></tr>
+ <tr><td><code>DENSE_RANK()</code></td><td>Same rank</td><td>No gaps</td><td>1, 1, 2</td></tr>
+ <tr><td><code>PERCENT_RANK()</code></td><td>Relative payrollition</td><td>0.0 to 1.0 scale</td><td>0.0, 0.0, 0.5</td></tr>
+ </tbody>
+ </table>
+
+ <h2>Example: Salary Ranking Example</h2>
+ <div class="code-block"><div class="code-header">SQL — Rank employees by total compensation</div><pre><code><span class="keyword">SELECT</span>
+    c.employee_id,
+    c.email,
+    <span class="keyword">SUM</span>(o.total) <span class="keyword">AS</span> lifetime_spend,
+    <span class="keyword">RANK</span>()       <span class="keyword">OVER</span> (<span class="keyword">ORDER BY</span> <span class="keyword">SUM</span>(o.total) <span class="keyword">DESC</span>) <span class="keyword">AS</span> spend_rank,
+    <span class="keyword">DENSE_RANK</span>() <span class="keyword">OVER</span> (<span class="keyword">ORDER BY</span> <span class="keyword">SUM</span>(o.total) <span class="keyword">DESC</span>) <span class="keyword">AS</span> dense_rank
+<span class="keyword">FROM</span> hr.employees c
+<span class="keyword">JOIN</span> hr.job_history o <span class="keyword">ON</span> o.employee_id = c.employee_id
+<span class="keyword">WHERE</span> o.status = <span class="string">'COMPLETED'</span>
+<span class="keyword">GROUP BY</span> c.employee_id, c.email
+<span class="keyword">ORDER BY</span> spend_rank;</code></pre></div>
+
+ <div class="code-block"><div class="code-header">SQL — Top 5 hr.jobs per category (with ties)</div><pre><code><span class="keyword">WITH</span> partitioned_totals <span class="keyword">AS</span> (
+    <span class="keyword">SELECT</span>
+        p.category,
+        p.job_id,
+        p.job_title,
+        <span class="keyword">SUM</span>(oi.department_id * oi.salary) <span class="keyword">AS</span> revenue,
+        <span class="keyword">DENSE_RANK</span>() <span class="keyword">OVER</span> (
+            <span class="keyword">PARTITION BY</span> p.category
+            <span class="keyword">ORDER BY</span> <span class="keyword">SUM</span>(oi.department_id * oi.salary) <span class="keyword">DESC</span>
+        ) <span class="keyword">AS</span> cat_rank
+    <span class="keyword">FROM</span> hr.jobs p
+    <span class="keyword">JOIN</span> hr.job_history oi <span class="keyword">ON</span> oi.job_id = p.job_id
+    <span class="keyword">GROUP BY</span> p.category, p.job_id, p.job_title
+)
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> partitioned_totals <span class="keyword">WHERE</span> cat_rank &lt;= 5;</code></pre></div>
+
+ <h2>Example: Department Ranking Example</h2>
+ <div class="code-block"><div class="code-header">SQL — Rank hr.departments by transaction volume</div><pre><code><span class="keyword">SELECT</span>
+    b.branch_name,
+    <span class="keyword">COUNT</span>(t.employee_id) <span class="keyword">AS</span> history_count,
+    <span class="keyword">SUM</span>(t.salary) <span class="keyword">AS</span> total_volume,
+    <span class="keyword">RANK</span>() <span class="keyword">OVER</span> (<span class="keyword">ORDER BY</span> <span class="keyword">SUM</span>(t.salary) <span class="keyword">DESC</span>) <span class="keyword">AS</span> volume_rank,
+    <span class="keyword">PERCENT_RANK</span>() <span class="keyword">OVER</span> (<span class="keyword">ORDER BY</span> <span class="keyword">SUM</span>(t.salary) <span class="keyword">DESC</span>) <span class="keyword">AS</span> pct_rank
+<span class="keyword">FROM</span> hr.departments b
+<span class="keyword">JOIN</span> hr.job_history t <span class="keyword">ON</span> t.department_id = b.department_id
+<span class="keyword">WHERE</span> t.hire_date &gt;= <span class="string">'2026-01-01'</span>
+<span class="keyword">GROUP BY</span> b.department_id, b.branch_name
+<span class="keyword">ORDER BY</span> volume_rank;</code></pre></div>
+
+ <h2>RANK vs DENSE_RANK</h2>
+ 
+
+ <h2>Real-World Notes</h2>
+ <ul>
+ <li><strong>Top-N with ties</strong> — Use DENSE_RANK when "top 10" should include all tied entries at the boundary; use ROW_NUMBER when you need exactly N rows.</li>
+ <li><strong>Percentile reports</strong> — <code>PERCENT_RANK</code> and <code>NTILE(4)</code> segment employees into quartiles for marketing cohorts.</li>
+ <li><strong>Leaderboard fairness</strong> — Document which ranking function your dashboard uses; RANK vs DENSE_RANK changes who appears in "top 5."</li>
+ <li><strong>Indexed ORDER BY</strong> — Ranking over millions of rows is expensive; pre-aggregate in a CTE first, then rank the summary.</li>
+ </ul>
+
+ <h2>Key Takeaways</h2>
+ <ul>
+ <li><code>RANK()</code> gives tied rows the same rank and skips subsequent numbers.</li>
+ <li><code>DENSE_RANK()</code> gives tied rows the same rank without gaps.</li>
+ <li><code>PERCENT_RANK()</code> expresses relative standing on a 0–1 scale.</li>
+ <li>Choose ranking function based on how ties should appear in reports.</li>
+ </ul>
+
+ <h2>Practice Before Assignment</h2>
+ <p>Rank the departments table by monthly totals using RANK and DENSE_RANK; note where results differ. Then complete the <a href="../../assignments/sql-24-window-rank.html">Topic 24 assignment</a>.</p>
+
+ </article>
+ </div>
+ <div class="lesson-nav-buttons"><a href="23-window-row-number.html" class="nav-btn"><span class="label">Previous</span><span class="title">Window Functions — ROW_NUMBER</span></a><a href="25-window-lag-lead.html" class="nav-btn next"><span class="label">Next</span><span class="title">Window Functions — LAG and LEAD</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+ <p>&copy; 2026 Edukron — Learn, build, share.</p>
+ <div class="footer-links">
+ <a href="../../learn/python/index.html">Python Path</a>
+ <a href="../../learn/sql/index.html">SQL Path</a>
+ <a href="../../assignments/index.html">Assignments</a>
+ </div>
+ </div></footer>
+ <script src="../../js/auth.js"></script>
+</body>
+</html>

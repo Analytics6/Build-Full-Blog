@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>COALESCE and NULLIF | Edukron</title>
+ <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+ <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+ <nav class="nav">
+ <a href="../../blog/index.html" >Blog</a>
+ <a href="../../learn/python/index.html" >Python</a>
+ <a href="../../learn/sql/index.html" class="active">SQL</a>
+ <a href="../../assignments/index.html" >Assignments</a>
+ </nav>
+ </div></header>
+<main class="page"><div class="container">
+ <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Sql Path</a><span>/</span><span class="current">Topic 16</span></nav>
+ <div class="lesson-layout">
+ <article class="prose">
+ <header class="article-header">
+ <p class="article-meta">Sql · Topic 16 of 30 · 20 min</p>
+ <h1>COALESCE and NULLIF</h1>
+ <p class="article-excerpt">Handle NULL values in expressions — replace missing data with defaults and prevent divide-by-zero errors in SQL expressions.</p>
+ <p style="margin-top:1rem;"><a href="../../assignments/sql-16-null-functions.html" class="btn btn-outline">Go to Assignment →</a></p>
+ </header>
+
+ <h2>Why NULL Handling Matters</h2>
+ <p>In relational databases, <code>NULL</code> means <em>unknown or not provided</em> — not zero, not an empty string. A row may have no optional middle name; a foreign key may be unset; a numeric column may be unknown. <strong>COALESCE</strong> and <strong>NULLIF</strong> let you write safe, readable expressions that fill gaps and avoid silent calculation errors.</p>
+
+ <h2>Theory &amp; Concepts</h2>
+ <table>
+ <thead><tr><th>Function</th><th>Purpose</th><th>Returns</th></tr></thead>
+ <tbody>
+ <tr><td><code>COALESCE(a, b, c, ...)</code></td><td>First non-NULL argument</td><td>First value that is not NULL, or NULL if all are NULL</td></tr>
+ <tr><td><code>NULLIF(a, b)</code></td><td>Convert matching values to NULL</td><td>NULL when <code>a = b</code>; otherwise returns <code>a</code></td></tr>
+ </tbody>
+ </table>
+ <p>Remember: <code>NULL = NULL</code> is unknown, not true. Use <code>IS NULL</code> / <code>IS NOT NULL</code> for comparisons. <code>COALESCE</code> is variadic — you can chain many fallbacks. <code>NULLIF</code> is commonly paired with division to turn zero denominators into NULL instead of errors.</p>
+
+ <h2>COALESCE in HR Reports</h2>
+ <div class="code-block"><div class="code-header">SQL — Effective value with COALESCE</div><pre><code><span class="comment">-- Use min_salary when set; otherwise fall back to salary</span>
+<span class="keyword">SELECT</span>
+    job_id,
+    job_title,
+    <span class="keyword">COALESCE</span>(min_salary, salary) <span class="keyword">AS</span> effective_price
+<span class="keyword">FROM</span> hr.jobs
+<span class="keyword">WHERE</span> category = <span class="string">'Sales'</span>;</code></pre></div>
+
+ <div class="code-block"><div class="code-header">SQL — Customer display name with fallbacks</div><pre><code><span class="keyword">SELECT</span>
+    employee_id,
+    <span class="keyword">COALESCE</span>(
+        <span class="keyword">NULLIF</span>(<span class="keyword">TRIM</span>(middle_name), <span class="string">''</span>),
+        first_name || <span class="string">' '</span> || last_name
+    ) <span class="keyword">AS</span> display_name,
+    <span class="keyword">COALESCE</span>(email, Manager, <span class="string">'no contact on file'</span>) <span class="keyword">AS</span> contact
+<span class="keyword">FROM</span> hr.employees;</code></pre></div>
+
+ <h2>NULLIF in HR Calculations</h2>
+ <div class="code-block"><div class="code-header">SQL — Safe average transaction salary</div><pre><code><span class="comment">-- Avoid divide-by-zero when a branch has no hr.job_history</span>
+<span class="keyword">SELECT</span>
+    b.branch_name,
+    <span class="keyword">SUM</span>(t.salary) <span class="keyword">AS</span> total_volume,
+    <span class="keyword">COUNT</span>(t.employee_id) <span class="keyword">AS</span> history_count,
+    <span class="keyword">SUM</span>(t.salary) / <span class="keyword">NULLIF</span>(<span class="keyword">COUNT</span>(t.employee_id), 0) <span class="keyword">AS</span> avg_txn
+<span class="keyword">FROM</span> hr.departments b
+<span class="keyword">LEFT JOIN</span> hr.job_history t <span class="keyword">ON</span> t.department_id = b.department_id
+<span class="keyword">GROUP BY</span> b.department_id, b.branch_name;</code></pre></div>
+
+ <h2>COALESCE Evaluation Flow</h2>
+ 
+
+ <h2>Real-World Notes</h2>
+ <ul>
+ <li><strong>ETL staging</strong> — Use <code>COALESCE(updated_at, created_at)</code> as a reliable watermark column when syncing the job_history table incrementally.</li>
+ <li><strong>Data quality</strong> — <code>NULLIF(column, '')</code> converts empty strings from legacy CSV feeds into proper NULLs before loading into the employees table.</li>
+ <li><strong>Reporting</strong> — Dashboards should never show blank KPI cells; <code>COALESCE(metric, 0)</code> gives analysts a zero instead of a missing value — but document when zero and NULL mean different things.</li>
+ <li><strong>HR compliance</strong> — Do not use <code>COALESCE</code> to mask missing KYC fields; flag NULLs for review instead of substituting defaults.</li>
+ </ul>
+
+ <h2>Common Mistakes</h2>
+ <ul>
+ <li>Using <code>WHERE column = NULL</code> — always use <code>IS NULL</code>.</li>
+ <li>Assuming <code>COALESCE(a, 0)</code> means the value was zero; it may have been unknown.</li>
+ <li>Chaining too many fallbacks without documenting business priority order.</li>
+ </ul>
+
+ <h2>Key Takeaways</h2>
+ <ul>
+ <li><code>COALESCE</code> returns the first non-NULL value from a list of expressions.</li>
+ <li><code>NULLIF(a, b)</code> returns NULL when <code>a</code> equals <code>b</code> — ideal for safe division.</li>
+ <li>NULL is not zero or empty string; treat it as unknown in HR data.</li>
+ <li>Use these functions in SELECT, WHERE, JOIN, and aggregate expressions.</li>
+ </ul>
+
+ <h2>Practice Before Assignment</h2>
+ <p>Write a query that computes each employee's lifetime spend, showing <code>0</code> instead of NULL when they have no the job_history table. Then complete the <a href="../../assignments/sql-16-null-functions.html">Topic 16 assignment</a>.</p>
+
+ </article>
+ </div>
+ <div class="lesson-nav-buttons"><a href="15-case-expressions.html" class="nav-btn"><span class="label">Previous</span><span class="title">CASE Expressions</span></a><a href="17-string-functions.html" class="nav-btn next"><span class="label">Next</span><span class="title">String Functions</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+ <p>&copy; 2026 Edukron — Learn, build, share.</p>
+ <div class="footer-links">
+ <a href="../../learn/python/index.html">Python Path</a>
+ <a href="../../learn/sql/index.html">SQL Path</a>
+ <a href="../../assignments/index.html">Assignments</a>
+ </div>
+ </div></footer>
+ <script src="../../js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 20: List Indexing &amp; Slicing | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 20</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 20 of 45 — 45-Hour Python Sprint</p>
+        <h1>List Indexing &amp; Slicing</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> Slice syntax [start:stop:step] on lists, modifying lists using slicing, shallow copies, list comprehension</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-20-list-indexing-and-slicing.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Subsets, Chunks, and Copies</h2>
+      <p>Analysis rarely needs a whole list — you want the top 10, the last 3, or every second element for sampling. List <strong>slicing</strong> uses the same <code>[start:stop:step]</code> syntax as strings, with two powers strings do not have: you can <em>assign into</em> a slice to replace a chunk, and you use slices to make safe copies before mutating data.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <p>All string-slicing rules carry over: start inclusive, stop exclusive, omitted bounds default to the ends, negative steps walk backwards, out-of-range bounds are clipped without error. The new capabilities come from mutability — a slice of a list is a <em>new list</em>, and a slice on the left side of <code>=</code> replaces elements in place.</p>
+
+      <h2>Syntax Reference</h2>
+      <p>Basic slicing returns a new list containing the selected range — the original stays intact.</p>
+      <div class="code-block"><div class="code-header">Slicing — extracting a range</div><pre><code>sales = [450, 320, 210, 175, 150, 89]     <span class="comment"># already sorted descending</span>
+
+top_3 = sales[0:3]
+print(top_3)          <span class="comment"># Output: [450, 320, 210]</span>
+
+print(sales[:2])      <span class="comment"># Output: [450, 320] — from the start</span>
+print(sales[4:])      <span class="comment"># Output: [150, 89] — to the end</span>
+print(sales)          <span class="comment"># Output: [450, 320, 210, 175, 150, 89] — unchanged</span></code></pre></div>
+
+      <p>Negative indices slice from the end — <code>[-2:]</code> is &quot;the last two&quot;, however long the list is.</p>
+      <div class="code-block"><div class="code-header">Negative slices — from the end</div><pre><code>transactions = [<span class="string">&quot;TXN-001&quot;</span>, <span class="string">&quot;TXN-002&quot;</span>, <span class="string">&quot;TXN-003&quot;</span>, <span class="string">&quot;TXN-004&quot;</span>]
+
+print(transactions[-2:])     <span class="comment"># Output: ['TXN-003', 'TXN-004'] — last two</span>
+print(transactions[:-1])     <span class="comment"># Output: ['TXN-001', 'TXN-002', 'TXN-003'] — all but last</span></code></pre></div>
+
+      <p>A step value skips through the list — <code>[::2]</code> takes every second element, a quick sampling pattern.</p>
+      <div class="code-block"><div class="code-header">Step slicing — sampling every Nth element</div><pre><code>amounts = [150, 320, 89, 450, 210, 175]
+
+print(amounts[::2])      <span class="comment"># Output: [150, 89, 210] — every second value</span>
+print(amounts[::-1])     <span class="comment"># Output: [175, 210, 450, 89, 320, 150] — reversed copy</span></code></pre></div>
+
+      <p><strong>Slice assignment</strong> — unique to mutable sequences — replaces a chunk of the list in place. The replacement can even have a different length.</p>
+      <div class="code-block"><div class="code-header">Slice assignment — replace a chunk in place</div><pre><code>statuses = [<span class="string">&quot;ACTIVE&quot;</span>, <span class="string">&quot;FROZEN&quot;</span>, <span class="string">&quot;FROZEN&quot;</span>, <span class="string">&quot;CLOSED&quot;</span>]
+
+statuses[1:3] = [<span class="string">&quot;ACTIVE&quot;</span>, <span class="string">&quot;ACTIVE&quot;</span>]     <span class="comment"># unfreeze two accounts at once</span>
+
+print(statuses)
+<span class="comment"># Output: ['ACTIVE', 'ACTIVE', 'ACTIVE', 'CLOSED']</span></code></pre></div>
+
+      <p>The full slice <code>[:]</code> copies the whole list — the idiomatic way to get an independent working copy before destructive changes. <code>lst.copy()</code> does the same.</p>
+      <div class="code-block"><div class="code-header">Copying with [:] — mutate safely</div><pre><code>original = [100, 200, 300]
+
+working = original[:]        <span class="comment"># shallow copy — a separate list</span>
+working[0] = 999
+
+print(original)   <span class="comment"># Output: [100, 200, 300] — safe</span>
+print(working)    <span class="comment"># Output: [999, 200, 300]</span></code></pre></div>
+
+      <p>Slicing also drives <strong>pagination</strong>: compute an offset, then take one page of rows at a time.</p>
+      <div class="code-block"><div class="code-header">Pagination — batching rows with slices</div><pre><code>rows = list(range(1, 11))        <span class="comment"># pretend these are 10 data rows</span>
+page_size = 4
+
+<span class="keyword">for</span> offset <span class="keyword">in</span> range(0, len(rows), page_size):
+    batch = rows[offset:offset + page_size]
+    print(batch)
+
+<span class="comment"># Output:</span>
+<span class="comment"># [1, 2, 3, 4]</span>
+<span class="comment"># [5, 6, 7, 8]</span>
+<span class="comment"># [9, 10]</span></code></pre></div>
+
+      <p>A <strong>list comprehension</strong> builds a new list from an existing one in a single readable line — transform, filter, or both. It is the Pythonic alternative to a for-loop with <code>append()</code>.</p>
+      <div class="code-block"><div class="code-header">List comprehension — transform and filter</div><pre><code>prices = [29.99, 49.99, 15.50, 89.00]
+
+<span class="comment"># Transform: apply a 10% discount to every price</span>
+discounted = [round(p * 0.9, 2) <span class="keyword">for</span> p <span class="keyword">in</span> prices]
+print(discounted)    <span class="comment"># Output: [26.99, 44.99, 13.95, 80.1]</span>
+
+<span class="comment"># Filter: keep only prices above 25</span>
+premium = [p <span class="keyword">for</span> p <span class="keyword">in</span> prices <span class="keyword">if</span> p &gt; 25]
+print(premium)       <span class="comment"># Output: [29.99, 49.99, 89.0]</span></code></pre></div>
+
+      <h2>Edge Cases &amp; Gotchas</h2>
+      <p>A slice copy is <strong>shallow</strong>: the outer list is new, but nested objects inside are still shared. Mutating a nested list through the copy also changes the original.</p>
+      <div class="code-block"><div class="code-header">Gotcha — shallow copies share nested lists</div><pre><code>stores = [[<span class="string">&quot;S1&quot;</span>, 1200], [<span class="string">&quot;S2&quot;</span>, 980]]
+
+snapshot = stores[:]           <span class="comment"># new outer list, SAME inner lists</span>
+snapshot[0][1] = 9999          <span class="comment"># mutate a nested value</span>
+
+print(stores[0])               <span class="comment"># Output: ['S1', 9999] — original changed too!</span>
+
+<span class="comment"># For fully independent copies use copy.deepcopy()</span>
+<span class="keyword">import</span> copy
+deep = copy.deepcopy(stores)</code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>ETL</strong> — <code>rows[offset:offset + 1000]</code> paginates large result sets into database-friendly batches.</li>
+        <li><strong>Analytics</strong> — sort then slice for top-N reports; <code>[::2]</code>-style steps sample rows for spot checks.</li>
+        <li><strong>Safety</strong> — copy a price list with <code>[:]</code> before applying discounts, so the source of truth survives.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>From a sorted sales list, extract the top 3 and bottom 2 with slices.</li>
+        <li>Use slice assignment to replace the middle two elements of a four-element list.</li>
+        <li>Paginate a 10-element list into pages of 3 using a loop over offsets.</li>
+        <li>Write one comprehension that discounts prices and another that filters cheap items out.</li>
+        <li>Reproduce the shallow-copy gotcha with a nested list, then fix it with <code>copy.deepcopy()</code>.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>List slicing follows string rules and returns a new list; the original is never touched by a read slice.</li>
+        <li>Slice assignment (<code>lst[1:3] = [...]</code>) replaces chunks in place — even with a different length.</li>
+        <li><code>[:]</code> and <code>.copy()</code> make shallow copies; nested objects are shared — use <code>deepcopy</code> when nesting matters.</li>
+        <li>List comprehensions replace transform/filter loops with one readable line.</li>
+        <li>Pagination is just arithmetic plus slicing: <code>rows[offset:offset + page_size]</code>.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-20-list-indexing-and-slicing.html">Hour 20 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-19-list-methods.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← List Methods</span></a><a href="hour-21-tuples.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Tuples →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

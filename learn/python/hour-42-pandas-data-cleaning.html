@@ -1,0 +1,128 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 42: Pandas Data Cleaning | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 42</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 42 of 45 — 45-Hour Python Sprint</p>
+        <h1>Pandas Data Cleaning</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> Handling missing values (isnull, dropna, fillna), handling duplicates (duplicated, drop_duplicates), renaming columns, type conversion in columns</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-42-pandas-data-cleaning.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Cleaning Dirty Data</h2>
+      <p>Real <code>store_sales</code> and <code>transactions</code> feeds arrive with missing values, duplicates, and inconsistent column names. Pandas data cleaning — handling <code>NaN</code>, deduplicating, imputing, renaming — is the critical step between raw ingest and trustworthy data analytics.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <h3>Missing Data (NaN)</h3>
+      <p>Pandas represents missing values as <code>NaN</code>. Audit with <code>df.isnull().sum()</code>. Impute with <code>fillna</code> (mean/median/mode) or remove with <code>dropna</code>.</p>
+      <h3>Duplicates</h3>
+      <p>Duplicate rows inflate counts — use <code>drop_duplicates(subset=[...])</code> on natural keys like <code>transaction_id</code>.</p>
+      <h3>Column Renaming</h3>
+      <p>Standardize to <code>snake_case</code> with <code>df.rename(columns={...})</code> before SQL loads.</p>
+
+      <h2>Syntax Reference</h2>
+      <p><code>isnull().sum()</code> counts missing values per column — the first audit on any freshly loaded dataset.</p>
+      <div class="code-block"><div class="code-header">isnull().sum() — audit missing values</div><pre><code><span class="keyword">import</span> pandas <span class="keyword">as</span> pd
+
+df = pd.read_csv(<span class="string">&quot;transactions.csv&quot;</span>)
+
+print(df.isnull().sum())
+<span class="comment"># Output (example):</span>
+<span class="comment"># transaction_id      0</span>
+<span class="comment"># account_id          3</span>
+<span class="comment"># amount             12</span></code></pre></div>
+
+      <p><code>fillna()</code> replaces missing values — commonly with the column median or mean. Assign the result back rather than relying on <code>inplace</code>.</p>
+      <div class="code-block"><div class="code-header">fillna() — impute missing values</div><pre><code>median_amount = df[<span class="string">&quot;amount&quot;</span>].median()
+
+df[<span class="string">&quot;amount&quot;</span>] = df[<span class="string">&quot;amount&quot;</span>].fillna(median_amount)
+
+print(df[<span class="string">&quot;amount&quot;</span>].isnull().sum())    <span class="comment"># Output: 0 — no missing amounts left</span></code></pre></div>
+
+      <p><code>dropna()</code> removes rows with missing values — use <code>subset=</code> to require only the columns that truly matter.</p>
+      <div class="code-block"><div class="code-header">dropna() — remove incomplete rows</div><pre><code>before = len(df)
+
+df = df.dropna(subset=[<span class="string">&quot;account_id&quot;</span>])    <span class="comment"># a txn without an account is unusable</span>
+
+print(before - len(df))    <span class="comment"># Output: 3 — rows removed</span></code></pre></div>
+
+      <p><code>duplicated()</code> flags repeat rows; <code>drop_duplicates()</code> removes them — always on a natural key like the transaction ID.</p>
+      <div class="code-block"><div class="code-header">drop_duplicates() — deduplicate on a key</div><pre><code>print(df.duplicated(subset=[<span class="string">&quot;transaction_id&quot;</span>]).sum())
+<span class="comment"># Output (example): 5 — duplicate transaction IDs found</span>
+
+df = df.drop_duplicates(subset=[<span class="string">&quot;transaction_id&quot;</span>])
+
+print(df.duplicated(subset=[<span class="string">&quot;transaction_id&quot;</span>]).sum())   <span class="comment"># Output: 0</span></code></pre></div>
+
+      <p><code>rename()</code> standardizes column names — map old names to new ones before a database load.</p>
+      <div class="code-block"><div class="code-header">rename() — standardize column names</div><pre><code>df = df.rename(columns={<span class="string">&quot;txn_type&quot;</span>: <span class="string">&quot;transaction_type&quot;</span>, <span class="string">&quot;Amt&quot;</span>: <span class="string">&quot;amount&quot;</span>})
+
+print(list(df.columns))
+<span class="comment"># Output: ['transaction_id', 'account_id', 'amount', 'transaction_type']</span></code></pre></div>
+
+      <p><code>astype()</code> converts a column's type — essential when numbers were read as text.</p>
+      <div class="code-block"><div class="code-header">astype() — convert column types</div><pre><code>df[<span class="string">&quot;amount&quot;</span>] = df[<span class="string">&quot;amount&quot;</span>].astype(float)
+
+print(df[<span class="string">&quot;amount&quot;</span>].dtype)    <span class="comment"># Output: float64 — math now behaves</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>Inventory data</strong> — Fill missing <code>unit_price</code> with category median before valuation.</li>
+        <li><strong>Data systems</strong> — Deduplicate on <code>transaction_id</code> after merging multiple feed sources.</li>
+        <li><strong>signups</strong> — Standardize column names before loading to PostgreSQL.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Audit null counts in a mock housing dataset; fill missing prices with the column mean.</li>
+        <li>Remove duplicate entries from a customer signup list.</li>
+        <li>Rename columns to snake_case style.</li>
+        <li>Compare row counts before and after <code>dropna()</code> vs <code>fillna()</code>.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li><code>.isnull().sum()</code> audits missing data.</li>
+        <li><code>.fillna()</code> imputes; <code>.dropna()</code> removes incomplete rows.</li>
+        <li><code>.drop_duplicates()</code> prevents inflated aggregations.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-42-pandas-data-cleaning.html">Hour 42 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-41-pandas-introduction.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Pandas Introduction</span></a><a href="hour-43-pandas-filtering.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Pandas Filtering →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

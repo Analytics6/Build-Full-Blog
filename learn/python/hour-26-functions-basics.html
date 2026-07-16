@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 26: Functions Basics | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 26</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 26 of 45 — 45-Hour Python Sprint</p>
+        <h1>Functions Basics</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> Defining functions, def keyword, parameter vs argument, return statement, return vs print</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-26-functions-basics.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Write Once, Call Anywhere</h2>
+      <p>The same calculation tends to appear again and again: a discount formula, a validation rule, a cleanup step. A <strong>function</strong> packages a block of code under a name so you write the logic once and call it wherever needed. Functions are the single most important tool for turning throwaway scripts into maintainable, testable programs.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <h3>Anatomy of a Function</h3>
+      <ul>
+        <li><code>def name(parameters):</code> starts the definition; the indented body follows.</li>
+        <li>A <strong>docstring</strong> — a triple-quoted string as the first line — documents what the function does.</li>
+        <li><code>return value</code> hands a result back to the caller and ends the function immediately. A function without <code>return</code> returns <code>None</code>.</li>
+      </ul>
+      <h3>Parameters vs Arguments</h3>
+      <p><strong>Parameters</strong> are the placeholders in the definition (<code>def calc_tax(amount, rate)</code>); <strong>arguments</strong> are the actual values supplied at call time (<code>calc_tax(1500.00, 0.18)</code>). The distinction matters when reading error messages.</p>
+      <h3>return vs print</h3>
+      <p><code>print()</code> only <em>displays</em> a value; the function still returns <code>None</code>. <code>return</code> sends the value back so it can be stored, compared, or passed onward. Rule of thumb: compute with <code>return</code>, display with <code>print</code> at the edges of the program.</p>
+
+      <h2>Syntax Reference</h2>
+      <p>A minimal function: define once with <code>def</code>, call as many times as you like.</p>
+      <div class="code-block"><div class="code-header">def — defining and calling a function</div><pre><code><span class="keyword">def</span> calc_order_total(quantity, unit_price):
+    <span class="string">&quot;&quot;&quot;Calculate the line total for one order line.&quot;&quot;&quot;</span>
+    <span class="keyword">return</span> quantity * unit_price
+
+total = calc_order_total(3, 29.99)      <span class="comment"># arguments: 3 and 29.99</span>
+print(total)                            <span class="comment"># Output: 89.97</span>
+
+print(calc_order_total(10, 5.50))       <span class="comment"># Output: 55.0 — reuse, no rewriting</span></code></pre></div>
+
+      <p>The difference between returning and printing, made visible: only the returned value can be captured in a variable.</p>
+      <div class="code-block"><div class="code-header">return vs print — capture vs display</div><pre><code><span class="keyword">def</span> show_balance(balance):
+    print(<span class="string">f&quot;Balance: {balance}&quot;</span>)        <span class="comment"># displays, returns nothing</span>
+
+<span class="keyword">def</span> get_balance_label(balance):
+    <span class="keyword">return</span> <span class="string">f&quot;Balance: {balance}&quot;</span>        <span class="comment"># returns, displays nothing</span>
+
+a = show_balance(5000)        <span class="comment"># prints: Balance: 5000</span>
+b = get_balance_label(5000)   <span class="comment"># prints nothing</span>
+
+print(a)     <span class="comment"># Output: None — show_balance returned nothing usable</span>
+print(b)     <span class="comment"># Output: Balance: 5000 — the value came back to us</span></code></pre></div>
+
+      <p><code>return</code> ends the function on the spot — any code after it never runs. This enables clean early-exit validation.</p>
+      <div class="code-block"><div class="code-header">return — exits immediately</div><pre><code><span class="keyword">def</span> classify_amount(amount):
+    <span class="keyword">if</span> amount &gt; 50000:
+        <span class="keyword">return</span> <span class="string">&quot;HIGH&quot;</span>          <span class="comment"># function ends here for large amounts</span>
+    <span class="keyword">if</span> amount &gt; 10000:
+        <span class="keyword">return</span> <span class="string">&quot;MEDIUM&quot;</span>
+    <span class="keyword">return</span> <span class="string">&quot;LOW&quot;</span>               <span class="comment"># reached only when both ifs failed</span>
+
+print(classify_amount(95000))   <span class="comment"># Output: HIGH</span>
+print(classify_amount(500))     <span class="comment"># Output: LOW</span></code></pre></div>
+
+      <p>Returning several values packs them into a tuple; the caller unpacks them into separate names.</p>
+      <div class="code-block"><div class="code-header">Multiple return values — tuple packing</div><pre><code><span class="keyword">def</span> summarize_sales(prices):
+    total = sum(prices)
+    count = len(prices)
+    <span class="keyword">return</span> total, count, total / count      <span class="comment"># three values, one tuple</span>
+
+total, count, avg = summarize_sales([29.99, 15.50, 42.00])
+
+print(total)   <span class="comment"># Output: 87.49</span>
+print(count)   <span class="comment"># Output: 3</span>
+print(<span class="string">f&quot;{avg:.2f}&quot;</span>)   <span class="comment"># Output: 29.16</span></code></pre></div>
+
+      <h2>Edge Cases &amp; Gotchas</h2>
+      <p>Variables created inside a function are <strong>local</strong> — they vanish when the function ends and are invisible outside. Trying to read one outside raises <code>NameError</code>.</p>
+      <div class="code-block"><div class="code-header">Gotcha — local variables stay local</div><pre><code><span class="keyword">def</span> apply_fee(balance):
+    fee = 25.00                    <span class="comment"># local to apply_fee</span>
+    <span class="keyword">return</span> balance - fee
+
+print(apply_fee(500))              <span class="comment"># Output: 475.0</span>
+<span class="comment"># print(fee)                      &lt;-- NameError: name 'fee' is not defined</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>Pipelines</strong> — <code>transform_orders()</code> standardizes columns once and is reused by every job that touches orders.</li>
+        <li><strong>Composition</strong> — small functions like <code>validate_iban()</code> and <code>flag_suspicious_amount()</code> combine into larger fraud checks.</li>
+        <li><strong>Testing</strong> — returned values can be asserted in unit tests; printed values cannot.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Write <code>circle_area(radius)</code> returning \(\pi r^2\) with <code>math.pi</code>.</li>
+        <li>Create <code>is_even(n)</code> returning <code>True</code>/<code>False</code>, and use it in an <code>if</code>.</li>
+        <li>Build a print-only and a return-only version of a greeting; assign both results and compare.</li>
+        <li>Write <code>summarize_sales(prices)</code> returning total, count, and average; unpack all three.</li>
+        <li>Trigger the <code>NameError</code> for a local variable, then fix it by returning the value instead.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li><code>def</code> names a reusable block; a docstring explains it; <code>return</code> hands back the result.</li>
+        <li>Parameters live in the definition; arguments are supplied at the call.</li>
+        <li><code>return</code> beats <code>print</code> for anything downstream code needs — a printing function returns <code>None</code>.</li>
+        <li><code>return</code> exits immediately, enabling early-exit validation chains.</li>
+        <li>Multiple returns are tuples; local variables never escape the function.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-26-functions-basics.html">Hour 26 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-25-nested-data-structures.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Nested Data Structures</span></a><a href="hour-27-function-arguments.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Function Arguments →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

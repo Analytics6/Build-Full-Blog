@@ -1,0 +1,165 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 16: While Loop | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 16</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 16 of 45 — 45-Hour Python Sprint</p>
+        <h1>While Loop</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> while loop syntax, infinite loops, loop conditions, updating state variables</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-16-while-loop.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Repeat Until Something Changes</h2>
+      <p>Not every repetition has a known count. A retry loop runs until the connection succeeds; an input loop runs until the user types &quot;exit&quot;; a balance drains until it hits zero. The <strong>while loop</strong> repeats its body as long as a condition stays <code>True</code> — <em>indefinite</em> iteration, where your code decides at runtime when to stop. The price of that flexibility: <em>you</em> are responsible for making the condition eventually turn false.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <h3>Evaluation Order</h3>
+      <p><code>while condition:</code> checks the condition <em>before</em> each pass. If it is false at the very start, the body never runs at all. After each pass, the condition is checked again.</p>
+      <h3>The Three-Part Recipe</h3>
+      <ul>
+        <li><strong>Initialize</strong> a state variable before the loop.</li>
+        <li><strong>Test</strong> that variable in the condition.</li>
+        <li><strong>Update</strong> it inside the body — forget this and the loop runs forever.</li>
+      </ul>
+      <h3>for vs while</h3>
+      <p>Iterating over a known collection or count → <code>for</code>. Repeating until an unpredictable event (user input, API success, threshold reached) → <code>while</code>. If you can write it as a <code>for</code>, do — it is harder to get wrong.</p>
+
+      <h2>Syntax Reference</h2>
+      <p>The canonical counter loop: state initialized, tested, and updated.</p>
+      <div class="code-block"><div class="code-header">while — batch progress counter</div><pre><code>processed = 0                        <span class="comment"># 1. initialize</span>
+batch_size = 1000
+total_txns = 4500
+
+<span class="keyword">while</span> processed &lt; total_txns:        <span class="comment"># 2. test</span>
+    processed += batch_size          <span class="comment"># 3. update</span>
+    print(<span class="string">f&quot;Processed {min(processed, total_txns)} of {total_txns}&quot;</span>)
+
+<span class="comment"># Output:</span>
+<span class="comment"># Processed 1000 of 4500</span>
+<span class="comment"># Processed 2000 of 4500</span>
+<span class="comment"># Processed 3000 of 4500</span>
+<span class="comment"># Processed 4000 of 4500</span>
+<span class="comment"># Processed 4500 of 4500</span></code></pre></div>
+
+      <p>A countdown makes the update direction explicit — subtract until the guard fails.</p>
+      <div class="code-block"><div class="code-header">while — retry countdown</div><pre><code>retries = 3
+
+<span class="keyword">while</span> retries &gt; 0:
+    print(<span class="string">f&quot;Attempting warehouse connection... ({retries} left)&quot;</span>)
+    retries -= 1                     <span class="comment"># MUST decrease, or the loop never ends</span>
+
+print(<span class="string">&quot;Out of retries&quot;</span>)
+
+<span class="comment"># Output:</span>
+<span class="comment"># Attempting warehouse connection... (3 left)</span>
+<span class="comment"># Attempting warehouse connection... (2 left)</span>
+<span class="comment"># Attempting warehouse connection... (1 left)</span>
+<span class="comment"># Out of retries</span></code></pre></div>
+
+      <p>Interactive loops run until a sentinel value arrives — the classic point-of-sale pattern.</p>
+      <div class="code-block"><div class="code-header">while — input until a sentinel</div><pre><code>command = <span class="string">&quot;&quot;</span>
+
+<span class="keyword">while</span> command != <span class="string">&quot;exit&quot;</span>:
+    command = input(<span class="string">&quot;Enter SKU or 'exit': &quot;</span>).strip()
+    <span class="keyword">if</span> command != <span class="string">&quot;exit&quot;</span>:
+        print(<span class="string">f&quot;Looking up {command} in product_catalog...&quot;</span>)
+
+print(<span class="string">&quot;Session closed&quot;</span>)
+
+<span class="comment"># Example session:</span>
+<span class="comment"># Enter SKU or 'exit': SKU-42</span>
+<span class="comment"># Looking up SKU-42 in product_catalog...</span>
+<span class="comment"># Enter SKU or 'exit': exit</span>
+<span class="comment"># Session closed</span></code></pre></div>
+
+      <p>A condition that is false from the start means zero iterations — sometimes exactly what you want, sometimes a sign of an inverted comparison.</p>
+      <div class="code-block"><div class="code-header">while — a false condition never runs</div><pre><code>overdue_amount = 0
+
+<span class="keyword">while</span> overdue_amount &gt; 0:
+    print(<span class="string">&quot;Sending payment reminder&quot;</span>)      <span class="comment"># never executes</span>
+    overdue_amount -= 100
+
+print(<span class="string">&quot;No reminders needed&quot;</span>)
+<span class="comment"># Output: No reminders needed</span></code></pre></div>
+
+      <h2>Edge Cases &amp; Gotchas</h2>
+      <p>The infinite loop: forget the update (or update in the wrong direction) and the program hangs, consuming CPU until killed. If a running cell never finishes, this is the first thing to check.</p>
+      <div class="code-block"><div class="code-header">Gotcha — the infinite loop</div><pre><code>balance = 500
+
+<span class="comment"># WRONG — balance never changes, condition stays True forever:</span>
+<span class="comment"># while balance &gt; 0:</span>
+<span class="comment">#     print(&quot;Charging fee&quot;)          &lt;-- runs forever; Ctrl+C / interrupt kernel</span>
+
+<span class="comment"># CORRECT — the state moves toward the exit:</span>
+<span class="keyword">while</span> balance &gt; 0:
+    balance -= 200                    <span class="comment"># fee reduces the balance</span>
+    print(<span class="string">f&quot;Fee charged. Remaining: {balance}&quot;</span>)
+
+<span class="comment"># Output:</span>
+<span class="comment"># Fee charged. Remaining: 300</span>
+<span class="comment"># Fee charged. Remaining: 100</span>
+<span class="comment"># Fee charged. Remaining: -100</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>Resilience</strong> — retry loops around flaky network calls, capped by a max-attempts counter.</li>
+        <li><strong>Polling</strong> — monitors re-check a queue or table until a threshold is met.</li>
+        <li><strong>Interactive tools</strong> — CLIs accept commands until the user types a sentinel like &quot;exit&quot;.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Count from 1 to 5 with a while loop, then rewrite it as a for loop.</li>
+        <li>Simulate a retry countdown from 3, printing attempts.</li>
+        <li>Build an input loop that echoes SKUs until &quot;exit&quot; is typed.</li>
+        <li>Write (in a comment!) an infinite loop, then fix it with a proper update.</li>
+        <li>Drain a 500 balance by 200 per iteration; explain why it ends at -100 and how to stop at 0.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li><code>while</code> re-checks its condition before every pass; a false start means zero iterations.</li>
+        <li>Initialize, test, update — miss the update and the loop is infinite.</li>
+        <li>Prefer <code>for</code> for known sequences; reserve <code>while</code> for open-ended repetition.</li>
+        <li>Sentinel-driven input loops and capped retry loops are the two everyday patterns.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-16-while-loop.html">Hour 16 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-15-for-loop.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← For Loop</span></a><a href="hour-17-loop-control.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Loop Control →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

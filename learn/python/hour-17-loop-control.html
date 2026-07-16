@@ -1,0 +1,158 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 17: Loop Control | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 17</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 17 of 45 — 45-Hour Python Sprint</p>
+        <h1>Loop Control</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> break statement, continue statement, pass statement, else clause in loops</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-17-loop-control.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Steering a Running Loop</h2>
+      <p>Scanning 50,000 records does not mean touching all 50,000 when the match appears at row 12. Loop-control statements change a loop's flow from inside: <code>break</code> exits immediately, <code>continue</code> skips to the next iteration, <code>pass</code> does nothing (a placeholder), and the rarely-taught <code>else</code> clause runs only when the loop finished <em>without</em> breaking.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <table>
+        <thead><tr><th>Statement</th><th>Effect</th><th>Typical Use</th></tr></thead>
+        <tbody>
+          <tr><td><code>break</code></td><td>Exit the loop now</td><td>Stop searching after the first match</td></tr>
+          <tr><td><code>continue</code></td><td>Skip the rest of this iteration</td><td>Filter out bad rows without nesting</td></tr>
+          <tr><td><code>pass</code></td><td>Do nothing</td><td>Stub out a block you will write later</td></tr>
+          <tr><td>loop <code>else</code></td><td>Run only if no <code>break</code> occurred</td><td>&quot;Searched everything, found nothing&quot;</td></tr>
+        </tbody>
+      </table>
+      <p>In nested loops, <code>break</code> and <code>continue</code> affect only the <em>innermost</em> loop containing them.</p>
+
+      <h2>Syntax Reference</h2>
+      <p><code>break</code> abandons the loop the moment its job is done — the remaining elements are never visited.</p>
+      <div class="code-block"><div class="code-header">break — stop at the first match</div><pre><code>txn_ids = [<span class="string">&quot;TXN-001&quot;</span>, <span class="string">&quot;TXN-002&quot;</span>, <span class="string">&quot;TXN-FRAUD&quot;</span>, <span class="string">&quot;TXN-004&quot;</span>]
+
+<span class="keyword">for</span> txn_id <span class="keyword">in</span> txn_ids:
+    <span class="keyword">if</span> txn_id == <span class="string">&quot;TXN-FRAUD&quot;</span>:
+        print(<span class="string">f&quot;Fraud found: {txn_id}&quot;</span>)
+        <span class="keyword">break</span>                          <span class="comment"># TXN-004 is never checked</span>
+    print(<span class="string">f&quot;Checked {txn_id}&quot;</span>)
+
+<span class="comment"># Output:</span>
+<span class="comment"># Checked TXN-001</span>
+<span class="comment"># Checked TXN-002</span>
+<span class="comment"># Fraud found: TXN-FRAUD</span></code></pre></div>
+
+      <p><code>continue</code> skips only the current element — the loop itself keeps going. It filters bad data without wrapping the whole body in an <code>if</code>.</p>
+      <div class="code-block"><div class="code-header">continue — skip invalid rows</div><pre><code>amounts = [150.0, -5.0, 200.0, 0.0, 89.0]
+total = 0
+
+<span class="keyword">for</span> amt <span class="keyword">in</span> amounts:
+    <span class="keyword">if</span> amt &lt;= 0:
+        <span class="keyword">continue</span>              <span class="comment"># bad data — jump to the next amount</span>
+    total += amt              <span class="comment"># only valid amounts reach this line</span>
+
+print(<span class="string">f&quot;Valid sales total: ${total}&quot;</span>)
+<span class="comment"># Output: Valid sales total: $439.0</span></code></pre></div>
+
+      <p><code>pass</code> is a syntactic placeholder: Python requires <em>something</em> in every block, and <code>pass</code> satisfies that while doing nothing — useful while sketching a pipeline.</p>
+      <div class="code-block"><div class="code-header">pass — an intentional no-op</div><pre><code>order_statuses = [<span class="string">&quot;shipped&quot;</span>, <span class="string">&quot;pending&quot;</span>, <span class="string">&quot;returned&quot;</span>]
+
+<span class="keyword">for</span> status <span class="keyword">in</span> order_statuses:
+    <span class="keyword">if</span> status == <span class="string">&quot;returned&quot;</span>:
+        <span class="keyword">pass</span>                  <span class="comment"># TODO: refund logic goes here later</span>
+    <span class="keyword">else</span>:
+        print(<span class="string">f&quot;Processing {status} order&quot;</span>)
+
+<span class="comment"># Output:</span>
+<span class="comment"># Processing shipped order</span>
+<span class="comment"># Processing pending order</span></code></pre></div>
+
+      <p>The loop <code>else</code> runs exactly when the loop ran to completion — that is, no <code>break</code> fired. It expresses &quot;searched everything and did not find it&quot; without a flag variable.</p>
+      <div class="code-block"><div class="code-header">Loop else — search completed, no match</div><pre><code>accounts = [<span class="string">&quot;ACC-101&quot;</span>, <span class="string">&quot;ACC-102&quot;</span>, <span class="string">&quot;ACC-103&quot;</span>]
+search = <span class="string">&quot;ACC-999&quot;</span>
+
+<span class="keyword">for</span> acc <span class="keyword">in</span> accounts:
+    <span class="keyword">if</span> acc == search:
+        print(<span class="string">&quot;Found&quot;</span>)
+        <span class="keyword">break</span>
+<span class="keyword">else</span>:                             <span class="comment"># belongs to the FOR, not an if</span>
+    print(<span class="string">&quot;Account not found&quot;</span>)
+
+<span class="comment"># Output: Account not found</span></code></pre></div>
+
+      <h2>Edge Cases &amp; Gotchas</h2>
+      <p>In nested loops, <code>break</code> only exits the innermost loop — the outer one continues. Escaping both usually means restructuring into a function with <code>return</code>.</p>
+      <div class="code-block"><div class="code-header">Gotcha — break only exits one level</div><pre><code>stores = [<span class="string">&quot;S1&quot;</span>, <span class="string">&quot;S2&quot;</span>]
+skus = [<span class="string">&quot;OK-1&quot;</span>, <span class="string">&quot;BAD&quot;</span>, <span class="string">&quot;OK-2&quot;</span>]
+
+<span class="keyword">for</span> store <span class="keyword">in</span> stores:
+    <span class="keyword">for</span> sku <span class="keyword">in</span> skus:
+        <span class="keyword">if</span> sku == <span class="string">&quot;BAD&quot;</span>:
+            <span class="keyword">break</span>                 <span class="comment"># exits the sku loop only</span>
+        print(<span class="string">f&quot;{store}: {sku}&quot;</span>)
+
+<span class="comment"># Output:</span>
+<span class="comment"># S1: OK-1</span>
+<span class="comment"># S2: OK-1</span>
+<span class="comment"># The outer loop still ran for S2 — break did not stop it.</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>Search</strong> — <code>break</code> ends a scan the moment the target record is found, saving compute on large batches.</li>
+        <li><strong>Data quality</strong> — <code>continue</code> drops cancelled or malformed rows while the valid ones aggregate.</li>
+        <li><strong>Verification</strong> — loop <code>else</code> reports &quot;ID not in roster&quot; cleanly after an exhaustive search.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Scan a list for a target value and <code>break</code> on the first hit; count how many checks were saved.</li>
+        <li>Sum only positive amounts using <code>continue</code>.</li>
+        <li>Stub a branch with <code>pass</code> and a TODO comment.</li>
+        <li>Search for a missing ID and report it via the loop's <code>else</code> clause.</li>
+        <li>Show that <code>break</code> in a nested loop leaves the outer loop running.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li><code>break</code> exits the loop; <code>continue</code> skips to the next iteration; both affect only the innermost loop.</li>
+        <li><code>pass</code> is a do-nothing placeholder that keeps stub blocks syntactically valid.</li>
+        <li>The loop <code>else</code> runs only when no <code>break</code> fired — ideal for not-found reporting.</li>
+        <li>Early exits and skips make scans faster and filtering code flatter.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-17-loop-control.html">Hour 17 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-16-while-loop.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← While Loop</span></a><a href="hour-18-lists-basics.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Lists Basics →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

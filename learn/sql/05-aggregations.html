@@ -1,0 +1,106 @@
+﻿<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Aggregations | Edukron</title><link rel="stylesheet" href="../../css/style.css"></head>
+<body>
+ <header class="site-header"><div class="container header-inner"><a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a><nav class="nav"><a href="../../blog/index.html">Blog</a><a href="../python/index.html">Python</a><a href="index.html" class="active" aria-current="page">SQL</a><a href="../../assignments/index.html">Assignments</a></nav></div></header>
+ <main class="page"><div class="container"><nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">SQL Path</a><span>/</span><span class="current">Aggregations</span></nav><div class="lesson-layout">
+ <article class="prose">
+ <header class="article-header">
+ <p class="article-meta">SQL Learning Path · Lesson 5 · 30 min</p>
+ <h1>Aggregations</h1>
+ <p class="article-excerpt">Summarize data with COUNT, SUM, and AVG, then group results with GROUP BY and filter groups using HAVING.</p>
+ </header>
+
+ <p>Raw rows in the employees table or the job_history table are too granular for summary reports. Aggregate functions collapse many rows into KPIs — totals, averages, and row counts — that power dashboards.</p>
+
+ <h2>Aggregation pipeline</h2>
+ 
+
+ <h2>Common aggregate functions</h2>
+ <table><thead><tr><th>Function</th><th>Returns</th><th>Example</th></tr></thead><tbody>
+ <tr><td><code>COUNT()</code></td><td>number of rows/values</td><td>sales per store</td></tr>
+ <tr><td><code>SUM()</code></td><td>total numeric value</td><td>daily totals</td></tr>
+ <tr><td><code>AVG()</code></td><td>mean numeric value</td><td>avg loan salary</td></tr>
+ <tr><td><code>MIN()</code>/<code>MAX()</code></td><td>extremes</td><td>earliest/latest txn</td></tr>
+ </tbody></table>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="comment">-- Example: total revenue across all sales</span>
+<span class="keyword">SELECT</span> <span class="keyword">SUM</span>(salary) <span class="keyword">AS</span> total_amount,
+       <span class="keyword">AVG</span>(salary) <span class="keyword">AS</span> avg_basket,
+       <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> sale_count
+<span class="keyword">FROM</span> hr.employees;
+
+<span class="comment">-- Example: transaction volume</span>
+<span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> history_count,
+       <span class="keyword">SUM</span>(salary) <span class="keyword">AS</span> total_volume
+<span class="keyword">FROM</span> hr.job_history
+<span class="keyword">WHERE</span> job_id = 'deposit';</code></pre></div>
+ <p><code>COUNT(*)</code> counts every row; <code>COUNT(column)</code> skips NULLs in that column.</p>
+
+ <h2>GROUP BY — one summary per bucket</h2>
+ <p>Every non-aggregated column in SELECT must appear in GROUP BY.</p>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="comment">-- Totals by group (via join)</span>
+<span class="keyword">SELECT</span> p.category,
+       <span class="keyword">SUM</span>(oi.salary) <span class="keyword">AS</span> category_total
+<span class="keyword">FROM</span> hr.job_history <span class="keyword">AS</span> oi
+<span class="keyword">INNER JOIN</span> hr.jobs <span class="keyword">AS</span> p <span class="keyword">ON</span> p.job_id = oi.job_id
+<span class="keyword">GROUP BY</span> p.category
+<span class="keyword">ORDER BY</span> category_total <span class="keyword">DESC</span>;
+
+<span class="comment">-- Sales count per store</span>
+<span class="keyword">SELECT</span> department_id, <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> sales_count
+<span class="keyword">FROM</span> hr.employees
+<span class="keyword">GROUP BY</span> department_id;</code></pre></div>
+
+ <h2>HAVING — filter groups, not rows</h2>
+ <p><code>WHERE</code> filters individual rows before grouping. <code>HAVING</code> filters the groups afterward and can reference aggregates.</p>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="comment">-- hr.departments with more than 100 sales</span>
+<span class="keyword">SELECT</span> department_id, <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> sales_count
+<span class="keyword">FROM</span> hr.employees
+<span class="keyword">GROUP BY</span> department_id
+<span class="keyword">HAVING</span> <span class="keyword">COUNT</span>(*) &gt; 100;
+
+<span class="comment">-- hr.employees whose 2026 spend exceeds 500</span>
+<span class="keyword">SELECT</span> employee_id, <span class="keyword">SUM</span>(salary) <span class="keyword">AS</span> spend_2026
+<span class="keyword">FROM</span> hr.employees
+<span class="keyword">WHERE</span> hire_date &gt;= '2026-01-01'
+<span class="keyword">GROUP BY</span> employee_id
+<span class="keyword">HAVING</span> <span class="keyword">SUM</span>(salary) &gt; 500;</code></pre></div>
+
+ <h2>Aggregations with joins</h2>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="comment">-- Every parent row and child count (including zero)</span>
+<span class="keyword">SELECT</span> c.last_name, <span class="keyword">COUNT</span>(s.employee_id) <span class="keyword">AS</span> employee_count
+<span class="keyword">FROM</span> hr.employees <span class="keyword">AS</span> c
+<span class="keyword">LEFT JOIN</span> hr.employees <span class="keyword">AS</span> s <span class="keyword">ON</span> s.employee_id = c.employee_id
+<span class="keyword">GROUP BY</span> c.employee_id, c.last_name
+<span class="keyword">ORDER BY</span> employee_count <span class="keyword">DESC</span>;
+
+<span class="comment">-- Average loan salary by status</span>
+<span class="keyword">SELECT</span> status, <span class="keyword">AVG</span>(requested_amount) <span class="keyword">AS</span> avg_amount
+<span class="keyword">FROM</span> hr.job_history
+<span class="keyword">GROUP BY</span> status;</code></pre></div>
+
+ <h2>Real-world context</h2>
+ <ul>
+ <li><strong>ETL validation</strong> — After loading the employees table, GROUP BY <code>hire_date</code> and compare row counts to source files.</li>
+ <li><strong>Feature engineering</strong> — Aggregate per-entity totals from a detail table before training a churn model.</li>
+ <li><strong>Risk reporting</strong> — HAVING on average transaction size flags the employees table with unusual activity patterns.</li>
+ </ul>
+
+ <h2>Practice</h2>
+ <ol>
+ <li>Find the min, max, and average <code>salary</code> in the jobs table.</li>
+ <li>Count the job_history table grouped by <code>job_id</code>.</li>
+ <li>Find departments with total aggregated value over 10,000 using JOIN, GROUP BY, and HAVING.</li>
+ </ol>
+
+ <h2>Key takeaways</h2>
+ <ul>
+ <li>Aggregate functions summarize values across rows.</li>
+ <li><code>GROUP BY</code> creates one summary row per distinct bucket.</li>
+ <li><code>WHERE</code> filters rows; <code>HAVING</code> filters groups after aggregation.</li>
+ <li>Combine joins with aggregates for human-readable business reports.</li>
+ </ul>
+ </article>
+ </div></div></main>
+ <footer class="site-footer"><div class="container footer-inner"><p>&copy; 2026 Edukron — Learn, build, share.</p><div class="footer-links"><a href="../python/index.html">Python Path</a><a href="index.html">SQL Path</a><a href="../../assignments/index.html">Assignments</a></div></div></footer>
+ <script src="../../js/auth.js"></script>
+</body></html>

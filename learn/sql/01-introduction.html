@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+ <meta charset="UTF-8">
+
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+ <title>Introduction to SQL | Edukron</title>
+
+ <link rel="stylesheet" href="../../css/style.css">
+
+</head>
+
+<body>
+
+ <header class="site-header">
+
+ <div class="container header-inner">
+
+ <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+
+ <nav class="nav"><a href="../../blog/index.html">Blog</a><a href="../python/index.html">Python</a><a href="index.html" class="active" aria-current="page">SQL</a><a href="../../assignments/index.html">Assignments</a></nav>
+
+ </div>
+
+ </header>
+
+ <main class="page"><div class="container">
+
+ <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">SQL Path</a><span>/</span><span class="current">Introduction</span></nav>
+
+ <div class="lesson-layout">
+
+ <article class="prose">
+
+ <header class="article-header">
+
+ <p class="article-meta">SQL Learning Path · Lesson 1 · 20 min</p>
+
+ <h1>Introduction to SQL</h1>
+
+ <p class="article-excerpt">Understand databases, tables, and rows, then write your first SELECT query.</p>
+
+ </header>
+
+
+
+ <p>Every analyst working with relational data eventually asks the same question: <em>"What does the data say?"</em> SQL — Structured Query Language — is how you ask it. Whether you are exploring employee records from a data pipeline or auditing historical rows in an operational database, SQL is the universal interface to relational databases.</p>
+
+
+
+ <h2>Why SQL matters</h2>
+
+ <p>This course uses a standard <strong>sample relational schema</strong> with tables such as employees, departments, jobs, and job_history — the same pattern you will see in textbooks and certification exams.</p>
+
+ <ul>
+
+ <li><strong>Tables and rows</strong> — each table stores one kind of entity; each row is one record.</li>
+
+ <li><strong>Columns</strong> — typed attributes such as identifiers, names, dates, and numeric values.</li>
+
+ <li><strong>Relationships</strong> — primary and foreign keys connect related tables for joins and integrity.</li>
+
+ </ul>
+
+ <p>Data engineers load tables from files and APIs; analysts query them to build reports and validate pipelines. SQL is the first skill that connects all three roles.</p>
+
+
+
+ <h2>Databases, tables, rows, and columns</h2>
+
+ <p>A <strong>database</strong> is an organized collection of data. A <strong>table</strong> represents one kind of entity — employees, departments, or job assignments. Each <strong>row</strong> is one record; each <strong>column</strong> is one attribute.</p>
+
+ <table>
+
+ <thead><tr><th>employee_id</th><th>first_name</th><th>last_name</th><th>department_id</th></tr></thead>
+
+ <tbody>
+
+ <tr><td>100</td><td>Steven</td><td>King</td><td>90</td></tr>
+
+ <tr><td>101</td><td>Neena</td><td>Kochhar</td><td>90</td></tr>
+
+ </tbody>
+
+ </table>
+
+ <p>This is a slice of an employees table with typical identifier, name, and department columns.</p>
+
+
+
+ <h2>How SELECT works</h2>
+
+ 
+
+ <p>The database engine reads the named table, projects the requested columns, and returns a result set your notebook, BI tool, or Python script can consume.</p>
+
+
+
+ <h2>Your first query</h2>
+
+ <p><code>SELECT</code> chooses columns; <code>FROM</code> names the table. SQL keywords are conventionally capitalized, though the language is generally case-insensitive.</p>
+
+ <div class="code-block">
+
+          <div class="code-header">SQL</div>
+
+          <pre><code><span class="comment">-- Browse all employees</span>
+
+<span class="keyword">SELECT</span> *
+
+<span class="keyword">FROM</span> hr.employees;
+
+
+
+<span class="comment">-- Prefer explicit columns in production queries</span>
+
+<span class="keyword">SELECT</span> employee_id, first_name, last_name, salary
+
+<span class="keyword">FROM</span> hr.employees;
+
+
+
+<span class="comment">-- Filter to one department</span>
+
+<span class="keyword">SELECT</span> employee_id, first_name, last_name, salary
+
+<span class="keyword">FROM</span> hr.employees
+
+<span class="keyword">WHERE</span> department_id = 50;</code></pre>
+
+ </div>
+
+ <p>The asterisk (<code>*</code>) means "all columns." Explicit column lists make queries easier to read, prevent accidental exposure of sensitive fields, and reduce data transfer in large pipelines.</p>
+
+
+
+ <h2>sample schema: same language, relational databases</h2>
+
+ <div class="code-block">
+
+          <div class="code-header">SQL</div>
+
+          <pre><code><span class="comment">-- Verify yesterday's load by hire_date</span>
+
+<span class="keyword">SELECT</span> hire_date, department_id, <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> row_count
+
+<span class="keyword">FROM</span> hr.employees
+
+<span class="keyword">GROUP BY</span> hire_date, department_id;
+
+
+
+<span class="comment">-- Sample recent job history rows</span>
+
+<span class="keyword">SELECT</span> employee_id, start_date, end_date, job_id, department_id
+
+<span class="keyword">FROM</span> hr.job_history
+
+<span class="keyword">LIMIT</span> 10;</code></pre>
+
+ </div>
+
+ <p>You do not need to memorize every table now. The pattern — <code>SELECT … FROM …</code> — is the foundation. Later lessons add filtering, joins, and aggregations on these same tables.</p>
+
+
+
+ <h2>Create a small table locally</h2>
+
+ <p>Before querying production data, practice on a local SQLite file. This mirrors how developers prototype schemas before deploying to PostgreSQL or Snowflake.</p>
+
+ <div class="code-block">
+
+          <div class="code-header">SQL</div>
+
+          <pre><code><span class="comment">-- Prototype a mini jobs table</span>
+
+<span class="keyword">CREATE TABLE</span> hr.jobs (
+
+  job_id     <span class="keyword">INTEGER PRIMARY KEY</span>,
+
+  job_title  <span class="keyword">TEXT NOT NULL</span>,
+
+  min_salary <span class="keyword">REAL</span>,
+
+  max_salary <span class="keyword">REAL</span>
+
+);
+
+
+
+<span class="keyword">INSERT INTO</span> hr.jobs (job_title, min_salary, max_salary)
+
+<span class="keyword">VALUES</span> ('Sales Manager', 60000, 85000),
+
+       ('Software Engineer', 45000, 65000);</code></pre>
+
+ </div>
+
+
+
+ <h2>Try SQLite locally</h2>
+
+ <p>SQLite stores everything in one file — ideal for learning and for lightweight ETL prototypes on Edukron assignments.</p>
+
+ <table>
+
+ <thead><tr><th>Command</th><th>Purpose</th></tr></thead>
+
+ <tbody>
+
+ <tr><td><code>sqlite3 hr_practice.db</code></td><td>Create or open a database file</td></tr>
+
+ <tr><td><code>.headers on</code></td><td>Show column names in results</td></tr>
+
+ <tr><td><code>.mode column</code></td><td>Format results in aligned columns</td></tr>
+
+ <tr><td><code>.tables</code></td><td>List all tables — useful after a CREATE script</td></tr>
+
+ </tbody>
+
+ </table>
+
+
+
+ <h2>Real-world context</h2>
+
+ <ul>
+
+ <li><strong>Data engineering</strong> — After loading a table from CSV, run a row-count SELECT to confirm the pipeline delivered expected volume.</li>
+
+ <li><strong>Data analytics</strong> — BI dashboards are powered by SELECT queries; Tableau and Metabase generate them automatically, but you must read and debug them.</li>
+
+ <li><strong>Reporting</strong> — Aggregate analysis often starts with SQL: pull grouped totals from joined tables before building dashboards.</li>
+
+ </ul>
+
+
+
+ <h2>Practice</h2>
+
+ <ol>
+
+ <li>Write a query that returns only <code>job_title</code> and <code>max_salary</code> from the jobs table.</li>
+
+ <li>List three columns you would expect in a job_history table and explain why each matters.</li>
+
+ <li>Open SQLite, create a two-row employees table, and SELECT all rows.</li>
+
+ </ol>
+
+
+
+ <h2>Key takeaways</h2>
+
+ <ul>
+
+ <li>Relational databases organize records into tables of rows and columns.</li>
+
+ <li><code>SELECT … FROM …</code> is the foundation of every read query on relational tables.</li>
+
+ <li>Data engineers, analysts, and scientists all rely on SQL to inspect, validate, and transform relational data.</li>
+
+ <li>SQLite provides a zero-setup environment for practicing before querying production systems.</li>
+
+ </ul>
+
+ </article>
+
+ </div>
+
+ </div></main>
+
+ <footer class="site-footer"><div class="container footer-inner"><p>&copy; 2026 Edukron — Learn, build, share.</p><div class="footer-links"><a href="../python/index.html">Python Path</a><a href="index.html">SQL Path</a><a href="../../assignments/index.html">Assignments</a></div></div></footer>
+
+ <script src="../../js/auth.js"></script>
+
+</body>
+
+</html>
+

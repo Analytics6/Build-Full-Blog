@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 15: For Loop | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 15</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 15 of 45 — 45-Hour Python Sprint</p>
+        <h1>For Loop</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> for loop syntax, range() function (start, stop, step), iterating over strings</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-15-for-loop.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Do This for Every Item</h2>
+      <p>The <strong>for loop</strong> is the workhorse of repetition: process every row in a file, every transaction in a batch, every character in a code. Python's <code>for</code> iterates directly over the <em>elements</em> of any sequence — no index bookkeeping required. Use it whenever the number of iterations is known or determined by a collection; the next hour's <code>while</code> loop covers the open-ended case.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <h3>The Loop Variable</h3>
+      <p><code>for item in sequence:</code> binds <code>item</code> to each element in turn and runs the indented body once per element. The loop variable is a real variable — name it meaningfully (<code>price</code>, <code>txn</code>, <code>row</code>), not <code>i</code>, unless it truly is just a counter.</p>
+      <h3>range()</h3>
+      <p><code>range(start, stop, step)</code> generates integers from <code>start</code> up to but <em>not including</em> <code>stop</code>. One argument means <code>range(stop)</code> starting at 0; three arguments add a step. Ranges are lazy — they produce numbers on demand, so <code>range(1_000_000)</code> costs almost nothing.</p>
+      <h3>The Accumulator Pattern</h3>
+      <p>Initialize a total <em>before</em> the loop, add to it <em>inside</em> the loop, use it <em>after</em>. This pattern underlies nearly every aggregation you will ever write.</p>
+
+      <h2>Syntax Reference</h2>
+      <p>Iterating a list directly: the loop variable receives each element, in order.</p>
+      <div class="code-block"><div class="code-header">for over a list — process each element</div><pre><code>prices = [29.99, 15.50, 42.00]
+
+<span class="keyword">for</span> price <span class="keyword">in</span> prices:
+    print(<span class="string">f&quot;Line item: ${price}&quot;</span>)
+
+<span class="comment"># Output:</span>
+<span class="comment"># Line item: $29.99</span>
+<span class="comment"># Line item: $15.5</span>
+<span class="comment"># Line item: $42.0</span></code></pre></div>
+
+      <p>The accumulator pattern: a running total built one element at a time.</p>
+      <div class="code-block"><div class="code-header">Accumulator pattern — summing revenue</div><pre><code>prices = [29.99, 15.50, 42.00, 8.75]
+total_revenue = 0                        <span class="comment"># initialize BEFORE the loop</span>
+
+<span class="keyword">for</span> price <span class="keyword">in</span> prices:
+    total_revenue += price               <span class="comment"># accumulate INSIDE the loop</span>
+
+print(<span class="string">f&quot;Daily revenue: ${total_revenue:.2f}&quot;</span>)
+<span class="comment"># Output: Daily revenue: $96.24</span></code></pre></div>
+
+      <p><code>range()</code> drives counted loops. Remember the stop value is excluded — <code>range(1, 6)</code> ends at 5.</p>
+      <div class="code-block"><div class="code-header">range() — counted iteration</div><pre><code><span class="keyword">for</span> day <span class="keyword">in</span> range(1, 6):
+    print(<span class="string">f&quot;Generating report for day {day}&quot;</span>)
+
+<span class="comment"># Output:</span>
+<span class="comment"># Generating report for day 1</span>
+<span class="comment"># Generating report for day 2</span>
+<span class="comment"># Generating report for day 3</span>
+<span class="comment"># Generating report for day 4</span>
+<span class="comment"># Generating report for day 5</span></code></pre></div>
+
+      <p>A step value processes work in strides — here, batches of 1000 transactions.</p>
+      <div class="code-block"><div class="code-header">range() with step — batch processing</div><pre><code><span class="keyword">for</span> batch_start <span class="keyword">in</span> range(0, 5000, 1000):
+    print(<span class="string">f&quot;Processing transactions {batch_start} to {batch_start + 999}&quot;</span>)
+
+<span class="comment"># Output:</span>
+<span class="comment"># Processing transactions 0 to 999</span>
+<span class="comment"># Processing transactions 1000 to 1999</span>
+<span class="comment"># Processing transactions 2000 to 2999</span>
+<span class="comment"># Processing transactions 3000 to 3999</span>
+<span class="comment"># Processing transactions 4000 to 4999</span></code></pre></div>
+
+      <p>Strings are sequences too — a for loop visits each character, useful for validating codes character by character.</p>
+      <div class="code-block"><div class="code-header">for over a string — character by character</div><pre><code>sku = <span class="string">&quot;AB12&quot;</span>
+digit_count = 0
+
+<span class="keyword">for</span> ch <span class="keyword">in</span> sku:
+    <span class="keyword">if</span> ch.isdigit():
+        digit_count += 1
+
+print(<span class="string">f&quot;{digit_count} digits in {sku}&quot;</span>)   <span class="comment"># Output: 2 digits in AB12</span></code></pre></div>
+
+      <h2>Edge Cases &amp; Gotchas</h2>
+      <p>Modifying a list <em>while</em> looping over it skips elements, because the loop's internal position no longer matches the shifted list. Iterate over a copy instead.</p>
+      <div class="code-block"><div class="code-header">Gotcha — never mutate the list you are looping</div><pre><code>amounts = [100, -50, 200, -75, 300]
+
+<span class="keyword">for</span> amt <span class="keyword">in</span> amounts[:]:          <span class="comment"># loop over a COPY ([:])...</span>
+    <span class="keyword">if</span> amt &lt; 0:
+        amounts.remove(amt)      <span class="comment"># ...so removing from the original is safe</span>
+
+print(amounts)                   <span class="comment"># Output: [100, 200, 300]</span>
+
+<span class="comment"># Looping over `amounts` directly while removing would skip -75.</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>ETL</strong> — loop over the files in a folder, transforming and loading each one.</li>
+        <li><strong>Aggregation</strong> — the accumulator pattern computes daily totals from transaction amounts.</li>
+        <li><strong>Batching</strong> — <code>range(0, total, batch_size)</code> chunks big workloads into database-friendly pieces.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Loop over a list of five prices, printing each with a label.</li>
+        <li>Sum the numbers 1 through 100 with an accumulator and <code>range(1, 101)</code> — the answer is 5050.</li>
+        <li>Print batch boundaries for 5000 rows in steps of 1000.</li>
+        <li>Count the digits in a mixed SKU string.</li>
+        <li>Remove negative values from a list safely by looping over a copy.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li><code>for item in sequence:</code> visits each element — no index management needed.</li>
+        <li><code>range(start, stop, step)</code> excludes the stop value; one argument starts from 0.</li>
+        <li>The accumulator pattern (init before, add inside, use after) powers every aggregation.</li>
+        <li>Strings iterate character by character.</li>
+        <li>Never modify a list while looping over it — iterate a copy with <code>[:]</code>.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-15-for-loop.html">Hour 15 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-14-nested-conditions.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Nested Conditions</span></a><a href="hour-16-while-loop.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">While Loop →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

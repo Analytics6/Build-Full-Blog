@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>UNIQUE and CHECK Constraints | Edukron</title>
+ <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+ <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+ <nav class="nav">
+ <a href="../../blog/index.html" >Blog</a>
+ <a href="../../learn/python/index.html" >Python</a>
+ <a href="../../learn/sql/index.html" class="active">SQL</a>
+ <a href="../../assignments/index.html" >Assignments</a>
+ </nav>
+ </div></header>
+<main class="page"><div class="container">
+ <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Sql Path</a><span>/</span><span class="current">Topic 10</span></nav>
+ <div class="lesson-layout">
+ <article class="prose">
+ <header class="article-header">
+ <p class="article-meta">Sql · Topic 10 of 30 · 25 min</p>
+ <h1>UNIQUE and CHECK Constraints</h1>
+ <p class="article-excerpt">Enforce data rules at the database level — catch bad data before it corrupts HR reports.</p>
+ <p style="margin-top:1rem;"><a href="../../assignments/sql-10-constraints.html" class="btn btn-outline">Go to Assignment →</a></p>
+ </header>
+
+ <p>Application code can validate data, but the database is the last line of defense. Constraints reject invalid rows at insert/update time — preventing duplicate titles, negative salaries, or values outside an allowed range.</p>
+
+ <h2>Defense-in-depth for data quality</h2>
+ 
+
+ <h2>UNIQUE — no duplicates</h2>
+ <p>UNIQUE ensures no two rows share the same value(s) in the constrained column(s).</p>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="keyword">CREATE TABLE</span> hr.jobs (
+  job_id   <span class="keyword">INTEGER PRIMARY KEY</span>,
+  job_id          <span class="keyword">TEXT UNIQUE NOT NULL</span>,
+  job_title <span class="keyword">TEXT NOT NULL</span>,
+  salary   <span class="keyword">DECIMAL</span>(10, 2)
+);
+
+<span class="keyword">CREATE TABLE</span> hr.employees (
+  employee_id  <span class="keyword">INTEGER PRIMARY KEY</span>,
+  email        <span class="keyword">TEXT UNIQUE</span>,
+  last_name    <span class="keyword">TEXT NOT NULL</span>
+);
+
+<span class="comment">-- Unique constraint example</span>
+<span class="keyword">CREATE TABLE</span> hr.job_history (
+  application_id   <span class="keyword">INTEGER PRIMARY KEY</span>,
+  employee_id      <span class="keyword">INTEGER NOT NULL</span>,
+  submitted_at       <span class="keyword">DATE NOT NULL</span>,
+  requested_amount   <span class="keyword">DECIMAL</span>(12, 2),
+  <span class="keyword">UNIQUE</span> (employee_id, submitted_at)
+);</code></pre></div>
+
+ <h2>CHECK — validate values</h2>
+ <p>CHECK constraints enforce boolean conditions on column values.</p>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="keyword">CREATE TABLE</span> hr.employees (
+  employee_id   <span class="keyword">INTEGER PRIMARY KEY</span>,
+  salary      <span class="keyword">DECIMAL</span>(15, 2) <span class="keyword">DEFAULT</span> 0.00,
+  job_title <span class="keyword">TEXT NOT NULL</span>,
+  <span class="keyword">CHECK</span> (salary &gt;= 0),
+  <span class="keyword">CHECK</span> (job_title <span class="keyword">IN</span> ('active', 'inactive', 'pending'))
+);
+
+<span class="keyword">CREATE TABLE</span> hr.job_history (
+  item_id    <span class="keyword">INTEGER PRIMARY KEY</span>,
+  department_id   <span class="keyword">INTEGER NOT NULL</span>,
+  salary <span class="keyword">DECIMAL</span>(10, 2),
+  <span class="keyword">CHECK</span> (department_id &gt; 0),
+  <span class="keyword">CHECK</span> (salary &gt;= 0)
+);
+
+<span class="keyword">CREATE TABLE</span> hr.job_history (
+  application_id   <span class="keyword">INTEGER PRIMARY KEY</span>,
+  requested_amount <span class="keyword">DECIMAL</span>(12, 2),
+  salary     <span class="keyword">INTEGER</span>,
+  <span class="keyword">CHECK</span> (requested_amount &gt; 0),
+  <span class="keyword">CHECK</span> (salary <span class="keyword">BETWEEN</span> 300 <span class="keyword">AND</span> 850)
+);</code></pre></div>
+
+ <h2>Add constraints to existing tables</h2>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="keyword">ALTER TABLE</span> hr.job_history
+<span class="keyword">ADD CONSTRAINT</span> chk_payrollitive_amount
+<span class="keyword">CHECK</span> (salary &gt; 0);
+
+<span class="keyword">ALTER TABLE</span> hr.jobs
+<span class="keyword">ADD CONSTRAINT</span> uq_job_title <span class="keyword">UNIQUE</span> (job_id);</code></pre></div>
+
+ <h2>Real-world context</h2>
+ <ul>
+ <li><strong>ETL</strong> — Constraints cause ETL failures early, surfacing source bugs before bad rows reach BI tools.</li>
+ <li><strong>HR compliance</strong> — CHECK on salary range prevents impayrollsible values in risk models.</li>
+ <li><strong>Data operations</strong> — UNIQUE on job title prevents duplicate duplicate entries from different supplier feeds.</li>
+ </ul>
+
+ <h2>Practice</h2>
+ <ol>
+ <li>Add a CHECK ensuring <code>salary</code> in the jobs table is greater than zero.</li>
+ <li>Create a the job_history table where <code>job_id</code> must be 'deposit', 'transfer', or 'transfer'.</li>
+ <li>Explain why enforcing rules in the database beats only checking in Python ETL code.</li>
+ </ol>
+
+ <h2>Key takeaways</h2>
+ <ul>
+ <li>UNIQUE prevents duplicate values; CHECK validates value ranges and conditions.</li>
+ <li>Constraints protect data integrity regardless of which application writes the row.</li>
+ <li>Combine ETL validation with database constraints for defense-in-depth.</li>
+ <li>Test constraint additions on staging data before applying to production.</li>
+ </ul>
+
+ </article>
+ </div>
+ <div class="lesson-nav-buttons"><a href="09-alter-table.html" class="nav-btn"><span class="label">Previous</span><span class="title">ALTER TABLE</span></a><a href="11-indexes.html" class="nav-btn next"><span class="label">Next</span><span class="title">Indexes</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+ <p>&copy; 2026 Edukron — Learn, build, share.</p>
+ <div class="footer-links">
+ <a href="../../learn/python/index.html">Python Path</a>
+ <a href="../../learn/sql/index.html">SQL Path</a>
+ <a href="../../assignments/index.html">Assignments</a>
+ </div>
+ </div></footer>
+ <script src="../../js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 4: Data Types Overview | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 4</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 4 of 45 — 45-Hour Python Sprint</p>
+        <h1>Data Types Overview</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> int, float, str, bool, type() function</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-04-data-types-overview.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Why Types Matter</h2>
+      <p>Every value in Python has a type, and the type determines what you can do with it. You can multiply two numbers but not two names; you can uppercase a string but not an integer. When data arrives from the outside world — a CSV file, an API response, user input — it often arrives as <em>text</em>, and converting it to the right type is one of the most common (and most commonly forgotten) steps in data work.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <h3>The Four Primitive Types</h3>
+      <table>
+        <thead><tr><th>Type</th><th>Example</th><th>Typical Use</th></tr></thead>
+        <tbody>
+          <tr><td><code>int</code></td><td><code>42</code>, <code>-7</code>, <code>0</code></td><td>Counts, IDs, quantities</td></tr>
+          <tr><td><code>float</code></td><td><code>3.14</code>, <code>-0.5</code></td><td>Prices, amounts, rates, percentages</td></tr>
+          <tr><td><code>str</code></td><td><code>&quot;Wireless Mouse&quot;</code>, <code>'ACC-001'</code></td><td>Names, codes, any text</td></tr>
+          <tr><td><code>bool</code></td><td><code>True</code>, <code>False</code></td><td>Flags, yes/no states, conditions</td></tr>
+        </tbody>
+      </table>
+      <p>Note that <code>bool</code> is actually a subtype of <code>int</code> — <code>True</code> behaves as <code>1</code> and <code>False</code> as <code>0</code>. That is why <code>True + True</code> equals <code>2</code>, and why <code>sum()</code> over a list of booleans counts the <code>True</code> values — a genuinely useful trick in data analysis.</p>
+
+      <h3>Checking Types with type()</h3>
+      <p><code>type(value)</code> returns the class of any object. Reach for it whenever a calculation misbehaves — the most frequent cause is a number that is secretly a string.</p>
+
+      <h3>Type Casting</h3>
+      <p>Convert between types explicitly with the constructor functions <code>int()</code>, <code>float()</code>, <code>str()</code>, and <code>bool()</code>. Two rules to remember:</p>
+      <ul>
+        <li><code>int(49.99)</code> <strong>truncates</strong> toward zero — it gives <code>49</code>, it does not round. Use <code>round()</code> if you want rounding.</li>
+        <li><code>int(&quot;49.99&quot;)</code> raises <code>ValueError</code> — a string must look like a plain integer to cast directly. Go through <code>float()</code> first.</li>
+      </ul>
+
+      <h2>Syntax Reference</h2>
+      <div class="code-block"><div class="code-header">Example — Inspecting types of transaction fields</div><pre><code><span class="comment"># Fields from one banking transaction record</span>
+customer_id = 8842              <span class="comment"># int — a whole-number identifier</span>
+loan_amount = 250000.00         <span class="comment"># float — money needs decimals</span>
+account_type = <span class="string">&quot;SAVINGS&quot;</span>        <span class="comment"># str — a text code</span>
+is_active = <span class="keyword">True</span>                <span class="comment"># bool — a yes/no flag</span>
+
+print(type(customer_id))    <span class="comment"># Output: &lt;class 'int'&gt;</span>
+print(type(loan_amount))    <span class="comment"># Output: &lt;class 'float'&gt;</span>
+print(type(account_type))   <span class="comment"># Output: &lt;class 'str'&gt;</span>
+print(type(is_active))      <span class="comment"># Output: &lt;class 'bool'&gt;</span></code></pre></div>
+
+      <div class="code-block"><div class="code-header">Example — Casting CSV strings before math</div><pre><code><span class="comment"># CSV columns arrive as text — cast them before any arithmetic</span>
+raw_amount = <span class="string">&quot;1549.99&quot;</span>            <span class="comment"># str straight from a store_sales CSV</span>
+raw_qty = <span class="string">&quot;12&quot;</span>
+
+sale_amount = float(raw_amount)    <span class="comment"># now usable in calculations</span>
+quantity = int(raw_qty)
+
+line_total = sale_amount * quantity
+print(<span class="string">f&quot;Line total: {line_total:.2f}&quot;</span>)   <span class="comment"># Output: Line total: 18599.88</span>
+
+<span class="comment"># Forgetting the cast produces silent nonsense, not an error:</span>
+print(raw_qty * 3)   <span class="comment"># Output: 121212 — string repetition, not arithmetic!</span></code></pre></div>
+
+      <p><code>int()</code> applied to a float <em>truncates</em> — it simply drops the decimal part. Use <code>round()</code> when you want normal rounding.</p>
+      <div class="code-block"><div class="code-header">Example — int() truncates, round() rounds</div><pre><code>print(int(49.99))    <span class="comment"># Output: 49 — decimals dropped</span>
+print(round(49.99))  <span class="comment"># Output: 50 — properly rounded</span>
+print(int(-49.99))   <span class="comment"># Output: -49 — truncates toward zero</span></code></pre></div>
+
+      <p><code>str()</code> converts numbers to text — required before concatenating them with other strings.</p>
+      <div class="code-block"><div class="code-header">Example — str() for building labels</div><pre><code>customer_num = 20481
+
+customer_label = <span class="string">&quot;CUS-&quot;</span> + str(customer_num)   <span class="comment"># cast before concatenation</span>
+print(customer_label)   <span class="comment"># Output: CUS-20481</span>
+
+<span class="comment"># &quot;CUS-&quot; + customer_num  &lt;-- TypeError: can only concatenate str to str</span></code></pre></div>
+
+      <p><code>bool()</code> follows the truthiness rules: zero and empty values convert to <code>False</code>, everything else to <code>True</code> — including the text <code>&quot;False&quot;</code>.</p>
+      <div class="code-block"><div class="code-header">Example — bool() and truthiness</div><pre><code>print(bool(0))          <span class="comment"># Output: False — zero</span>
+print(bool(<span class="string">&quot;&quot;</span>))         <span class="comment"># Output: False — empty string</span>
+print(bool(<span class="string">&quot;fraud&quot;</span>))    <span class="comment"># Output: True — any non-empty string</span>
+print(bool(<span class="string">&quot;False&quot;</span>))    <span class="comment"># Output: True — beware! non-empty text is truthy</span></code></pre></div>
+
+      <div class="code-block"><div class="code-header">Example — Counting True flags with sum()</div><pre><code><span class="comment"># Because bool is a subtype of int, True counts as 1</span>
+fraud_flags = [<span class="keyword">True</span>, <span class="keyword">False</span>, <span class="keyword">True</span>, <span class="keyword">True</span>, <span class="keyword">False</span>]
+
+flagged_count = sum(fraud_flags)   <span class="comment"># adds 1 for every True</span>
+print(<span class="string">f&quot;Flagged transactions: {flagged_count}&quot;</span>)
+<span class="comment"># Output: Flagged transactions: 3</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>ETL</strong> — explicit casting prevents an <code>amount</code> column of strings from breaking SUM aggregations after a CSV load.</li>
+        <li><strong>Data quality checks</strong> — <code>type()</code> assertions catch schema drift when an upstream feed changes a column from int to string.</li>
+        <li><strong>Analytics</strong> — boolean columns like <code>is_fraud</code> can be summed directly to count positives, thanks to bool being an int subtype.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Declare one variable of each type (int, float, str, bool) and print <code>type()</code> for each.</li>
+        <li>Cast <code>&quot;49.99&quot;</code> to a float, then to an int — note the truncation.</li>
+        <li>Try <code>int(&quot;49.99&quot;)</code> directly and read the <code>ValueError</code>.</li>
+        <li>Concatenate <code>&quot;Order #&quot;</code> with the number <code>1001</code> using <code>str()</code>.</li>
+        <li>Predict <code>bool(0)</code>, <code>bool(&quot;&quot;)</code>, <code>bool(&quot;0&quot;)</code>, then verify.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>The four primitives are <code>int</code>, <code>float</code>, <code>str</code>, and <code>bool</code>; every value has exactly one type.</li>
+        <li><code>type()</code> is your first debugging tool when arithmetic misbehaves.</li>
+        <li>External data (CSVs, input, APIs) arrives as strings — cast explicitly before doing math.</li>
+        <li><code>int()</code> truncates; <code>round()</code> rounds; <code>int(&quot;49.99&quot;)</code> raises an error.</li>
+        <li>Non-empty strings are always truthy — even <code>&quot;False&quot;</code>.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-04-data-types-overview.html">Hour 4 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-03-variables.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Variables</span></a><a href="hour-05-numbers.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Numbers →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

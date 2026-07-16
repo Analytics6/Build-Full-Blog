@@ -1,0 +1,144 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 40: NumPy Operations | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 40</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 40 of 45 — 45-Hour Python Sprint</p>
+        <h1>NumPy Operations</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> Array math (element-wise), broadcasting, array indexing and slicing, reshaping arrays, aggregation methods (sum, mean, max, min)</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-40-numpy-operations.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Why NumPy Operations Matter in Data Analytics</h2>
+      <p>Creating arrays is step one; the power is in <strong>vectorized operations</strong> — applying math to entire arrays without explicit loops. Analysts apply a 5% markup to all unit prices, extract submatrices of store sales, reshape transaction batches, and compute column-wise averages — all in a few NumPy lines that would take hundreds of loop iterations in plain Python.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <h3>Vectorized Arithmetic</h3>
+      <p>Operations apply element-wise: <code>arr * 2</code>, <code>arr1 + arr2</code>. No <code>for</code> loop needed.</p>
+
+      <h3>Broadcasting</h3>
+      <p>NumPy expands smaller arrays to match larger ones: adding scalar <code>10</code> to every element of a matrix, or adding a 1D row vector to each row of a 2D array.</p>
+
+      <h3>Indexing &amp; Slicing 2D</h3>
+      <p><code>matrix[row, col]</code> — use slices for submatrices: <code>matrix[0:2, 1:3]</code>.</p>
+
+      <h3>Aggregations Along Axes</h3>
+      <ul>
+        <li><code>axis=0</code> — down columns (per-subject average)</li>
+        <li><code>axis=1</code> — across rows (per-student average)</li>
+      </ul>
+
+      <h2>Syntax Reference</h2>
+      <p>Element-wise arithmetic: an operation between an array and a scalar applies to <em>every</em> element at once — this is broadcasting in its simplest form.</p>
+      <div class="code-block"><div class="code-header">Vectorized arithmetic — array and scalar</div><pre><code><span class="keyword">import</span> numpy <span class="keyword">as</span> np
+
+prices = np.array([72, 85, 90, 58, 77])
+
+marked_up = prices + 5
+print(marked_up)          <span class="comment"># Output: [77 90 95 63 82] — 5 added to every element</span>
+
+print(prices * 1.10)      <span class="comment"># Output: [79.2 93.5 99.  63.8 84.7] — 10% markup</span></code></pre></div>
+
+      <p>Two arrays of the same shape combine element by element — position 0 with position 0, and so on.</p>
+      <div class="code-block"><div class="code-header">Array + array — element-wise pairs</div><pre><code><span class="keyword">import</span> numpy <span class="keyword">as</span> np
+
+weekday_sales = np.array([1200, 980, 1450])
+weekend_sales = np.array([800, 650, 900])
+
+total = weekday_sales + weekend_sales
+print(total)     <span class="comment"># Output: [2000 1630 2350] — per-store totals</span></code></pre></div>
+
+      <p>2D indexing takes <code>[row, column]</code>; slices carve out submatrices with the familiar start/stop rules.</p>
+      <div class="code-block"><div class="code-header">2D indexing and slicing — [row, col]</div><pre><code><span class="keyword">import</span> numpy <span class="keyword">as</span> np
+
+grid = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+
+print(grid[1, 1])       <span class="comment"># Output: 5 — row 1, column 1</span>
+print(grid[1, 1:3])     <span class="comment"># Output: [5 6] — row 1, columns 1-2</span>
+print(grid[:, 0])       <span class="comment"># Output: [1 4 7] — the whole first column</span></code></pre></div>
+
+      <p><code>reshape()</code> reorganizes elements into a new shape without changing the values — element counts must match.</p>
+      <div class="code-block"><div class="code-header">reshape() — reorganize dimensions</div><pre><code><span class="keyword">import</span> numpy <span class="keyword">as</span> np
+
+flat = np.arange(12)          <span class="comment"># [0 1 2 ... 11]</span>
+matrix = flat.reshape(3, 4)   <span class="comment"># 3 rows x 4 columns from 12 elements</span>
+
+print(matrix.shape)   <span class="comment"># Output: (3, 4)</span>
+print(matrix[2, 3])   <span class="comment"># Output: 11 — last element, now at row 2 col 3</span></code></pre></div>
+
+      <p>Aggregations along axes: <code>axis=0</code> collapses <em>down</em> the columns, <code>axis=1</code> collapses <em>across</em> the rows. This one parameter powers most matrix reporting.</p>
+      <div class="code-block"><div class="code-header">Aggregation — axis=0 vs axis=1</div><pre><code><span class="keyword">import</span> numpy <span class="keyword">as</span> np
+
+<span class="comment"># Rows = stores, columns = product categories</span>
+sales = np.array([
+    [88, 72, 95],
+    [61, 84, 77],
+    [90, 88, 92],
+])
+
+print(np.mean(sales, axis=0))   <span class="comment"># Output: [79.67 81.33 88.  ] — per-category (columns)</span>
+print(np.mean(sales, axis=1))   <span class="comment"># Output: [85.   74.   90.  ] — per-store (rows)</span>
+print(sales.sum())              <span class="comment"># Output: 747 — grand total, no axis</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>Normalization</strong> — Subtract column means and divide by std for ML feature scaling.</li>
+        <li><strong>Data grids</strong> — Reshape flat POS exports into store — product matrices for pivot analysis.</li>
+        <li><strong>Transaction batches</strong> — Vectorized fee calculation on arrays of transaction amounts.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Add a 5% markup to an array of unit prices.</li>
+        <li>Extract the center elements from a 3—3 grid using slicing.</li>
+        <li>Reshape a 1D array of 12 elements into a 3—4 matrix.</li>
+        <li>Compute per-category averages (columns) in a store sales matrix with <code>axis=0</code>.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>Vectorized ops replace loops — faster and more readable on large arrays.</li>
+        <li>Broadcasting applies scalars/small arrays to larger ones automatically.</li>
+        <li>Use <code>axis=0</code> for column-wise and <code>axis=1</code> for row-wise aggregation.</li>
+        <li><code>reshape()</code> reorganizes data without changing the underlying values.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-40-numpy-operations.html">Hour 40 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-39-numpy-introduction.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← NumPy Introduction</span></a><a href="hour-41-pandas-introduction.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Pandas Introduction →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

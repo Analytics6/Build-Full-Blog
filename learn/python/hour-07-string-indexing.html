@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 7: String Indexing | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 7</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 7 of 45 — 45-Hour Python Sprint</p>
+        <h1>String Indexing</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> Positive indexing, negative indexing, accessing individual characters</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-07-string-indexing.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Reaching Into a String</h2>
+      <p>A string is an ordered sequence, which means every character has a numbered position. <strong>Indexing</strong> with square brackets lets you pull out any single character — the first letter of a code, the last digit of an account number. The one rule beginners must internalize: <strong>counting starts at 0</strong>, not 1.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <h3>Positive and Negative Indices</h3>
+      <p>Positive indices count from the left starting at <code>0</code>; negative indices count from the right starting at <code>-1</code>. For the string <code>&quot;PYTHON&quot;</code>:</p>
+      <table>
+        <thead><tr><th>Character</th><th>P</th><th>Y</th><th>T</th><th>H</th><th>O</th><th>N</th></tr></thead>
+        <tbody>
+          <tr><td>Positive index</td><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr>
+          <tr><td>Negative index</td><td>-6</td><td>-5</td><td>-4</td><td>-3</td><td>-2</td><td>-1</td></tr>
+        </tbody>
+      </table>
+      <p>Negative indexing shines when you care about the <em>end</em> of a string regardless of its length: <code>s[-1]</code> is always the last character, whether the string has 5 characters or 500.</p>
+
+      <h3>Rules and Pitfalls</h3>
+      <ul>
+        <li><code>len(s)</code> returns the character count; the largest valid index is <code>len(s) - 1</code>, a classic off-by-one trap.</li>
+        <li>An out-of-range index raises <code>IndexError: string index out of range</code>.</li>
+        <li>Strings are immutable — <code>s[0] = 'X'</code> raises <code>TypeError</code>. Build a new string instead.</li>
+        <li>Indexing an empty string always fails: even <code>&quot;&quot;[0]</code> is an <code>IndexError</code>. Check <code>len()</code> or truthiness first.</li>
+      </ul>
+
+      <h2>Syntax Reference</h2>
+      <div class="code-block"><div class="code-header">Example — Indexing an account number</div><pre><code><span class="comment"># Inspect individual characters of a banking account code</span>
+account = <span class="string">&quot;ACC-8842-01&quot;</span>
+
+print(account[0])     <span class="comment"># Output: A — first character</span>
+print(account[4])     <span class="comment"># Output: 8 — start of the numeric part</span>
+print(account[-1])    <span class="comment"># Output: 1 — last character (branch digit)</span>
+print(account[-2])    <span class="comment"># Output: 0 — second from the right</span>
+print(len(account))   <span class="comment"># Output: 11</span>
+
+<span class="comment"># The largest valid index is len - 1:</span>
+print(account[10])    <span class="comment"># Output: 1 — same as account[-1]</span>
+<span class="comment"># print(account[11])  &lt;-- IndexError: string index out of range</span></code></pre></div>
+
+      <div class="code-block"><div class="code-header">Example — Routing log lines by first character</div><pre><code><span class="comment"># Classify pipeline log lines by their severity prefix</span>
+log_line = <span class="string">&quot;ERROR: Failed to load store_sales.csv&quot;</span>
+
+<span class="keyword">if</span> log_line[0] == <span class="string">&quot;E&quot;</span>:
+    print(<span class="string">&quot;Critical pipeline failure — page the on-call engineer&quot;</span>)
+<span class="keyword">elif</span> log_line[0] == <span class="string">&quot;W&quot;</span>:
+    print(<span class="string">&quot;Warning — review the ETL step tomorrow&quot;</span>)
+<span class="keyword">else</span>:
+    print(<span class="string">&quot;Informational — no action needed&quot;</span>)
+
+<span class="comment"># Output: Critical pipeline failure — page the on-call engineer</span></code></pre></div>
+
+      <p>Because strings are immutable, you cannot overwrite a character in place — instead, build a new string from the pieces you want to keep.</p>
+      <div class="code-block"><div class="code-header">Example — Immutability workaround</div><pre><code>sku = <span class="string">&quot;P-4421&quot;</span>
+
+<span class="comment"># sku[0] = &quot;S&quot;                 &lt;-- TypeError: strings are immutable</span>
+sku = <span class="string">&quot;S&quot;</span> + sku[1:]              <span class="comment"># new string: keep everything after index 0</span>
+print(sku)                       <span class="comment"># Output: S-4421</span></code></pre></div>
+
+      <p>Indexing an empty string always raises <code>IndexError</code> — even position 0 does not exist. Guard with a truthiness check before touching the first character.</p>
+      <div class="code-block"><div class="code-header">Example — Guarding against empty strings</div><pre><code>customer_note = <span class="string">&quot;&quot;</span>
+
+<span class="keyword">if</span> customer_note:                <span class="comment"># empty string is falsy — block is skipped</span>
+    print(customer_note[0])
+<span class="keyword">else</span>:
+    print(<span class="string">&quot;No note on file&quot;</span>)
+
+<span class="comment"># Output: No note on file</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>Routing</strong> — the first character of a <code>transaction_id</code> decides which processing queue a record enters.</li>
+        <li><strong>Validation</strong> — SKU conventions like &quot;first char <code>P</code> = product, <code>S</code> = service&quot; are enforced with a single index check.</li>
+        <li><strong>Check digits</strong> — card and account numbers store a checksum in the last position, read with <code>[-1]</code>.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Given <code>word = &quot;analytics&quot;</code>, print its first, last, and middle characters.</li>
+        <li>Print the same character using both a positive and a negative index.</li>
+        <li>Trigger an <code>IndexError</code> on purpose and read the message.</li>
+        <li>Rebuild <code>&quot;P-4421&quot;</code> into <code>&quot;S-4421&quot;</code> without item assignment.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>Indexing starts at <code>0</code>; the last valid index is <code>len(s) - 1</code>.</li>
+        <li>Negative indices count from the right — <code>s[-1]</code> is always the last character.</li>
+        <li>Out-of-range access raises <code>IndexError</code>; empty strings cannot be indexed at all.</li>
+        <li>Strings are immutable — rebuild with concatenation and slicing instead of assigning.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-07-string-indexing.html">Hour 7 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-06-strings-basics.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Strings Basics</span></a><a href="hour-08-string-slicing.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">String Slicing →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

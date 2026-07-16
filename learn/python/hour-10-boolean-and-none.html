@@ -1,0 +1,164 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 10: Boolean &amp; None | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 10</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 10 of 45 — 45-Hour Python Sprint</p>
+        <h1>Boolean &amp; None</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> True, False, NoneType, bool() function, truthy and falsy values, is vs ==</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-10-boolean-and-none.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Yes, No, and Missing</h2>
+      <p>Programs answer yes/no questions constantly: is this value above the threshold, does this record exist, has this flag been set? <strong>Booleans</strong> (<code>True</code> and <code>False</code>) carry those answers. A separate concept — <strong><code>None</code></strong> — represents the <em>absence</em> of a value, the Python equivalent of SQL's <code>NULL</code>. Confusing &quot;no&quot; with &quot;not provided&quot; is a classic source of bugs, so this hour treats them carefully and separately.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <h3>The bool Type</h3>
+      <p><code>True</code> and <code>False</code> (capitalized!) are the only two boolean values. Comparisons like <code>&gt;=</code> and <code>==</code> produce them, and <code>if</code>/<code>while</code> consume them. Under the hood <code>bool</code> is a subtype of <code>int</code>: <code>True</code> behaves as <code>1</code> and <code>False</code> as <code>0</code>.</p>
+      <h3>Truthy and Falsy</h3>
+      <p>Every Python value can stand in for a boolean. The <strong>falsy</strong> values are: <code>False</code>, <code>None</code>, <code>0</code>, <code>0.0</code>, <code>&quot;&quot;</code>, <code>[]</code>, <code>{}</code>, <code>()</code>, and <code>set()</code>. <em>Everything else</em> is truthy — including <code>&quot; &quot;</code> (a single space), <code>&quot;False&quot;</code> (non-empty text), and <code>[0]</code> (a non-empty list).</p>
+      <h3>NoneType</h3>
+      <p><code>None</code> is the sole value of type <code>NoneType</code>. It means &quot;no value here&quot;: a missing CSV field, a function that returned nothing, a variable initialized before its real value is known. <code>False</code> means &quot;no&quot;; <code>None</code> means &quot;nobody answered.&quot;</p>
+
+      <h2>Syntax Reference</h2>
+      <p><code>bool()</code> converts any value to <code>True</code> or <code>False</code> using the truthiness rules — a quick way to test what a value would do inside an <code>if</code>.</p>
+      <div class="code-block"><div class="code-header">bool() — convert any value to True/False</div><pre><code>print(bool(0))              <span class="comment"># Output: False — zero is falsy</span>
+print(bool(4500.00))        <span class="comment"># Output: True — any non-zero number</span>
+print(bool(<span class="string">&quot;&quot;</span>))             <span class="comment"># Output: False — empty string</span>
+print(bool(<span class="string">&quot;TXN-4421&quot;</span>))     <span class="comment"># Output: True — non-empty string</span>
+print(bool([]))             <span class="comment"># Output: False — empty list</span>
+print(bool([0]))            <span class="comment"># Output: True — list with one item (even a zero!)</span></code></pre></div>
+
+      <p>Comparisons produce booleans directly — you rarely need to write <code>True</code> or <code>False</code> literally; you compute them.</p>
+      <div class="code-block"><div class="code-header">Comparisons — booleans from expressions</div><pre><code>credit_score = 720
+account_balance = 15420.50
+
+approved = credit_score &gt;= 700
+print(approved)                       <span class="comment"># Output: True</span>
+
+is_overdrawn = account_balance &lt; 0
+print(is_overdrawn)                   <span class="comment"># Output: False</span></code></pre></div>
+
+      <p>Because <code>bool</code> is a subtype of <code>int</code>, <code>True</code> counts as <code>1</code> in arithmetic — so <code>sum()</code> over a list of flags counts the <code>True</code> values.</p>
+      <div class="code-block"><div class="code-header">Booleans as numbers — counting flags</div><pre><code>fraud_flags = [<span class="keyword">True</span>, <span class="keyword">False</span>, <span class="keyword">True</span>, <span class="keyword">True</span>, <span class="keyword">False</span>]
+
+print(sum(fraud_flags))       <span class="comment"># Output: 3 — each True adds 1</span>
+print(<span class="keyword">True</span> + <span class="keyword">True</span>)            <span class="comment"># Output: 2 — surprising but consistent</span></code></pre></div>
+
+      <p><code>None</code> marks a missing value. It prints as the word <code>None</code> and has its own type, <code>NoneType</code>.</p>
+      <div class="code-block"><div class="code-header">None — representing a missing value</div><pre><code>phone = <span class="keyword">None</span>                  <span class="comment"># customer has no phone on file (SQL NULL)</span>
+email = <span class="string">&quot;priya@bank.com&quot;</span>
+
+print(phone)                  <span class="comment"># Output: None</span>
+print(type(phone))            <span class="comment"># Output: &lt;class 'NoneType'&gt;</span></code></pre></div>
+
+      <p>Test for <code>None</code> with <code>is None</code> / <code>is not None</code>. The <code>is</code> operator checks <em>identity</em> (same object), which is exactly right here because there is only one <code>None</code> object in the whole program.</p>
+      <div class="code-block"><div class="code-header">is None — the correct missing-value test</div><pre><code>phone = <span class="keyword">None</span>
+
+<span class="keyword">if</span> phone <span class="keyword">is</span> <span class="keyword">None</span>:
+    print(<span class="string">&quot;Phone missing — request from customer&quot;</span>)
+<span class="keyword">else</span>:
+    print(<span class="string">f&quot;Send SMS to {phone}&quot;</span>)
+
+<span class="comment"># Output: Phone missing — request from customer</span></code></pre></div>
+
+      <p>Truthiness makes empty-value checks concise: <code>if email:</code> reads as &quot;if email has a value.&quot; Use this for strings and collections, but not when <code>0</code> or <code>&quot;&quot;</code> are legitimate values you must keep.</p>
+      <div class="code-block"><div class="code-header">Truthiness in if — concise empty checks</div><pre><code>discount_code = <span class="string">&quot;&quot;</span>            <span class="comment"># customer entered nothing</span>
+
+<span class="keyword">if</span> discount_code:
+    print(<span class="string">f&quot;Applying code {discount_code}&quot;</span>)
+<span class="keyword">else</span>:
+    print(<span class="string">&quot;No discount applied&quot;</span>)
+
+<span class="comment"># Output: No discount applied</span></code></pre></div>
+
+      <h2>Edge Cases &amp; Gotchas</h2>
+      <p><code>is</code> compares identity (the same object in memory); <code>==</code> compares value. They can disagree — use <code>==</code> for values, and reserve <code>is</code> for <code>None</code>.</p>
+      <div class="code-block"><div class="code-header">Gotcha — is vs ==</div><pre><code>a = [1, 2, 3]
+b = [1, 2, 3]
+
+print(a == b)     <span class="comment"># Output: True — same contents</span>
+print(a <span class="keyword">is</span> b)     <span class="comment"># Output: False — two separate list objects</span>
+
+c = a
+print(a <span class="keyword">is</span> c)     <span class="comment"># Output: True — both names point to one object</span></code></pre></div>
+
+      <p>The subtle distinction that causes real bugs: <code>False</code>, <code>0</code>, and <code>None</code> are all falsy, but they mean different things. A truthiness check cannot tell them apart — an explicit <code>is None</code> can.</p>
+      <div class="code-block"><div class="code-header">Gotcha — 0 is falsy but not missing</div><pre><code>last_txn_amount = 0.0     <span class="comment"># a real transaction of zero — NOT missing</span>
+
+<span class="keyword">if</span> <span class="keyword">not</span> last_txn_amount:
+    print(<span class="string">&quot;WRONG: treats a $0.00 transaction as missing data&quot;</span>)
+
+<span class="keyword">if</span> last_txn_amount <span class="keyword">is</span> <span class="keyword">None</span>:
+    print(<span class="string">&quot;This does not print — 0.0 is a value, not None&quot;</span>)
+<span class="keyword">else</span>:
+    print(<span class="string">&quot;Correct: amount present, it just happens to be zero&quot;</span>)
+
+<span class="comment"># Output:</span>
+<span class="comment"># WRONG: treats a $0.00 transaction as missing data</span>
+<span class="comment"># Correct: amount present, it just happens to be zero</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>ETL</strong> — blank CSV fields become <code>None</code>; pipelines test <code>is None</code> before imputing or rejecting rows.</li>
+        <li><strong>Business rules</strong> — boolean flags like <code>is_overdraft</code> and computed conditions like <code>credit_score &gt;= 700</code> gate downstream actions.</li>
+        <li><strong>Analytics</strong> — summing boolean columns counts positives; distinguishing <code>0</code> from <code>None</code> keeps averages honest.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Predict <code>bool()</code> for: <code>0</code>, <code>&quot;0&quot;</code>, <code>&quot;&quot;</code>, <code>&quot; &quot;</code>, <code>[]</code>, <code>[0]</code> — then verify each.</li>
+        <li>Write an <code>is None</code> check for a missing phone number.</li>
+        <li>Count the <code>True</code> values in a list of flags with <code>sum()</code>.</li>
+        <li>Create two equal lists and compare them with both <code>==</code> and <code>is</code>.</li>
+        <li>Show why <code>if not amount:</code> misclassifies a zero-value transaction.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li><code>True</code> and <code>False</code> are the only booleans; comparisons produce them and conditionals consume them.</li>
+        <li>Falsy values: <code>False</code>, <code>None</code>, <code>0</code>, <code>0.0</code>, <code>&quot;&quot;</code>, and empty collections. Everything else — including <code>&quot;False&quot;</code> — is truthy.</li>
+        <li><code>None</code> means &quot;missing,&quot; not &quot;no&quot; — always test it with <code>is None</code>, never <code>== None</code> or truthiness.</li>
+        <li><code>is</code> checks identity; <code>==</code> checks value. Reserve <code>is</code> for <code>None</code> comparisons.</li>
+        <li><code>bool</code> is an int subtype, so <code>sum()</code> over flags counts the <code>True</code> values.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-10-boolean-and-none.html">Hour 10 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-09-string-methods.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← String Methods</span></a><a href="hour-11-operators.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Operators →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

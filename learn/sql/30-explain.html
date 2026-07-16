@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Query Performance and EXPLAIN | Edukron</title>
+ <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+ <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+ <nav class="nav">
+ <a href="../../blog/index.html" >Blog</a>
+ <a href="../../learn/python/index.html" >Python</a>
+ <a href="../../learn/sql/index.html" class="active">SQL</a>
+ <a href="../../assignments/index.html" >Assignments</a>
+ </nav>
+ </div></header>
+<main class="page"><div class="container">
+ <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Sql Path</a><span>/</span><span class="current">Topic 30</span></nav>
+ <div class="lesson-layout">
+ <article class="prose">
+ <header class="article-header">
+ <p class="article-meta">Sql · Topic 30 of 30 · 40 min</p>
+ <h1>Query Performance and EXPLAIN</h1>
+ <p class="article-excerpt">Analyze and optimize slow queries — read execution plans, choose indexes wisely, and keep dashboards fast at scale.</p>
+ <p style="margin-top:1rem;"><a href="../../assignments/sql-30-explain.html" class="btn btn-outline">Go to Assignment →</a></p>
+ </header>
+
+ <h2>The Final Skill: Making Queries Fast</h2>
+ <p>A correct query that runs for 45 minutes is not production-ready. When a dashboard or report query slows down, engineers turn to <strong>EXPLAIN</strong> — the database's own description of how it will (or did) execute a query. This lesson closes the SQL path with performance literacy.</p>
+
+ <h2>Theory: How Databases Execute Queries</h2>
+ <table>
+ <thead><tr><th>Operation</th><th>Cost</th><th>When it happens</th></tr></thead>
+ <tbody>
+ <tr><td><strong>Seq Scan</strong></td><td>Reads every row</td><td>No useful index; small tables</td></tr>
+ <tr><td><strong>Index Scan</strong></td><td>Reads index + matching rows</td><td>Indexed WHERE/JOIN columns</td></tr>
+ <tr><td><strong>Index Only Scan</strong></td><td>Reads index only</td><td>All needed columns in index</td></tr>
+ <tr><td><strong>Hash Join</strong></td><td>Builds hash table from one side</td><td>Large equi-joins without index</td></tr>
+ <tr><td><strong>Nested Loop</strong></td><td>For each row, probe other table</td><td>Small outer + indexed inner</td></tr>
+ <tr><td><strong>Sort</strong></td><td>Sorts all rows in memory/disk</td><td>ORDER BY, GROUP BY, window functions</td></tr>
+ </tbody>
+ </table>
+
+ <h2>Reading EXPLAIN Output</h2>
+ <div class="code-block"><div class="code-header">SQL — EXPLAIN an analytical query (PostgreSQL)</div><pre><code><span class="keyword">EXPLAIN ANALYZE</span>
+<span class="keyword">SELECT</span>
+    c.name,
+    <span class="keyword">SUM</span>(o.total) <span class="keyword">AS</span> lifetime_spend
+<span class="keyword">FROM</span> hr.employees c
+<span class="keyword">JOIN</span> hr.job_history o <span class="keyword">ON</span> o.employee_id = c.employee_id
+<span class="keyword">WHERE</span> o.hire_date &gt;= <span class="string">'2026-01-01'</span>
+<span class="keyword">GROUP BY</span> c.employee_id, c.name
+<span class="keyword">ORDER BY</span> lifetime_spend <span class="keyword">DESC</span>
+<span class="keyword">LIMIT</span> 100;</code></pre></div>
+ <p>Sample plan output (abbreviated):</p>
+ <div class="code-block"><div class="code-header">Plan output</div><pre><code>Limit  (cost=... rows=100)
+  -&gt;  Sort  (cost=... rows=...)
+        Sort Key: (sum(o.total)) DESC
+        -&gt;  HashAggregate  (cost=... rows=...)
+              Group Key: c.employee_id, c.name
+              -&gt;  Hash Join  (cost=... rows=...)
+                    Hash Cond: (o.employee_id = c.employee_id)
+                    -&gt;  Seq Scan on hr.job_history o  (rows=250000)
+                          Filter: (hire_date &gt;= '2026-01-01')
+                    -&gt;  Seq Scan on hr.employees c  (rows=50000)</code></pre></div>
+ <p>Red flags: <code>Seq Scan</code> on large tables, high <code>cost</code> values, <code>rows</code> estimates far from actual, <code>Sort</code> spilling to disk.</p>
+
+ <h2>Optimizing with Indexes</h2>
+ <div class="code-block"><div class="code-header">SQL — Add indexes for the slow query</div><pre><code><span class="comment">-- Index the filter column on the large fact table</span>
+<span class="keyword">CREATE INDEX</span> idx_job_history_txn_date <span class="keyword">ON</span> hr.job_history (hire_date);
+
+<span class="comment">-- Index the join column (if not already a FK index)</span>
+<span class="keyword">CREATE INDEX</span> idx_job_history_account_id <span class="keyword">ON</span> hr.job_history (employee_id);
+
+<span class="comment">-- Compayrollite index for common filter + join pattern</span>
+<span class="keyword">CREATE INDEX</span> idx_job_history_employee_date
+    <span class="keyword">ON</span> hr.job_history (employee_id, hire_date);</code></pre></div>
+
+ <div class="code-block"><div class="code-header">SQL — job history record lookup</div><pre><code><span class="comment">-- Before: Seq Scan on 10M rows</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> hr.job_history
+<span class="keyword">WHERE</span> employee_id = 5001
+  <span class="keyword">AND</span> hire_date &gt;= <span class="string">'2026-07-01'</span>;
+
+<span class="comment">-- After index:</span>
+<span class="keyword">CREATE INDEX</span> idx_txn_account_date
+    <span class="keyword">ON</span> hr.job_history (employee_id, hire_date);
+
+<span class="comment">-- Re-run EXPLAIN — expect Index Scan</span></code></pre></div>
+
+ <h2>Query Optimization Workflow</h2>
+ 
+
+ <h2>Real-World Notes</h2>
+ <ul>
+ <li><strong>EXPLAIN vs EXPLAIN ANALYZE</strong> — EXPLAIN estimates; ANALYZE actually runs the query and shows real timings. Use ANALYZE on dev/staging, not destructive prod queries.</li>
+ <li><strong>Index trade-offs</strong> — Indexes speed reads but slow writes; don't index every column.</li>
+ <li><strong>Function on indexed column</strong> — <code>WHERE UPPER(email) = 'X'</code> can't use a plain index; store a normalized column or use expression indexes.</li>
+ <li><strong>Statistics</strong> — Run <code>ANALYZE table_name</code> after large loads so the optimizer chooses good plans.</li>
+ <li><strong>Partition pruning</strong> — Filter on <code>hire_date</code> in partitioned the employees table so only relevant partitions are scanned.</li>
+ </ul>
+
+ <h2>Common Anti-Patterns</h2>
+ <ul>
+ <li><code>SELECT *</code> on wide tables — retrieves columns you don't need.</li>
+ <li>Missing WHERE on large fact tables before JOIN.</li>
+ <li>Correlated subqueries that execute per row — rewrite as JOIN or window function.</li>
+ <li>Accidental cross join (Topic 22) producing billions of rows.</li>
+ </ul>
+
+ <h2>Key Takeaways</h2>
+ <ul>
+ <li><code>EXPLAIN</code> / <code>EXPLAIN ANALYZE</code> reveal how the database executes your query.</li>
+ <li>Seq Scan on large tables is the most common performance bottleneck.</li>
+ <li>Indexes on filter and join columns are the first optimization lever.</li>
+ <li>Always measure before and after — verify the plan actually improved.</li>
+ </ul>
+
+ <h2>Practice Before Assignment</h2>
+ <p>Run EXPLAIN on a slow JOIN between the job_history table and the employees table, add an index, and compare plans. Then complete the <a href="../../assignments/sql-30-explain.html">Topic 30 assignment</a> to finish the SQL path.</p>
+
+ </article>
+ </div>
+ <div class="lesson-nav-buttons"><a href="29-normalization.html" class="nav-btn"><span class="label">Previous</span><span class="title">Database Normalization</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+ <p>&copy; 2026 Edukron — Learn, build, share.</p>
+ <div class="footer-links">
+ <a href="../../learn/python/index.html">Python Path</a>
+ <a href="../../learn/sql/index.html">SQL Path</a>
+ <a href="../../assignments/index.html">Assignments</a>
+ </div>
+ </div></footer>
+ <script src="../../js/auth.js"></script>
+</body>
+</html>

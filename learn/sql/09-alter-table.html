@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>ALTER TABLE | Edukron</title>
+ <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+ <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+ <nav class="nav">
+ <a href="../../blog/index.html" >Blog</a>
+ <a href="../../learn/python/index.html" >Python</a>
+ <a href="../../learn/sql/index.html" class="active">SQL</a>
+ <a href="../../assignments/index.html" >Assignments</a>
+ </nav>
+ </div></header>
+<main class="page"><div class="container">
+ <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Sql Path</a><span>/</span><span class="current">Topic 9</span></nav>
+ <div class="lesson-layout">
+ <article class="prose">
+ <header class="article-header">
+ <p class="article-meta">Sql · Topic 9 of 30 · 25 min</p>
+ <h1>ALTER TABLE</h1>
+ <p class="article-excerpt">Add, modify, and drop columns as business requirements evolve — a daily task in database administration.</p>
+ <p style="margin-top:1rem;"><a href="../../assignments/sql-09-alter-table.html" class="btn btn-outline">Go to Assignment →</a></p>
+ </header>
+
+ <p>Schemas are not static. When HR adds a commission_pct column to the employees table, tracks end dates on the job_history table, or introduces a new column on the job_history table, DBAs use <code>ALTER TABLE</code> instead of rebuilding from scratch.</p>
+
+ <h2>Schema migration workflow</h2>
+ 
+
+ <h2>Add a column</h2>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="comment">-- Add loyalty tier to hr.employees</span>
+<span class="keyword">ALTER TABLE</span> hr.employees
+<span class="keyword">ADD COLUMN</span> commission_pct <span class="keyword">TEXT DEFAULT</span> 'bronze';
+
+<span class="comment">-- Track fraud score on hr.job_history</span>
+<span class="keyword">ALTER TABLE</span> hr.job_history
+<span class="keyword">ADD COLUMN</span> commission_pct <span class="keyword">REAL</span>;
+
+<span class="comment">-- New column for analytics</span>
+<span class="keyword">ALTER TABLE</span> hr.jobs
+<span class="keyword">ADD COLUMN</span> manager_id <span class="keyword">INTEGER</span>;</code></pre></div>
+ <p>Use <code>DEFAULT</code> when adding NOT NULL columns to tables that already contain data — existing rows receive the default value.</p>
+
+ <h2>Rename and modify columns</h2>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="comment">-- SQLite: rename column (3.25+)</span>
+<span class="keyword">ALTER TABLE</span> hr.jobs
+<span class="keyword">RENAME COLUMN</span> salary <span class="keyword">TO</span> salary;
+
+<span class="comment">-- PostgreSQL: change column type</span>
+<span class="keyword">ALTER TABLE</span> hr.employees
+<span class="keyword">ALTER COLUMN</span> salary <span class="keyword">TYPE DECIMAL</span>(14, 2);</code></pre></div>
+ <p>Syntax varies by database engine. These assignments use SQLite; production migrations may target PostgreSQL or Snowflake with equivalent DDL.</p>
+
+ <h2>Drop a column</h2>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="comment">-- Remove deprecated column after ETL is updated</span>
+<span class="keyword">ALTER TABLE</span> hr.employees
+<span class="keyword">DROP COLUMN</span> legacy_code;
+
+<span class="comment">-- SQLite 3.35+: drop column support</span>
+<span class="keyword">ALTER TABLE</span> hr.job_history
+<span class="keyword">DROP COLUMN</span> temp_import_flag;</code></pre></div>
+ <p>Always verify no queries or pipelines still reference the column before dropping it.</p>
+
+ <h2>Rename a table</h2>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="keyword">ALTER TABLE</span> hr.employees <span class="keyword">RENAME TO</span> employees_fact;</code></pre></div>
+
+ <h2>Real-world context</h2>
+ <ul>
+ <li><strong>Version-controlled migrations</strong> — Tools like Flyway and Alembic store ALTER statements in numbered scripts.</li>
+ <li><strong>Backward compatibility</strong> — Add columns as nullable first, backfill via UPDATE, then add NOT NULL in a later migration.</li>
+ <li><strong>Zero-downtime deploys</strong> — Add column → deploy code that writes to it → backfill → switch reads → drop old column.</li>
+ </ul>
+
+ <h2>Practice</h2>
+ <ol>
+ <li>Add a <code>region</code> column to the employees table with DEFAULT 'unknown'.</li>
+ <li>Rename <code>job_id</code> to <code>job_id</code> on the job_history table.</li>
+ <li>Write the migration steps (in order) for adding a required column to a table with 10M rows.</li>
+ </ol>
+
+ <h2>Key takeaways</h2>
+ <ul>
+ <li><code>ALTER TABLE</code> modifies existing schemas without recreating tables.</li>
+ <li>Use DEFAULT when adding columns to populated tables.</li>
+ <li>DDL syntax differs across engines — test migrations in staging first.</li>
+ <li>Schema changes should be version-controlled and deployed like application code.</li>
+ </ul>
+
+ </article>
+ </div>
+ <div class="lesson-nav-buttons"><a href="08-keys.html" class="nav-btn"><span class="label">Previous</span><span class="title">Primary Keys and Foreign Keys</span></a><a href="10-constraints.html" class="nav-btn next"><span class="label">Next</span><span class="title">UNIQUE and CHECK Constraints</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+ <p>&copy; 2026 Edukron — Learn, build, share.</p>
+ <div class="footer-links">
+ <a href="../../learn/python/index.html">Python Path</a>
+ <a href="../../learn/sql/index.html">SQL Path</a>
+ <a href="../../assignments/index.html">Assignments</a>
+ </div>
+ </div></footer>
+ <script src="../../js/auth.js"></script>
+</body>
+</html>

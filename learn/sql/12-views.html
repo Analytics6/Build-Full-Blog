@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Views | Edukron</title>
+ <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+ <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+ <nav class="nav">
+ <a href="../../blog/index.html" >Blog</a>
+ <a href="../../learn/python/index.html" >Python</a>
+ <a href="../../learn/sql/index.html" class="active">SQL</a>
+ <a href="../../assignments/index.html" >Assignments</a>
+ </nav>
+ </div></header>
+<main class="page"><div class="container">
+ <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Sql Path</a><span>/</span><span class="current">Topic 12</span></nav>
+ <div class="lesson-layout">
+ <article class="prose">
+ <header class="article-header">
+ <p class="article-meta">Sql · Topic 12 of 30 · 25 min</p>
+ <h1>Views</h1>
+ <p class="article-excerpt">Save queries as reusable virtual tables — simplify analytics access without duplicating data.</p>
+ <p style="margin-top:1rem;"><a href="../../assignments/sql-12-views.html" class="btn btn-outline">Go to Assignment →</a></p>
+ </header>
+
+ <p>A view is a stored SELECT statement that looks like a table. Data analysts query <code>v_daily_summary</code> instead of rewriting a five-table join every morning. Data engineers expose curated views as the stable interface between raw schemas and BI dashboards.</p>
+
+ <h2>View vs. base table</h2>
+ 
+ <p>Views do not store data themselves — they execute the underlying query each time you SELECT from them.</p>
+
+ <h2>Create a view</h2>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="comment">-- Department headcount summary</span>
+<span class="keyword">CREATE VIEW</span> v_department_headcount <span class="keyword">AS</span>
+<span class="keyword">SELECT</span> hire_date,
+       department_id,
+       <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> sale_count,
+       <span class="keyword">SUM</span>(salary) <span class="keyword">AS</span> revenue
+<span class="keyword">FROM</span> hr.employees
+<span class="keyword">GROUP BY</span> hire_date, department_id;
+
+<span class="comment">-- Query the view like a table</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> v_department_headcount
+<span class="keyword">WHERE</span> hire_date = '2026-07-15'
+<span class="keyword">ORDER BY</span> revenue <span class="keyword">DESC</span>;</code></pre></div>
+
+ <h2>Enriched job assignments view</h2>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="keyword">CREATE VIEW</span> v_job_assignments <span class="keyword">AS</span>
+<span class="keyword">SELECT</span> p.job_title,
+       p.category,
+       p.job_id,
+       <span class="keyword">SUM</span>(oi.department_id) <span class="keyword">AS</span> units_sold,
+       <span class="keyword">SUM</span>(oi.salary) <span class="keyword">AS</span> total_amount
+<span class="keyword">FROM</span> hr.job_history <span class="keyword">AS</span> oi
+<span class="keyword">INNER JOIN</span> hr.jobs <span class="keyword">AS</span> p
+  <span class="keyword">ON</span> p.job_id = oi.job_id
+<span class="keyword">GROUP BY</span> p.job_id, p.job_title, p.category, p.job_id;</code></pre></div>
+
+ <h2>Employee department summary view</h2>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="keyword">CREATE VIEW</span> v_employee_departments <span class="keyword">AS</span>
+<span class="keyword">SELECT</span> c.employee_id,
+       c.last_name,
+       c.email,
+       <span class="keyword">COUNT</span>(a.employee_id) <span class="keyword">AS</span> account_count,
+       <span class="keyword">SUM</span>(a.salary) <span class="keyword">AS</span> total_balance
+<span class="keyword">FROM</span> hr.employees <span class="keyword">AS</span> c
+<span class="keyword">LEFT JOIN</span> hr.employees <span class="keyword">AS</span> a <span class="keyword">ON</span> a.employee_id = c.employee_id
+<span class="keyword">GROUP BY</span> c.employee_id, c.last_name, c.email;</code></pre></div>
+
+ <h2>Replace and drop views</h2>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="keyword">CREATE OR REPLACE VIEW</span> v_department_headcount <span class="keyword">AS</span>
+<span class="keyword">SELECT</span> hire_date, department_id,
+       <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> sale_count,
+       <span class="keyword">SUM</span>(salary) <span class="keyword">AS</span> revenue,
+       <span class="keyword">AVG</span>(salary) <span class="keyword">AS</span> avg_basket
+<span class="keyword">FROM</span> hr.employees
+<span class="keyword">GROUP BY</span> hire_date, department_id;
+
+<span class="keyword">DROP VIEW</span> v_job_assignments;</code></pre></div>
+
+ <h2>Real-world context</h2>
+ <ul>
+ <li><strong>Semantic layer</strong> — Views define business-friendly column names hiding complex joins.</li>
+ <li><strong>Access control</strong> — Grant SELECT on views without exposing raw PII columns.</li>
+ <li><strong>dbt models</strong> — Modern pipelines materialize views (or tables) as versioned transformations.</li>
+ </ul>
+
+ <h2>Practice</h2>
+ <ol>
+ <li>Create a view showing each job assignment's employee name, salary, and department.</li>
+ <li>Query your view to find the top 5 departments by employee count.</li>
+ <li>Explain the difference between a view and a physical table.</li>
+ </ol>
+
+ <h2>Key takeaways</h2>
+ <ul>
+ <li>Views store a query definition, not data — they run fresh on each access.</li>
+ <li>Use views to simplify complex joins for analysts and BI tools.</li>
+ <li><code>CREATE OR REPLACE VIEW</code> updates the definition without dropping dependencies.</li>
+ <li>Views are the lightweight curation layer between raw warehouse schemas and BI consumers.</li>
+ </ul>
+
+ </article>
+ </div>
+ <div class="lesson-nav-buttons"><a href="11-indexes.html" class="nav-btn"><span class="label">Previous</span><span class="title">Indexes</span></a><a href="13-subqueries.html" class="nav-btn next"><span class="label">Next</span><span class="title">Subqueries</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+ <p>&copy; 2026 Edukron — Learn, build, share.</p>
+ <div class="footer-links">
+ <a href="../../learn/python/index.html">Python Path</a>
+ <a href="../../learn/sql/index.html">SQL Path</a>
+ <a href="../../assignments/index.html">Assignments</a>
+ </div>
+ </div></footer>
+ <script src="../../js/auth.js"></script>
+</body>
+</html>

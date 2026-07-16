@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 11: Operators | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 11</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 11 of 45 — 45-Hour Python Sprint</p>
+        <h1>Operators</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> Arithmetic, Comparison (==, !=, &gt;, &lt;, &gt;=, &lt;=), Logical (and, or, not), Identity (is, is not), Membership (in, not in)</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-11-operators.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Comparing and Combining</h2>
+      <p>Programs make decisions by comparing values and combining the results. Python groups its operators into families: <strong>arithmetic</strong> (covered in Hour 5), <strong>comparison</strong> for questions like &quot;is this bigger?&quot;, <strong>logical</strong> for combining conditions, <strong>membership</strong> for &quot;is this in that collection?&quot;, and <strong>identity</strong> for &quot;are these literally the same object?&quot;. Every filter and validation rule you will ever write is built from these.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <table>
+        <thead><tr><th>Family</th><th>Operators</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Comparison</td><td><code>==</code> <code>!=</code> <code>&lt;</code> <code>&gt;</code> <code>&lt;=</code> <code>&gt;=</code></td><td>bool</td></tr>
+          <tr><td>Logical</td><td><code>and</code> <code>or</code> <code>not</code></td><td>one of the operands / bool</td></tr>
+          <tr><td>Membership</td><td><code>in</code> <code>not in</code></td><td>bool</td></tr>
+          <tr><td>Identity</td><td><code>is</code> <code>is not</code></td><td>bool</td></tr>
+        </tbody>
+      </table>
+      <p>Two behaviors worth understanding early: logical operators <strong>short-circuit</strong> (the second operand is only evaluated when needed), and comparisons can be <strong>chained</strong> (<code>100 &lt;= price &lt;= 5000</code>) just like in mathematics.</p>
+
+      <h2>Syntax Reference</h2>
+      <p>Comparison operators return booleans. Note that equality is <code>==</code> (two signs) — a single <code>=</code> is assignment, and confusing them is a beginner rite of passage.</p>
+      <div class="code-block"><div class="code-header">Comparison operators — ==, !=, &lt;, &gt;</div><pre><code>price = 899.00
+
+print(price == 899.00)    <span class="comment"># Output: True — equal</span>
+print(price != 500.00)    <span class="comment"># Output: True — not equal</span>
+print(price &gt; 1000)       <span class="comment"># Output: False</span>
+print(price &lt;= 899.00)    <span class="comment"># Output: True</span></code></pre></div>
+
+      <p>Chained comparisons read like math: <code>a &lt;= x &lt;= b</code> checks that <code>x</code> lies in the range in one clean expression.</p>
+      <div class="code-block"><div class="code-header">Chained comparison — range checks</div><pre><code>price = 899.00
+
+in_catalog_range = 100 &lt;= price &lt;= 5000
+print(in_catalog_range)      <span class="comment"># Output: True</span>
+
+<span class="comment"># Equivalent to: 100 &lt;= price and price &lt;= 5000</span></code></pre></div>
+
+      <p><code>and</code> requires <em>both</em> sides to be true; <code>or</code> requires <em>at least one</em>; <code>not</code> flips a boolean. Combine them to express real business rules.</p>
+      <div class="code-block"><div class="code-header">Logical operators — and, or, not</div><pre><code>balance = 4500
+account_type = <span class="string">&quot;SAVINGS&quot;</span>
+is_active = <span class="keyword">True</span>
+
+eligible = balance &gt;= 1000 <span class="keyword">and</span> account_type == <span class="string">&quot;SAVINGS&quot;</span> <span class="keyword">and</span> is_active
+print(eligible)                  <span class="comment"># Output: True — all three conditions hold</span>
+
+overdrawn = balance &lt; 0 <span class="keyword">or</span> <span class="keyword">not</span> is_active
+print(overdrawn)                 <span class="comment"># Output: False — neither condition holds</span></code></pre></div>
+
+      <p>Logical operators <strong>short-circuit</strong>: <code>and</code> stops at the first falsy value, <code>or</code> at the first truthy one. This lets a cheap guard protect an expensive (or dangerous) check.</p>
+      <div class="code-block"><div class="code-header">Short-circuiting — guards that prevent errors</div><pre><code>txn_count = 0
+total = 4500
+
+<span class="comment"># Without the guard, 4500 / 0 would raise ZeroDivisionError</span>
+average = txn_count &gt; 0 <span class="keyword">and</span> total / txn_count
+print(average)     <span class="comment"># Output: False — right side never evaluated</span>
+
+txn_count = 3
+average = txn_count &gt; 0 <span class="keyword">and</span> total / txn_count
+print(average)     <span class="comment"># Output: 1500.0</span></code></pre></div>
+
+      <p><code>in</code> tests membership: substring in string, element in list, key in dict, element in set. On sets and dict keys it is O(1) — effectively instant at any size.</p>
+      <div class="code-block"><div class="code-header">Membership — in and not in</div><pre><code>valid_categories = {<span class="string">&quot;ELEC&quot;</span>, <span class="string">&quot;FOOD&quot;</span>, <span class="string">&quot;CLOTH&quot;</span>}
+sku = <span class="string">&quot;RET-ELEC-0042&quot;</span>
+
+print(<span class="string">&quot;ELEC&quot;</span> <span class="keyword">in</span> sku)                 <span class="comment"># Output: True — substring check</span>
+print(<span class="string">&quot;ELEC&quot;</span> <span class="keyword">in</span> valid_categories)    <span class="comment"># Output: True — set membership, O(1)</span>
+print(<span class="string">&quot;TOYS&quot;</span> <span class="keyword">not</span> <span class="keyword">in</span> valid_categories) <span class="comment"># Output: True</span>
+print(<span class="string">&quot;@&quot;</span> <span class="keyword">in</span> <span class="string">&quot;priya@retailbank.com&quot;</span>)  <span class="comment"># Output: True — quick email sanity check</span></code></pre></div>
+
+      <p><code>is</code> asks whether two names point to the <em>same object in memory</em>, while <code>==</code> asks whether their values are equal. Use <code>==</code> for data, <code>is</code> only for <code>None</code>.</p>
+      <div class="code-block"><div class="code-header">Identity — is vs ==</div><pre><code>x = [1, 2]
+y = [1, 2]
+
+print(x == y)     <span class="comment"># Output: True — equal values</span>
+print(x <span class="keyword">is</span> y)     <span class="comment"># Output: False — two distinct list objects</span>
+
+phone = <span class="keyword">None</span>
+print(phone <span class="keyword">is</span> <span class="keyword">None</span>)     <span class="comment"># Output: True — the correct None test</span></code></pre></div>
+
+      <h2>Edge Cases &amp; Gotchas</h2>
+      <p><code>and</code>/<code>or</code> actually return one of their <em>operands</em>, not always a strict boolean. <code>or</code> is commonly used to supply defaults — but it treats every falsy value as &quot;missing,&quot; which can bite with legitimate zeros.</p>
+      <div class="code-block"><div class="code-header">Gotcha — or-defaults swallow zeros</div><pre><code>requested_limit = 0        <span class="comment"># customer explicitly asked for a 0 limit</span>
+
+limit = requested_limit <span class="keyword">or</span> 5000    <span class="comment"># 0 is falsy, so the default kicks in</span>
+print(limit)                        <span class="comment"># Output: 5000 — the 0 was overridden!</span>
+
+<span class="comment"># Safe version: only replace when the value is actually missing</span>
+limit = requested_limit <span class="keyword">if</span> requested_limit <span class="keyword">is not</span> <span class="keyword">None</span> <span class="keyword">else</span> 5000
+print(limit)                        <span class="comment"># Output: 0</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>Filtering</strong> — chained comparisons express amount ranges; <code>and</code>/<code>or</code> route records to fraud vs normal queues.</li>
+        <li><strong>Validation</strong> — <code>in</code> against an allowed set checks account types before approval; <code>&quot;@&quot; in email</code> is a first-pass sanity check.</li>
+        <li><strong>Safety</strong> — short-circuit guards prevent division-by-zero and missing-key crashes in one line.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Write a chained comparison verifying a price sits between 100 and 5000.</li>
+        <li>Combine three conditions with <code>and</code> to compute loan eligibility.</li>
+        <li>Use a short-circuit guard to avoid dividing by a zero transaction count.</li>
+        <li>Compare two equal lists with <code>==</code> and <code>is</code>; explain the difference in a comment.</li>
+        <li>Demonstrate the <code>or</code>-default gotcha with a legitimate zero value.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>Comparisons return booleans and can be chained: <code>a &lt;= x &lt;= b</code>.</li>
+        <li><code>and</code>/<code>or</code> short-circuit — use cheap guards before risky expressions.</li>
+        <li><code>in</code> is O(1) on sets and dict keys — the right tool for lookups and allowlists.</li>
+        <li><code>==</code> compares values; <code>is</code> compares identity — reserve <code>is</code> for <code>None</code>.</li>
+        <li><code>value or default</code> replaces <em>every</em> falsy value, including a legitimate 0.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-11-operators.html">Hour 11 assignment</a> (20 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-10-boolean-and-none.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Boolean &amp; None</span></a><a href="hour-12-input-function.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Input Function →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

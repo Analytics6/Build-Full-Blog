@@ -1,0 +1,205 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 22: Sets | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 22</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 22 of 45 — 45-Hour Python Sprint</p>
+        <h1>Sets</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> Set creation, add/update/remove/discard/pop/clear, union, intersection, difference, symmetric_difference, subset/superset tests, frozenset</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-22-sets.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Unique Values, Fast Lookups</h2>
+      <p>A <strong>set</strong> is an unordered collection of <em>unique</em> elements. Add a duplicate and nothing happens — the set already has it. Two properties make sets indispensable: automatic deduplication, and near-instant (<em>O(1)</em>) membership testing, no matter how large the set grows. Sets also support the mathematical operations you know from Venn diagrams: union, intersection, and difference.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <ul>
+        <li><strong>Creation</strong> — <code>{1, 2, 3}</code> or <code>set(iterable)</code>. Careful: <code>{}</code> creates an empty <em>dict</em>; the empty set is <code>set()</code>.</li>
+        <li><strong>Unordered</strong> — sets have no indices; <code>s[0]</code> is a <code>TypeError</code>. Iterate or convert to a list when order matters.</li>
+        <li><strong>Hashable elements only</strong> — numbers, strings, and tuples are fine; lists and dicts cannot go into a set.</li>
+      </ul>
+
+      <h2>Creating Sets</h2>
+      <p>Building a set from a list silently drops duplicates — the fastest deduplication tool in Python.</p>
+      <div class="code-block"><div class="code-header">set() — create and deduplicate</div><pre><code>txn_ids = [<span class="string">&quot;TXN-1&quot;</span>, <span class="string">&quot;TXN-2&quot;</span>, <span class="string">&quot;TXN-1&quot;</span>, <span class="string">&quot;TXN-3&quot;</span>, <span class="string">&quot;TXN-2&quot;</span>]
+
+unique_ids = set(txn_ids)
+print(unique_ids)         <span class="comment"># Output: {'TXN-1', 'TXN-2', 'TXN-3'} — order may vary</span>
+print(len(unique_ids))    <span class="comment"># Output: 3 — two duplicates removed</span>
+
+empty = set()             <span class="comment"># NOT {} — that would be an empty dict</span>
+print(type(empty))        <span class="comment"># Output: &lt;class 'set'&gt;</span></code></pre></div>
+
+      <h2>Adding &amp; Removing Elements</h2>
+      <p><code>add(item)</code> inserts one element. Adding something already present changes nothing — no error, no duplicate.</p>
+      <div class="code-block"><div class="code-header">set.add() — insert one element</div><pre><code>fraud_accounts = {<span class="string">&quot;ACC-999&quot;</span>, <span class="string">&quot;ACC-888&quot;</span>}
+
+fraud_accounts.add(<span class="string">&quot;ACC-777&quot;</span>)
+fraud_accounts.add(<span class="string">&quot;ACC-999&quot;</span>)      <span class="comment"># already present — silently ignored</span>
+
+print(len(fraud_accounts))         <span class="comment"># Output: 3</span></code></pre></div>
+
+      <p><code>update(iterable)</code> adds every element of another collection at once — the set version of <code>extend()</code>.</p>
+      <div class="code-block"><div class="code-header">set.update() — add many at once</div><pre><code>blocklist = {<span class="string">&quot;ACC-999&quot;</span>}
+
+blocklist.update([<span class="string">&quot;ACC-888&quot;</span>, <span class="string">&quot;ACC-777&quot;</span>, <span class="string">&quot;ACC-999&quot;</span>])
+
+print(sorted(blocklist))
+<span class="comment"># Output: ['ACC-777', 'ACC-888', 'ACC-999'] — the duplicate collapsed</span></code></pre></div>
+
+      <p><code>remove(item)</code> deletes an element and raises <code>KeyError</code> if it is missing; <code>discard(item)</code> deletes without complaining. Choose based on whether a missing element is a bug.</p>
+      <div class="code-block"><div class="code-header">set.remove() / set.discard() — delete an element</div><pre><code>blocklist = {<span class="string">&quot;ACC-999&quot;</span>, <span class="string">&quot;ACC-888&quot;</span>}
+
+blocklist.remove(<span class="string">&quot;ACC-888&quot;</span>)        <span class="comment"># present — removed</span>
+blocklist.discard(<span class="string">&quot;ACC-000&quot;</span>)       <span class="comment"># absent — no error</span>
+<span class="comment"># blocklist.remove(&quot;ACC-000&quot;)      &lt;-- KeyError: 'ACC-000'</span>
+
+print(blocklist)                   <span class="comment"># Output: {'ACC-999'}</span></code></pre></div>
+
+      <p><code>pop()</code> removes and returns an <em>arbitrary</em> element (sets have no order, so there is no &quot;last&quot;); <code>clear()</code> empties the set.</p>
+      <div class="code-block"><div class="code-header">set.pop() / set.clear() — arbitrary removal, empty all</div><pre><code>pending_reviews = {<span class="string">&quot;ACC-101&quot;</span>, <span class="string">&quot;ACC-102&quot;</span>, <span class="string">&quot;ACC-103&quot;</span>}
+
+next_case = pending_reviews.pop()     <span class="comment"># some element — you cannot choose which</span>
+print(next_case)                      <span class="comment"># Output: e.g. ACC-102</span>
+
+pending_reviews.clear()
+print(pending_reviews)                <span class="comment"># Output: set()</span></code></pre></div>
+
+      <h2>Set Operations</h2>
+      <p><code>union()</code> (or <code>|</code>) combines two sets into one containing every element from both.</p>
+      <div class="code-block"><div class="code-header">set.union() — all elements from both</div><pre><code>store_a = {1001, 1002, 1003, 1004}
+store_b = {1003, 1004, 1005, 1006}
+
+all_customers = store_a | store_b          <span class="comment"># same as store_a.union(store_b)</span>
+print(sorted(all_customers))
+<span class="comment"># Output: [1001, 1002, 1003, 1004, 1005, 1006]</span></code></pre></div>
+
+      <p><code>intersection()</code> (or <code>&amp;</code>) keeps only the elements present in <em>both</em> sets — e.g. customers who shopped at both stores.</p>
+      <div class="code-block"><div class="code-header">set.intersection() — common to both</div><pre><code>store_a = {1001, 1002, 1003, 1004}
+store_b = {1003, 1004, 1005, 1006}
+
+loyal_both = store_a &amp; store_b       <span class="comment"># same as store_a.intersection(store_b)</span>
+print(sorted(loyal_both))            <span class="comment"># Output: [1003, 1004]</span></code></pre></div>
+
+      <p><code>difference()</code> (or <code>-</code>) keeps elements in the first set that are <em>not</em> in the second. Order matters: <code>a - b</code> and <code>b - a</code> differ.</p>
+      <div class="code-block"><div class="code-header">set.difference() — in one but not the other</div><pre><code>store_a = {1001, 1002, 1003, 1004}
+store_b = {1003, 1004, 1005, 1006}
+
+only_a = store_a - store_b
+only_b = store_b - store_a
+
+print(sorted(only_a))   <span class="comment"># Output: [1001, 1002]</span>
+print(sorted(only_b))   <span class="comment"># Output: [1005, 1006]</span></code></pre></div>
+
+      <p><code>symmetric_difference()</code> (or <code>^</code>) keeps elements in <em>either</em> set but not in both — the &quot;exactly one store&quot; customers.</p>
+      <div class="code-block"><div class="code-header">set.symmetric_difference() — either, not both</div><pre><code>store_a = {1001, 1002, 1003, 1004}
+store_b = {1003, 1004, 1005, 1006}
+
+one_store_only = store_a ^ store_b
+print(sorted(one_store_only))
+<span class="comment"># Output: [1001, 1002, 1005, 1006]</span></code></pre></div>
+
+      <h2>Set Relationship Tests</h2>
+      <p><code>issubset()</code> asks &quot;is every element of this set inside that one?&quot;; <code>issuperset()</code> asks the reverse.</p>
+      <div class="code-block"><div class="code-header">set.issubset() / set.issuperset() — containment tests</div><pre><code>premium_customers = {1003, 1004}
+all_customers = {1001, 1002, 1003, 1004}
+
+print(premium_customers.issubset(all_customers))    <span class="comment"># Output: True</span>
+print(all_customers.issuperset(premium_customers))  <span class="comment"># Output: True</span>
+print(all_customers.issubset(premium_customers))    <span class="comment"># Output: False</span></code></pre></div>
+
+      <p><code>isdisjoint()</code> returns <code>True</code> when two sets share <em>no</em> elements — a clean way to verify that, say, no active account is on the fraud blocklist.</p>
+      <div class="code-block"><div class="code-header">set.isdisjoint() — no overlap at all?</div><pre><code>active_accounts = {<span class="string">&quot;ACC-101&quot;</span>, <span class="string">&quot;ACC-102&quot;</span>}
+fraud_blocklist = {<span class="string">&quot;ACC-999&quot;</span>, <span class="string">&quot;ACC-888&quot;</span>}
+
+print(active_accounts.isdisjoint(fraud_blocklist))   <span class="comment"># Output: True — all clear</span>
+print(active_accounts.isdisjoint({<span class="string">&quot;ACC-101&quot;</span>}))       <span class="comment"># Output: False — overlap found</span></code></pre></div>
+
+      <p>A <code>frozenset</code> is an immutable set: no <code>add</code> or <code>remove</code> after creation. Because it is hashable, it can be a dictionary key or an element of another set.</p>
+      <div class="code-block"><div class="code-header">frozenset — an immutable set</div><pre><code>weekend_days = frozenset([<span class="string">&quot;Sat&quot;</span>, <span class="string">&quot;Sun&quot;</span>])
+
+print(<span class="string">&quot;Sat&quot;</span> <span class="keyword">in</span> weekend_days)     <span class="comment"># Output: True — lookups still work</span>
+<span class="comment"># weekend_days.add(&quot;Fri&quot;)        &lt;-- AttributeError: no add on frozenset</span>
+
+<span class="comment"># Hashable, so it can key a dict:</span>
+schedules = {weekend_days: <span class="string">&quot;reduced staff&quot;</span>}
+print(schedules[weekend_days])   <span class="comment"># Output: reduced staff</span></code></pre></div>
+
+      <h2>Edge Cases &amp; Gotchas</h2>
+      <p>Membership testing is where sets earn their keep: checking <code>in</code> against a list scans every element, while a set answers in constant time.</p>
+      <div class="code-block"><div class="code-header">Fast membership — set vs list lookups</div><pre><code>fraud_accounts = {<span class="string">&quot;ACC-999&quot;</span>, <span class="string">&quot;ACC-888&quot;</span>}     <span class="comment"># set: O(1) lookup</span>
+account = <span class="string">&quot;ACC-101&quot;</span>
+
+<span class="keyword">if</span> account <span class="keyword">in</span> fraud_accounts:
+    print(<span class="string">&quot;Block transaction&quot;</span>)
+<span class="keyword">else</span>:
+    print(<span class="string">&quot;Approve transaction&quot;</span>)
+
+<span class="comment"># Output: Approve transaction</span>
+<span class="comment"># With a million-entry blocklist, a list would scan all entries;</span>
+<span class="comment"># the set answers instantly.</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>ETL</strong> — <code>set()</code> deduplicates customer IDs before a warehouse load.</li>
+        <li><strong>Fraud screening</strong> — blocklists live in sets for constant-time checks on every transaction.</li>
+        <li><strong>Analytics</strong> — intersection finds cross-store customers; difference finds churned ones between two periods.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Deduplicate a list of transaction IDs and count how many duplicates were removed.</li>
+        <li>Compute union, intersection, both differences, and symmetric difference of two customer sets.</li>
+        <li>Compare <code>remove()</code> vs <code>discard()</code> on a missing element.</li>
+        <li>Check <code>issubset</code>, <code>issuperset</code>, and <code>isdisjoint</code> on three small sets.</li>
+        <li>Create a <code>frozenset</code> and use it as a dictionary key.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>Sets hold unique, hashable elements; <code>set()</code> is the empty set, not <code>{}</code>.</li>
+        <li>Add with <code>add</code>/<code>update</code>; remove with <code>remove</code> (raises), <code>discard</code> (silent), <code>pop</code> (arbitrary), <code>clear</code>.</li>
+        <li>Set math: <code>|</code> union, <code>&amp;</code> intersection, <code>-</code> difference, <code>^</code> symmetric difference.</li>
+        <li><code>issubset</code>/<code>issuperset</code>/<code>isdisjoint</code> answer containment questions in one call.</li>
+        <li>Membership tests are O(1) — use sets for blocklists and dedup, and <code>frozenset</code> when immutability or hashability is needed.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-22-sets.html">Hour 22 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-21-tuples.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Tuples</span></a><a href="hour-23-dictionaries.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Dictionaries →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

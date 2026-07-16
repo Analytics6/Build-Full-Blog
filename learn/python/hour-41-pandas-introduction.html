@@ -1,0 +1,140 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 41: Pandas Introduction | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 41</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 41 of 45 — 45-Hour Python Sprint</p>
+        <h1>Pandas Introduction</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> What is Pandas, Series vs DataFrame, creating Series, creating DataFrame (from dictionary, list of lists), reading CSV files (pd.read_csv), head(), tail(), info(), describe()</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-41-pandas-introduction.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Pandas: The Data Scientist's Workbench</h2>
+      <p>Pandas brings SQL-table semantics to Python. A <strong>DataFrame</strong> is a labeled 2D table — like <code>store_sales</code> or <code>transactions</code> loaded into memory. Analysts use Pandas for exploration, cleaning, and aggregation before forecasting product demand or detecting fraud detection.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <ul>
+        <li><code>Series</code> — 1D labeled array (one column).</li>
+        <li><code>DataFrame</code> — 2D table with named columns and an index.</li>
+        <li><code>.head()</code>, <code>.info()</code>, <code>.describe()</code> — first steps on any new dataset.</li>
+        <li><code>pd.read_csv()</code> — load CSV files directly into DataFrames.</li>
+      </ul>
+
+      <h2>Syntax Reference</h2>
+      <p>A <code>Series</code> is one labeled column. Creating one from a list gives it a default integer index.</p>
+      <div class="code-block"><div class="code-header">pd.Series — one labeled column</div><pre><code><span class="keyword">import</span> pandas <span class="keyword">as</span> pd
+
+prices = pd.Series([49.99, 299.00, 24.99])
+
+print(prices.mean())    <span class="comment"># Output: 124.66</span>
+print(prices[0])        <span class="comment"># Output: 49.99 — index label 0</span></code></pre></div>
+
+      <p>A <code>DataFrame</code> built from a dict: keys become column names, lists become column values.</p>
+      <div class="code-block"><div class="code-header">pd.DataFrame — table from a dict</div><pre><code><span class="keyword">import</span> pandas <span class="keyword">as</span> pd
+
+products = pd.DataFrame({
+    <span class="string">&quot;product_id&quot;</span>: [<span class="string">&quot;P-001&quot;</span>, <span class="string">&quot;P-002&quot;</span>, <span class="string">&quot;P-003&quot;</span>],
+    <span class="string">&quot;product_name&quot;</span>: [<span class="string">&quot;Keyboard&quot;</span>, <span class="string">&quot;Monitor&quot;</span>, <span class="string">&quot;Mouse&quot;</span>],
+    <span class="string">&quot;unit_price&quot;</span>: [49.99, 299.00, 24.99],
+})
+
+print(products)
+<span class="comment"># Output:</span>
+<span class="comment">#   product_id product_name  unit_price</span>
+<span class="comment"># 0      P-001     Keyboard       49.99</span>
+<span class="comment"># 1      P-002      Monitor      299.00</span>
+<span class="comment"># 2      P-003        Mouse       24.99</span></code></pre></div>
+
+      <p><code>pd.read_csv()</code> loads a CSV straight into a DataFrame — with type inference, header detection, and quoting handled for you.</p>
+      <div class="code-block"><div class="code-header">pd.read_csv() — load a CSV file</div><pre><code><span class="keyword">import</span> pandas <span class="keyword">as</span> pd
+
+txns = pd.read_csv(<span class="string">&quot;transactions.csv&quot;</span>)
+
+print(txns.shape)               <span class="comment"># Output: e.g. (14230, 5) — rows, columns</span>
+print(txns[<span class="string">&quot;amount&quot;</span>].mean())    <span class="comment"># Output: e.g. 1263.42</span></code></pre></div>
+
+      <p><code>head()</code> and <code>tail()</code> preview the first and last rows — always the first call on a fresh dataset.</p>
+      <div class="code-block"><div class="code-header">head() / tail() — preview rows</div><pre><code>print(products.head(2))
+<span class="comment"># Output:</span>
+<span class="comment">#   product_id product_name  unit_price</span>
+<span class="comment"># 0      P-001     Keyboard       49.99</span>
+<span class="comment"># 1      P-002      Monitor      299.00</span>
+
+print(products.tail(1))
+<span class="comment"># Output:</span>
+<span class="comment">#   product_id product_name  unit_price</span>
+<span class="comment"># 2      P-003        Mouse       24.99</span></code></pre></div>
+
+      <p><code>info()</code> summarizes dtypes and null counts; <code>describe()</code> computes statistics for numeric columns — together, an instant data-quality snapshot.</p>
+      <div class="code-block"><div class="code-header">info() / describe() — first-look EDA</div><pre><code>products.info()
+<span class="comment"># Output (abridged):</span>
+<span class="comment"># RangeIndex: 3 entries, 0 to 2</span>
+<span class="comment"># unit_price    3 non-null   float64</span>
+
+print(products[<span class="string">&quot;unit_price&quot;</span>].describe())
+<span class="comment"># Output (abridged):</span>
+<span class="comment"># count      3.00</span>
+<span class="comment"># mean     124.66</span>
+<span class="comment"># min       24.99</span>
+<span class="comment"># max      299.00</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>Data analytics</strong> — Explore store_sales before building demand forecasting models.</li>
+        <li><strong>ETL</strong> — Validate CSV schema and null rates before warehouse load.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Create a DataFrame of 5 products with Name, Price, and Stock columns.</li>
+        <li>Load a sample CSV and print <code>head()</code> and column dtypes via <code>info()</code>.</li>
+        <li>Generate <code>describe()</code> statistics for numeric columns in a dataset.</li>
+        <li>Extract a single column as a Series and compute its mean.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>DataFrame = in-memory SQL table with labeled columns.</li>
+        <li><code>.head()</code>, <code>.info()</code>, <code>.describe()</code> for initial EDA.</li>
+        <li><code>pd.read_csv()</code> is the primary ingest path for tabular files.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-41-pandas-introduction.html">Hour 41 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-40-numpy-operations.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← NumPy Operations</span></a><a href="hour-42-pandas-data-cleaning.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Pandas Data Cleaning →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

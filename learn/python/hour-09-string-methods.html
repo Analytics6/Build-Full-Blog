@@ -1,0 +1,258 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 9: String Methods | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 9</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 9 of 45 — 45-Hour Python Sprint</p>
+        <h1>String Methods</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> Case methods, strip/replace, split/join, find/count, validation methods, alignment, format() and f-strings</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-09-string-methods.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Cleaning Text with Methods</h2>
+      <p>Raw text data arrives messy — extra whitespace, mixed case, inconsistent delimiters. String <strong>methods</strong> are functions attached to every string, called with dot notation: <code>text.upper()</code>. Because strings are immutable, every method returns a <em>new</em> string and leaves the original untouched — so remember to assign the result back: <code>name = name.strip()</code>. This hour covers each important method individually.</p>
+
+      <h2>Case Methods</h2>
+      <p><code>upper()</code> converts every letter to uppercase. Use it to normalize codes and make case-insensitive comparisons.</p>
+      <div class="code-block"><div class="code-header">str.upper() — convert to uppercase</div><pre><code>txn_type = <span class="string">&quot;debit&quot;</span>
+
+print(txn_type.upper())      <span class="comment"># Output: DEBIT</span>
+print(txn_type)              <span class="comment"># Output: debit — original unchanged</span></code></pre></div>
+
+      <p><code>lower()</code> converts every letter to lowercase — the standard first step before comparing user-entered text or emails.</p>
+      <div class="code-block"><div class="code-header">str.lower() — convert to lowercase</div><pre><code>email = <span class="string">&quot;Priya.Sharma@FirstNational.COM&quot;</span>
+
+print(email.lower())         <span class="comment"># Output: priya.sharma@firstnational.com</span></code></pre></div>
+
+      <p><code>title()</code> capitalizes the first letter of <em>every word</em> — useful for names and product labels.</p>
+      <div class="code-block"><div class="code-header">str.title() — capitalize each word</div><pre><code>product = <span class="string">&quot;wireless bluetooth mouse&quot;</span>
+
+print(product.title())       <span class="comment"># Output: Wireless Bluetooth Mouse</span></code></pre></div>
+
+      <p><code>capitalize()</code> uppercases only the very first character and lowercases the rest — good for sentences.</p>
+      <div class="code-block"><div class="code-header">str.capitalize() — first letter only</div><pre><code>alert = <span class="string">&quot;pAYMENT overdue on account&quot;</span>
+
+print(alert.capitalize())    <span class="comment"># Output: Payment overdue on account</span></code></pre></div>
+
+      <p><code>swapcase()</code> flips the case of every letter — rarely needed in production, but it appears in interviews and puzzles.</p>
+      <div class="code-block"><div class="code-header">str.swapcase() — invert the case</div><pre><code>code = <span class="string">&quot;Sku-Elec&quot;</span>
+
+print(code.swapcase())       <span class="comment"># Output: sKU-eLEC</span></code></pre></div>
+
+      <h2>Trimming Whitespace</h2>
+      <p><code>strip()</code> removes whitespace (spaces, tabs, newlines) from <em>both ends</em> of a string — the single most common data-cleaning call in Python. It can also strip a custom set of characters.</p>
+      <div class="code-block"><div class="code-header">str.strip() — trim both ends</div><pre><code>raw_name = <span class="string">&quot;   Wireless Keyboard   &quot;</span>
+
+print(raw_name.strip())          <span class="comment"># Output: Wireless Keyboard</span>
+print(<span class="string">&quot;##SALE##&quot;</span>.strip(<span class="string">&quot;#&quot;</span>))      <span class="comment"># Output: SALE — strips the given chars</span></code></pre></div>
+
+      <p><code>lstrip()</code> trims only the left (leading) side.</p>
+      <div class="code-block"><div class="code-header">str.lstrip() — trim the left side</div><pre><code>padded = <span class="string">&quot;   ACC-8842&quot;</span>
+
+print(padded.lstrip())           <span class="comment"># Output: ACC-8842</span>
+print(<span class="string">&quot;000042&quot;</span>.lstrip(<span class="string">&quot;0&quot;</span>))       <span class="comment"># Output: 42 — leading zeros removed</span></code></pre></div>
+
+      <p><code>rstrip()</code> trims only the right (trailing) side — commonly used to remove the newline at the end of each line read from a file.</p>
+      <div class="code-block"><div class="code-header">str.rstrip() — trim the right side</div><pre><code>file_line = <span class="string">&quot;TXN-88421,DEBIT,4500.00\n&quot;</span>
+
+print(file_line.rstrip())        <span class="comment"># Output: TXN-88421,DEBIT,4500.00</span>
+print(len(file_line), len(file_line.rstrip()))   <span class="comment"># Output: 25 24</span></code></pre></div>
+
+      <h2>Searching &amp; Replacing</h2>
+      <p><code>replace(old, new)</code> substitutes every occurrence of one substring with another. An optional third argument limits how many replacements happen.</p>
+      <div class="code-block"><div class="code-header">str.replace() — substitute text</div><pre><code>sku = <span class="string">&quot;RT_PROD_004821&quot;</span>
+
+print(sku.replace(<span class="string">&quot;_&quot;</span>, <span class="string">&quot;-&quot;</span>))         <span class="comment"># Output: RT-PROD-004821</span>
+print(sku.replace(<span class="string">&quot;_&quot;</span>, <span class="string">&quot;-&quot;</span>, 1))      <span class="comment"># Output: RT-PROD_004821 — first one only</span></code></pre></div>
+
+      <p><code>find(sub)</code> returns the index of the <em>first</em> occurrence of a substring, or <code>-1</code> if it is absent. Because it never raises an error, it is the safe choice when the text might not contain the target.</p>
+      <div class="code-block"><div class="code-header">str.find() — locate a substring safely</div><pre><code>desc = <span class="string">&quot;ATM WITHDRAWAL - DOWNTOWN ATM&quot;</span>
+
+print(desc.find(<span class="string">&quot;ATM&quot;</span>))      <span class="comment"># Output: 0 — index of the first match</span>
+print(desc.find(<span class="string">&quot;CHEQUE&quot;</span>))   <span class="comment"># Output: -1 — not found, no error</span></code></pre></div>
+
+      <p><code>rfind(sub)</code> is the same search starting from the <em>right</em> — it returns the index of the last occurrence.</p>
+      <div class="code-block"><div class="code-header">str.rfind() — locate from the right</div><pre><code>desc = <span class="string">&quot;ATM WITHDRAWAL - DOWNTOWN ATM&quot;</span>
+
+print(desc.rfind(<span class="string">&quot;ATM&quot;</span>))     <span class="comment"># Output: 26 — index of the last match</span></code></pre></div>
+
+      <p><code>index(sub)</code> works like <code>find()</code> but raises <code>ValueError</code> when the substring is missing. Prefer it when a missing value is a bug you want to hear about loudly.</p>
+      <div class="code-block"><div class="code-header">str.index() — locate or raise an error</div><pre><code>email = <span class="string">&quot;priya.sharma@firstnational.com&quot;</span>
+
+print(email.index(<span class="string">&quot;@&quot;</span>))      <span class="comment"># Output: 12</span>
+<span class="comment"># email.index(&quot;#&quot;)           &lt;-- ValueError: substring not found</span></code></pre></div>
+
+      <p><code>count(sub)</code> returns how many times a substring appears — a quick way to count delimiters or repeated codes.</p>
+      <div class="code-block"><div class="code-header">str.count() — count occurrences</div><pre><code>csv_row = <span class="string">&quot;TXN-88421,DEBIT,4500.00,ACC-8842&quot;</span>
+
+print(csv_row.count(<span class="string">&quot;,&quot;</span>))     <span class="comment"># Output: 3 — three commas = four fields</span>
+print(csv_row.count(<span class="string">&quot;88&quot;</span>))    <span class="comment"># Output: 2</span></code></pre></div>
+
+      <p><code>startswith(prefix)</code> and <code>endswith(suffix)</code> return booleans — the readable way to test prefixes and file extensions instead of slicing.</p>
+      <div class="code-block"><div class="code-header">str.startswith() / str.endswith() — prefix and suffix tests</div><pre><code>filename = <span class="string">&quot;store_sales_2026.csv&quot;</span>
+
+print(filename.startswith(<span class="string">&quot;store_&quot;</span>))   <span class="comment"># Output: True</span>
+print(filename.endswith(<span class="string">&quot;.csv&quot;</span>))       <span class="comment"># Output: True</span>
+print(filename.endswith(<span class="string">&quot;.xlsx&quot;</span>))      <span class="comment"># Output: False</span></code></pre></div>
+
+      <h2>Splitting &amp; Joining</h2>
+      <p><code>split(delimiter)</code> breaks a string into a <strong>list</strong> of pieces. With no argument it splits on any run of whitespace — ideal for words.</p>
+      <div class="code-block"><div class="code-header">str.split() — break into a list</div><pre><code>pos_line = <span class="string">&quot;SKU-0042|Wireless Mouse|2|899.00&quot;</span>
+
+fields = pos_line.split(<span class="string">&quot;|&quot;</span>)
+print(fields)
+<span class="comment"># Output: ['SKU-0042', 'Wireless Mouse', '2', '899.00']</span>
+
+print(<span class="string">&quot;pay  loan   now&quot;</span>.split())   <span class="comment"># Output: ['pay', 'loan', 'now']</span></code></pre></div>
+
+      <p><code>rsplit(delimiter, maxsplit)</code> splits from the <em>right</em> — the difference only matters when you limit the number of splits.</p>
+      <div class="code-block"><div class="code-header">str.rsplit() — split from the right</div><pre><code>path = <span class="string">&quot;etl/retail/2026/inventory.csv&quot;</span>
+
+print(path.rsplit(<span class="string">&quot;/&quot;</span>, 1))    <span class="comment"># Output: ['etl/retail/2026', 'inventory.csv']</span>
+print(path.split(<span class="string">&quot;/&quot;</span>, 1))     <span class="comment"># Output: ['etl', 'retail/2026/inventory.csv']</span></code></pre></div>
+
+      <p><code>join(iterable)</code> is the inverse of <code>split()</code>: it glues a list of strings together using the string it is called on as the separator. Note the order — the <em>separator</em> comes first.</p>
+      <div class="code-block"><div class="code-header">str.join() — glue a list into one string</div><pre><code>fields = [<span class="string">&quot;TXN-88421&quot;</span>, <span class="string">&quot;DEBIT&quot;</span>, <span class="string">&quot;4500.00&quot;</span>]
+
+print(<span class="string">&quot;,&quot;</span>.join(fields))       <span class="comment"># Output: TXN-88421,DEBIT,4500.00</span>
+print(<span class="string">&quot; | &quot;</span>.join(fields))     <span class="comment"># Output: TXN-88421 | DEBIT | 4500.00</span></code></pre></div>
+
+      <h2>Validation Methods (is...)</h2>
+      <p><code>isdigit()</code> returns <code>True</code> when every character is a digit — the safe pre-check before casting user input to <code>int</code>.</p>
+      <div class="code-block"><div class="code-header">str.isdigit() — all digits?</div><pre><code>print(<span class="string">&quot;004821&quot;</span>.isdigit())    <span class="comment"># Output: True</span>
+print(<span class="string">&quot;48.21&quot;</span>.isdigit())     <span class="comment"># Output: False — the dot is not a digit</span>
+print(<span class="string">&quot;&quot;</span>.isdigit())          <span class="comment"># Output: False — empty string fails all is-checks</span></code></pre></div>
+
+      <p><code>isalpha()</code> returns <code>True</code> when every character is a letter — no digits, spaces, or punctuation allowed.</p>
+      <div class="code-block"><div class="code-header">str.isalpha() — all letters?</div><pre><code>print(<span class="string">&quot;Sharma&quot;</span>.isalpha())        <span class="comment"># Output: True</span>
+print(<span class="string">&quot;Sharma123&quot;</span>.isalpha())     <span class="comment"># Output: False</span>
+print(<span class="string">&quot;Priya Sharma&quot;</span>.isalpha())  <span class="comment"># Output: False — the space fails it</span></code></pre></div>
+
+      <p><code>isalnum()</code> accepts letters and digits mixed together — good for validating codes like SKUs without separators.</p>
+      <div class="code-block"><div class="code-header">str.isalnum() — letters and digits only?</div><pre><code>print(<span class="string">&quot;ELEC4421&quot;</span>.isalnum())    <span class="comment"># Output: True</span>
+print(<span class="string">&quot;ELEC-4421&quot;</span>.isalnum())   <span class="comment"># Output: False — the hyphen fails it</span></code></pre></div>
+
+      <p><code>isspace()</code> returns <code>True</code> when the string contains only whitespace characters — useful for skipping blank lines in files.</p>
+      <div class="code-block"><div class="code-header">str.isspace() — only whitespace?</div><pre><code>print(<span class="string">&quot;   &quot;</span>.isspace())     <span class="comment"># Output: True</span>
+print(<span class="string">&quot;\t\n&quot;</span>.isspace())    <span class="comment"># Output: True — tabs and newlines count</span>
+print(<span class="string">&quot; a &quot;</span>.isspace())     <span class="comment"># Output: False</span></code></pre></div>
+
+      <p><code>isupper()</code> and <code>islower()</code> check whether all cased characters are upper- or lowercase — handy for enforcing code conventions.</p>
+      <div class="code-block"><div class="code-header">str.isupper() / str.islower() — case checks</div><pre><code>print(<span class="string">&quot;DEBIT&quot;</span>.isupper())      <span class="comment"># Output: True</span>
+print(<span class="string">&quot;Debit&quot;</span>.isupper())      <span class="comment"># Output: False</span>
+print(<span class="string">&quot;debit&quot;</span>.islower())      <span class="comment"># Output: True</span>
+print(<span class="string">&quot;ACC-8842&quot;</span>.isupper())   <span class="comment"># Output: True — digits/symbols are ignored</span></code></pre></div>
+
+      <h2>Alignment &amp; Padding</h2>
+      <p><code>center(width, fill)</code> pads a string on both sides until it reaches the given width — useful for report headings.</p>
+      <div class="code-block"><div class="code-header">str.center() — center within a width</div><pre><code>title = <span class="string">&quot;DAILY SALES&quot;</span>
+
+print(title.center(21))          <span class="comment"># Output:      DAILY SALES</span>
+print(title.center(21, <span class="string">&quot;=&quot;</span>))     <span class="comment"># Output: =====DAILY SALES=====</span></code></pre></div>
+
+      <p><code>ljust(width)</code> left-aligns and pads on the right; <code>rjust(width)</code> right-aligns and pads on the left. Together they build fixed-width text tables.</p>
+      <div class="code-block"><div class="code-header">str.ljust() / str.rjust() — column alignment</div><pre><code>print(<span class="string">&quot;Mouse&quot;</span>.ljust(12) + <span class="string">&quot;$29.99&quot;</span>.rjust(8))
+print(<span class="string">&quot;Keyboard&quot;</span>.ljust(12) + <span class="string">&quot;$49.99&quot;</span>.rjust(8))
+
+<span class="comment"># Output:</span>
+<span class="comment"># Mouse         $29.99</span>
+<span class="comment"># Keyboard      $49.99</span></code></pre></div>
+
+      <p><code>zfill(width)</code> pads with leading zeros — the standard way to format numeric IDs like invoice numbers.</p>
+      <div class="code-block"><div class="code-header">str.zfill() — pad with leading zeros</div><pre><code>invoice_num = <span class="string">&quot;42&quot;</span>
+
+print(invoice_num.zfill(6))     <span class="comment"># Output: 000042</span>
+print(<span class="string">&quot;-42&quot;</span>.zfill(6))           <span class="comment"># Output: -00042 — sign stays in front</span></code></pre></div>
+
+      <h2>Formatting</h2>
+      <p><code>format()</code> fills <code>{}</code> placeholders in a template string — the older style you will still meet in existing codebases.</p>
+      <div class="code-block"><div class="code-header">str.format() — template placeholders</div><pre><code>template = <span class="string">&quot;Account {} has balance ${:,.2f}&quot;</span>
+
+print(template.format(<span class="string">&quot;ACC-8842&quot;</span>, 15420.5))
+<span class="comment"># Output: Account ACC-8842 has balance $15,420.50</span></code></pre></div>
+
+      <p><strong>f-strings</strong> (Python 3.6+) embed expressions directly inside the string with an <code>f</code> prefix — the modern, preferred style. Format specs after a colon control decimals, commas, and percentages.</p>
+      <div class="code-block"><div class="code-header">f-strings — modern formatting</div><pre><code>account_balance = 15420.5
+fill_rate = 0.94
+
+print(<span class="string">f&quot;Balance: ${account_balance:,.2f}&quot;</span>)   <span class="comment"># Output: Balance: $15,420.50</span>
+print(<span class="string">f&quot;Fill rate: {fill_rate:.0%}&quot;</span>)          <span class="comment"># Output: Fill rate: 94%</span>
+print(<span class="string">f&quot;Total: {100 + 250}&quot;</span>)                  <span class="comment"># Output: Total: 350 — any expression works</span></code></pre></div>
+
+      <h2>Edge Cases &amp; Gotchas</h2>
+      <p>The most common string-method bug: forgetting that methods return a new string. Calling a method without assigning the result does nothing visible.</p>
+      <div class="code-block"><div class="code-header">Gotcha — methods do not modify in place</div><pre><code>name = <span class="string">&quot;  priya  &quot;</span>
+
+name.strip()                <span class="comment"># result thrown away — name is unchanged!</span>
+print(repr(name))           <span class="comment"># Output: '  priya  '</span>
+
+name = name.strip().title() <span class="comment"># assign the result back — methods chain nicely</span>
+print(repr(name))           <span class="comment"># Output: 'Priya'</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>ETL cleaning</strong> — <code>.strip().lower()</code> normalizes emails before deduplication; <code>.replace()</code> standardizes SKU separators.</li>
+        <li><strong>Parsing</strong> — <code>.split(&quot;|&quot;)</code> breaks POS export lines into fields; <code>.join()</code> reassembles them for output files.</li>
+        <li><strong>Validation</strong> — <code>.isdigit()</code> guards <code>int()</code> casts; <code>.startswith(&quot;ATM&quot;)</code> routes transaction descriptions.</li>
+        <li><strong>Reporting</strong> — <code>.ljust()</code>/<code>.rjust()</code> align console tables; f-strings format currency and percentages.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Clean <code>&quot;  wireless KEYBOARD  &quot;</code> into <code>&quot;Wireless Keyboard&quot;</code> by chaining two methods.</li>
+        <li>Split <code>&quot;SKU-0042|Mouse|2|899.00&quot;</code> on <code>|</code>, then rejoin it with commas.</li>
+        <li>Use <code>.find()</code> and <code>.index()</code> on a missing substring and compare the behavior.</li>
+        <li>Validate that <code>&quot;004821&quot;</code> is all digits before casting it with <code>int()</code>.</li>
+        <li>Build a two-column price table with <code>.ljust()</code> and <code>.rjust()</code>.</li>
+        <li>Format <code>15420.5</code> as <code>$15,420.50</code> using an f-string.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>String methods always return new strings — assign the result back, and chain calls like <code>.strip().lower()</code>.</li>
+        <li>Case: <code>upper</code>, <code>lower</code>, <code>title</code>, <code>capitalize</code>, <code>swapcase</code>. Trim: <code>strip</code>, <code>lstrip</code>, <code>rstrip</code>.</li>
+        <li>Search: <code>find</code> returns <code>-1</code> when missing; <code>index</code> raises <code>ValueError</code>; <code>count</code>, <code>startswith</code>, <code>endswith</code> round out the family.</li>
+        <li><code>split()</code> turns a string into a list; <code>join()</code> turns a list back into a string.</li>
+        <li>The <code>is...</code> methods validate content before casting; alignment methods (<code>center</code>, <code>ljust</code>, <code>rjust</code>, <code>zfill</code>) format fixed-width output.</li>
+        <li>Prefer f-strings over <code>format()</code> for new code.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-09-string-methods.html">Hour 9 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-08-string-slicing.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← String Slicing</span></a><a href="hour-10-boolean-and-none.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Boolean &amp; None →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

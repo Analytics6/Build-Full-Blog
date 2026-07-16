@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Joining Tables | Edukron</title><link rel="stylesheet" href="../../css/style.css"></head>
+<body>
+ <header class="site-header"><div class="container header-inner"><a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a><nav class="nav"><a href="../../blog/index.html">Blog</a><a href="../python/index.html">Python</a><a href="index.html" class="active" aria-current="page">SQL</a><a href="../../assignments/index.html">Assignments</a></nav></div></header>
+ <main class="page"><div class="container"><nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">SQL Path</a><span>/</span><span class="current">Joining Tables</span></nav><div class="lesson-layout">
+ <article class="prose">
+ <header class="article-header">
+ <p class="article-meta">SQL Learning Path · Lesson 4 · 35 min</p>
+ <h1>Joining Tables</h1>
+ <p class="article-excerpt">Combine related tables with INNER JOIN and LEFT JOIN — the core skill for building multi-table queries and reports.</p>
+ </header>
+
+ <p>Real datasets are normalized: one table holds master records, another holds detail rows, and lookup tables store reference data. A join connects tables through shared key columns, producing a single result set that applications and reports can consume.</p>
+
+ <h2>Table relationships</h2>
+ <table><thead><tr><th>Table role</th><th>Key columns</th><th>Relates to</th></tr></thead><tbody>
+ <tr><td>Master table (employees)</td><td><code>employee_id</code>, <code>department_id</code></td><td>one row per entity</td></tr>
+ <tr><td>Lookup table (departments)</td><td><code>department_id</code></td><td>reference labels</td></tr>
+ <tr><td>Detail table (job_history)</td><td><code>employee_id</code>, <code>job_id</code></td><td>history per parent row</td></tr>
+ <tr><td>Lookup table (jobs)</td><td><code>job_id</code></td><td>title reference data</td></tr>
+ </tbody></table>
+
+ <h2>INNER JOIN — matching rows only</h2>
+ <p>An <code>INNER JOIN</code> returns rows only when a match exists on both sides. Rows without a partner are dropped.</p>
+ 
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="comment">-- Each employee with their department</span>
+<span class="keyword">SELECT</span> e.employee_id, e.first_name, e.last_name, d.department_name
+<span class="keyword">FROM</span> hr.employees <span class="keyword">AS</span> e
+<span class="keyword">INNER JOIN</span> hr.departments <span class="keyword">AS</span> d
+  <span class="keyword">ON</span> e.department_id = d.department_id;
+
+<span class="comment">-- Job history enriched with job titles</span>
+<span class="keyword">SELECT</span> oi.employee_id, p.job_title, oi.department_id, oi.salary
+<span class="keyword">FROM</span> hr.job_history <span class="keyword">AS</span> oi
+<span class="keyword">INNER JOIN</span> hr.jobs <span class="keyword">AS</span> p
+  <span class="keyword">ON</span> oi.job_id = p.job_id;</code></pre></div>
+
+ <h2>Table aliases</h2>
+ <p>Aliases shorten references and are essential when joining three or more tables.</p>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="comment">-- Three-table join: employee → job history → jobs</span>
+<span class="keyword">SELECT</span> s.employee_id, p.job_title, oi.department_id
+<span class="keyword">FROM</span> hr.employees <span class="keyword">AS</span> s
+<span class="keyword">INNER JOIN</span> hr.job_history <span class="keyword">AS</span> oi <span class="keyword">ON</span> oi.employee_id = s.employee_id
+<span class="keyword">INNER JOIN</span> hr.jobs <span class="keyword">AS</span> p <span class="keyword">ON</span> p.job_id = oi.job_id
+<span class="keyword">WHERE</span> s.hire_date &gt;= '2026-01-01';</code></pre></div>
+
+ <h2>LEFT JOIN — keep every left row</h2>
+ <p>A <code>LEFT JOIN</code> keeps all rows from the left table. Unmatched right-side columns become <code>NULL</code>.</p>
+ 
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="comment">-- All departments, including those with no employees</span>
+<span class="keyword">SELECT</span> d.department_name, e.employee_id, e.salary
+<span class="keyword">FROM</span> hr.departments <span class="keyword">AS</span> d
+<span class="keyword">LEFT JOIN</span> hr.employees <span class="keyword">AS</span> e
+  <span class="keyword">ON</span> e.department_id = d.department_id;
+
+<span class="comment">-- Departments with no employees (anti-join pattern)</span>
+<span class="keyword">SELECT</span> d.department_id, d.department_name
+<span class="keyword">FROM</span> hr.departments <span class="keyword">AS</span> d
+<span class="keyword">LEFT JOIN</span> hr.employees <span class="keyword">AS</span> e <span class="keyword">ON</span> e.department_id = d.department_id
+<span class="keyword">WHERE</span> e.employee_id <span class="keyword">IS NULL</span>;</code></pre></div>
+
+ <h2>Example: the employees table and the job_history table</h2>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="comment">-- Every employee with their job history count</span>
+<span class="keyword">SELECT</span> e.employee_id, e.last_name, <span class="keyword">COUNT</span>(jh.employee_id) <span class="keyword">AS</span> history_count
+<span class="keyword">FROM</span> hr.employees <span class="keyword">AS</span> e
+<span class="keyword">LEFT JOIN</span> hr.job_history <span class="keyword">AS</span> jh <span class="keyword">ON</span> jh.employee_id = e.employee_id
+<span class="keyword">GROUP BY</span> e.employee_id, e.last_name;</code></pre></div>
+
+ <h2>Real-world context</h2>
+ <ul>
+ <li><strong>ETL</strong> — Fact tables join dimension tables before loading a warehouse dimensional model.</li>
+ <li><strong>Complete records</strong> — LEFT JOIN preserves parent rows when optional child rows are missing.</li>
+ <li><strong>Data quality</strong> — INNER JOIN between the job_history table and the jobs table exposes orphan foreign keys that fail the join.</li>
+ </ul>
+
+ <h2>Practice</h2>
+ <ol>
+ <li>Join the job_history table to the jobs table and return job_title, department_id, and salary.</li>
+ <li>List every department and its employees using LEFT JOIN; count how many have NULL employee_id.</li>
+ <li>Join the employees table to the departments table and filter to department_id = 50.</li>
+ </ol>
+
+ <h2>Key takeaways</h2>
+ <ul>
+ <li>Joins relate tables through matching key columns (usually PK → FK).</li>
+ <li><code>INNER JOIN</code> keeps matches only; <code>LEFT JOIN</code> preserves all left-side rows.</li>
+ <li>Aliases are essential for multi-table queries and self joins.</li>
+ <li>The anti-join pattern (<code>LEFT JOIN … WHERE right.key IS NULL</code>) finds rows without partners.</li>
+ </ul>
+ </article>
+ </div></div></main>
+ <footer class="site-footer"><div class="container footer-inner"><p>&copy; 2026 Edukron — Learn, build, share.</p><div class="footer-links"><a href="../python/index.html">Python Path</a><a href="index.html">SQL Path</a><a href="../../assignments/index.html">Assignments</a></div></div></footer>
+ <script src="../../js/auth.js"></script>
+</body></html>

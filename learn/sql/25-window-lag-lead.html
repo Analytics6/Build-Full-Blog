@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Window Functions — LAG and LEAD | Edukron</title>
+ <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+ <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+ <nav class="nav">
+ <a href="../../blog/index.html" >Blog</a>
+ <a href="../../learn/python/index.html" >Python</a>
+ <a href="../../learn/sql/index.html" class="active">SQL</a>
+ <a href="../../assignments/index.html" >Assignments</a>
+ </nav>
+ </div></header>
+<main class="page"><div class="container">
+ <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Sql Path</a><span>/</span><span class="current">Topic 25</span></nav>
+ <div class="lesson-layout">
+ <article class="prose">
+ <header class="article-header">
+ <p class="article-meta">Sql · Topic 25 of 30 · 30 min</p>
+ <h1>Window Functions — LAG and LEAD</h1>
+ <p class="article-excerpt">Access previous and next row values — compute month-over-month payroll spend growth and day-over-day HR salary changes without self joins.</p>
+ <p style="margin-top:1rem;"><a href="../../assignments/sql-25-window-lag-lead.html" class="btn btn-outline">Go to Assignment →</a></p>
+ </header>
+
+ <h2>Time-Travel Within a Result Set</h2>
+ <p><code>LAG()</code> looks backward; <code>LEAD()</code> looks forward. For each row, they fetch a value from a prior or subsequent row in the same partition. This replaces awkward self joins when computing period-over-period changes in sales and transaction data.</p>
+
+ <h2>Theory &amp; Concepts</h2>
+ <div class="code-block"><div class="code-header">SQL — LAG and LEAD syntax</div><pre><code><span class="keyword">LAG</span>(column, offset, default) <span class="keyword">OVER</span> (
+    <span class="keyword">PARTITION BY</span> group_col
+    <span class="keyword">ORDER BY</span> sort_col
+)
+
+<span class="keyword">LEAD</span>(column, offset, default) <span class="keyword">OVER</span> (
+    <span class="keyword">PARTITION BY</span> group_col
+    <span class="keyword">ORDER BY</span> sort_col
+)</code></pre></div>
+ <table>
+ <thead><tr><th>Parameter</th><th>Default</th><th>Meaning</th></tr></thead>
+ <tbody>
+ <tr><td><code>offset</code></td><td>1</td><td>How many rows back (LAG) or forward (LEAD)</td></tr>
+ <tr><td><code>default</code></td><td>NULL</td><td>Value when no prior/next row exists</td></tr>
+ </tbody>
+ </table>
+
+ <h2>Example: Period-over-Period Comparison</h2>
+ <div class="code-block"><div class="code-header">SQL — Revenue growth by month</div><pre><code><span class="keyword">WITH</span> monthly_totals <span class="keyword">AS</span> (
+    <span class="keyword">SELECT</span>
+        <span class="keyword">DATE_TRUNC</span>(<span class="string">'month'</span>, hire_date) <span class="keyword">AS</span> report_month,
+        <span class="keyword">SUM</span>(department_id * salary) <span class="keyword">AS</span> revenue
+    <span class="keyword">FROM</span> hr.employees
+    <span class="keyword">GROUP BY</span> 1
+)
+<span class="keyword">SELECT</span>
+    report_month,
+    revenue,
+    <span class="keyword">LAG</span>(revenue) <span class="keyword">OVER</span> (<span class="keyword">ORDER BY</span> report_month) <span class="keyword">AS</span> prev_month_total,
+    revenue - <span class="keyword">LAG</span>(revenue) <span class="keyword">OVER</span> (<span class="keyword">ORDER BY</span> report_month) <span class="keyword">AS</span> monthly_change,
+    <span class="keyword">ROUND</span>(
+        100.0 * (revenue - <span class="keyword">LAG</span>(revenue) <span class="keyword">OVER</span> (<span class="keyword">ORDER BY</span> report_month))
+        / <span class="keyword">NULLIF</span>(<span class="keyword">LAG</span>(revenue) <span class="keyword">OVER</span> (<span class="keyword">ORDER BY</span> report_month), 0),
+        2
+    ) <span class="keyword">AS</span> pct_change
+<span class="keyword">FROM</span> monthly_totals
+<span class="keyword">ORDER BY</span> report_month;</code></pre></div>
+
+ <h2>Example: Transaction Sequence Analysis</h2>
+ <div class="code-block"><div class="code-header">SQL — Balance change between consecutive hr.job_history</div><pre><code><span class="keyword">SELECT</span>
+    employee_id,
+    employee_id,
+    hire_date,
+    salary,
+    <span class="keyword">LAG</span>(salary) <span class="keyword">OVER</span> (
+        <span class="keyword">PARTITION BY</span> employee_id
+        <span class="keyword">ORDER BY</span> hire_date
+    ) <span class="keyword">AS</span> prev_amount,
+    salary - <span class="keyword">LAG</span>(salary) <span class="keyword">OVER</span> (
+        <span class="keyword">PARTITION BY</span> employee_id
+        <span class="keyword">ORDER BY</span> hire_date
+    ) <span class="keyword">AS</span> amount_delta,
+    <span class="keyword">LEAD</span>(hire_date) <span class="keyword">OVER</span> (
+        <span class="keyword">PARTITION BY</span> employee_id
+        <span class="keyword">ORDER BY</span> hire_date
+    ) <span class="keyword">AS</span> next_txn_time
+<span class="keyword">FROM</span> hr.job_history
+<span class="keyword">ORDER BY</span> employee_id, hire_date;</code></pre></div>
+
+ <div class="code-block"><div class="code-header">SQL — Days between consecutive rows</div><pre><code><span class="keyword">SELECT</span>
+    employee_id,
+    history_id,
+    hire_date,
+    <span class="keyword">LAG</span>(hire_date) <span class="keyword">OVER</span> (
+        <span class="keyword">PARTITION BY</span> employee_id
+        <span class="keyword">ORDER BY</span> hire_date
+    ) <span class="keyword">AS</span> prev_order_date,
+    hire_date - <span class="keyword">LAG</span>(hire_date) <span class="keyword">OVER</span> (
+        <span class="keyword">PARTITION BY</span> employee_id
+        <span class="keyword">ORDER BY</span> hire_date
+    ) <span class="keyword">AS</span> days_since_last_order
+<span class="keyword">FROM</span> hr.job_history
+<span class="keyword">WHERE</span> status = <span class="string">'COMPLETED'</span>;</code></pre></div>
+
+ <h2>LAG / LEAD Direction</h2>
+ 
+
+ <h2>Real-World Notes</h2>
+ <ul>
+ <li><strong>Period comparisons</strong> — LAG is the 30 for MoM, WoW, and YoY metrics in BI dashboards without exporting to Python.</li>
+ <li><strong>Session gaps</strong> — Use LAG on timestamps to detect inactivity gaps between payroll sessions or employee login events.</li>
+ <li><strong>Default values</strong> — Pass a third argument to LAG/LEAD (e.g., <code>0</code>) to avoid NULL arithmetic on the first row.</li>
+ <li><strong>Offset &gt; 1</strong> — <code>LAG(revenue, 12)</code> compares to the same month last year in monthly data.</li>
+ </ul>
+
+ <h2>Key Takeaways</h2>
+ <ul>
+ <li><code>LAG()</code> retrieves a value from a preceding row in the partition.</li>
+ <li><code>LEAD()</code> retrieves a value from a following row.</li>
+ <li>ORDER BY inside OVER is mandatory and defines "preceding" vs "following."</li>
+ <li>Ideal for period-over-period change, gaps, and sequential analysis.</li>
+ </ul>
+
+ <h2>Practice Before Assignment</h2>
+ <p>Calculate week-over-week payroll spend change using LAG. Then complete the <a href="../../assignments/sql-25-window-lag-lead.html">Topic 25 assignment</a>.</p>
+
+ </article>
+ </div>
+ <div class="lesson-nav-buttons"><a href="24-window-rank.html" class="nav-btn"><span class="label">Previous</span><span class="title">Window Functions — RANK</span></a><a href="26-cte.html" class="nav-btn next"><span class="label">Next</span><span class="title">Common Table Expressions</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+ <p>&copy; 2026 Edukron — Learn, build, share.</p>
+ <div class="footer-links">
+ <a href="../../learn/python/index.html">Python Path</a>
+ <a href="../../learn/sql/index.html">SQL Path</a>
+ <a href="../../assignments/index.html">Assignments</a>
+ </div>
+ </div></footer>
+ <script src="../../js/auth.js"></script>
+</body>
+</html>

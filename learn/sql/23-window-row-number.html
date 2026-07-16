@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Window Functions — ROW_NUMBER | Edukron</title>
+ <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+ <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+ <nav class="nav">
+ <a href="../../blog/index.html" >Blog</a>
+ <a href="../../learn/python/index.html" >Python</a>
+ <a href="../../learn/sql/index.html" class="active">SQL</a>
+ <a href="../../assignments/index.html" >Assignments</a>
+ </nav>
+ </div></header>
+<main class="page"><div class="container">
+ <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Sql Path</a><span>/</span><span class="current">Topic 23</span></nav>
+ <div class="lesson-layout">
+ <article class="prose">
+ <header class="article-header">
+ <p class="article-meta">Sql · Topic 23 of 30 · 35 min</p>
+ <h1>Window Functions — ROW_NUMBER</h1>
+ <p class="article-excerpt">Number rows within partitions without collapsing them — pick each partition's latest row, deduplicate the job_history table, and rank rows within each partition.</p>
+ <p style="margin-top:1rem;"><a href="../../assignments/sql-23-window-row-number.html" class="btn btn-outline">Go to Assignment →</a></p>
+ </header>
+
+ <h2>Analytics Without GROUP BY</h2>
+ <p>Aggregate functions collapse rows; window functions keep every row and add a computed column. <code>ROW_NUMBER()</code> assigns a unique sequential integer to each row within a partition, ordered by your chosen criteria. This is the foundation of modern SQL analytics on HR data.</p>
+
+ <h2>Theory &amp; Concepts</h2>
+ <div class="code-block"><div class="code-header">SQL — Window function syntax</div><pre><code><span class="keyword">SELECT</span>
+    column1,
+    column2,
+    <span class="keyword">ROW_NUMBER</span>() <span class="keyword">OVER</span> (
+        <span class="keyword">PARTITION BY</span> partition_column
+        <span class="keyword">ORDER BY</span> sort_column <span class="keyword">DESC</span>
+    ) <span class="keyword">AS</span> row_num
+<span class="keyword">FROM</span> my_table;</code></pre></div>
+ <table>
+ <thead><tr><th>Clause</th><th>Role</th></tr></thead>
+ <tbody>
+ <tr><td><code>OVER ()</code></td><td>Defines the window frame</td></tr>
+ <tr><td><code>PARTITION BY</code></td><td>Restarts numbering per group (like GROUP BY buckets)</td></tr>
+ <tr><td><code>ORDER BY</code></td><td>Determines numbering sequence — required for ROW_NUMBER</td></tr>
+ </tbody>
+ </table>
+
+ <h2>Example: Latest Order per Customer</h2>
+ <div class="code-block"><div class="code-header">SQL — Most recent job for each employee</div><pre><code><span class="keyword">WITH</span> ranked_jobs <span class="keyword">AS</span> (
+    <span class="keyword">SELECT</span>
+        history_id,
+        employee_id,
+        total,
+        hire_date,
+        <span class="keyword">ROW_NUMBER</span>() <span class="keyword">OVER</span> (
+            <span class="keyword">PARTITION BY</span> employee_id
+            <span class="keyword">ORDER BY</span> hire_date <span class="keyword">DESC</span>
+        ) <span class="keyword">AS</span> rn
+    <span class="keyword">FROM</span> hr.job_history
+    <span class="keyword">WHERE</span> status = <span class="string">'COMPLETED'</span>
+)
+<span class="keyword">SELECT</span> history_id, employee_id, total, hire_date
+<span class="keyword">FROM</span> ranked_jobs
+<span class="keyword">WHERE</span> rn = 1;</code></pre></div>
+
+ <div class="code-block"><div class="code-header">SQL — Top 3 rows per partition</div><pre><code><span class="keyword">WITH</span> partitioned_totals <span class="keyword">AS</span> (
+    <span class="keyword">SELECT</span>
+        department_id,
+        job_id,
+        <span class="keyword">SUM</span>(department_id * salary) <span class="keyword">AS</span> revenue,
+        <span class="keyword">ROW_NUMBER</span>() <span class="keyword">OVER</span> (
+            <span class="keyword">PARTITION BY</span> department_id
+            <span class="keyword">ORDER BY</span> <span class="keyword">SUM</span>(department_id * salary) <span class="keyword">DESC</span>
+        ) <span class="keyword">AS</span> rank_in_partition
+    <span class="keyword">FROM</span> hr.employees
+    <span class="keyword">GROUP BY</span> department_id, job_id
+)
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> partitioned_totals <span class="keyword">WHERE</span> rank_in_partition &lt;= 3;</code></pre></div>
+
+ <h2>Example: Deduplicate the job_history table</h2>
+ <div class="code-block"><div class="code-header">SQL — Keep one row per duplicate reference</div><pre><code><span class="keyword">WITH</span> deduped <span class="keyword">AS</span> (
+    <span class="keyword">SELECT</span>
+        employee_id,
+        email,
+        salary,
+        hire_date,
+        <span class="keyword">ROW_NUMBER</span>() <span class="keyword">OVER</span> (
+            <span class="keyword">PARTITION BY</span> email
+            <span class="keyword">ORDER BY</span> hire_date <span class="keyword">DESC</span>
+        ) <span class="keyword">AS</span> rn
+    <span class="keyword">FROM</span> hr.job_history
+)
+<span class="keyword">SELECT</span> employee_id, email, salary, hire_date
+<span class="keyword">FROM</span> deduped
+<span class="keyword">WHERE</span> rn = 1;</code></pre></div>
+
+ <h2>ROW_NUMBER Partition Flow</h2>
+ 
+
+ <h2>Real-World Notes</h2>
+ <ul>
+ <li><strong>Incremental dedup</strong> — ROW_NUMBER is the 30 pattern for keeping the latest version of slowly changing dimension rows.</li>
+ <li><strong>Top-N per group</strong> — Wrap in a CTE, filter <code>rn &lt;= N</code>. More readable than correlated subqueries.</li>
+ <li><strong>Tie-breaking</strong> — ROW_NUMBER always breaks ties arbitrarily. Use <code>RANK</code> (Topic 24) when ties should share the same number.</li>
+ <li><strong>Performance</strong> — Window functions scan and sort partitions; index columns in PARTITION BY and ORDER BY when payrollsible.</li>
+ </ul>
+
+ <h2>Key Takeaways</h2>
+ <ul>
+ <li><code>ROW_NUMBER()</code> assigns unique sequential numbers within a partition.</li>
+ <li><code>PARTITION BY</code> defines groups; <code>ORDER BY</code> defines numbering order.</li>
+ <li>Filter <code>rn = 1</code> for "latest per group" or deduplication patterns.</li>
+ <li>Window functions preserve all rows — unlike GROUP BY aggregates.</li>
+ </ul>
+
+ <h2>Practice Before Assignment</h2>
+ <p>Find each employee record's most recent transaction using ROW_NUMBER. Then complete the <a href="../../assignments/sql-23-window-row-number.html">Topic 23 assignment</a>.</p>
+
+ </article>
+ </div>
+ <div class="lesson-nav-buttons"><a href="22-cross-join.html" class="nav-btn"><span class="label">Previous</span><span class="title">Cross Join</span></a><a href="24-window-rank.html" class="nav-btn next"><span class="label">Next</span><span class="title">Window Functions — RANK</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+ <p>&copy; 2026 Edukron — Learn, build, share.</p>
+ <div class="footer-links">
+ <a href="../../learn/python/index.html">Python Path</a>
+ <a href="../../learn/sql/index.html">SQL Path</a>
+ <a href="../../assignments/index.html">Assignments</a>
+ </div>
+ </div></footer>
+ <script src="../../js/auth.js"></script>
+</body>
+</html>

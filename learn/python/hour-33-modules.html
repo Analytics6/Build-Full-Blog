@@ -1,0 +1,138 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 33: Modules | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 33</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 33 of 45 — 45-Hour Python Sprint</p>
+        <h1>Modules</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> import keyword, from ... import syntax, math module, random module, datetime module overview, custom module creation</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-33-modules.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Why Modules Matter in Data Analytics</h2>
+      <p>As a data team's codebase grows — ingest scripts, validation utilities, reporting helpers — putting everything in one file becomes unmaintainable. <strong>Modules</strong> split code across <code>.py</code> files. Python's standard library adds battle-tested tools (<code>math</code>, <code>random</code>, <code>datetime</code>) so you don't reinvent rounding, sampling, or timestamps in every pipeline.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <h3>What Is a Module?</h3>
+      <p>Any <code>.py</code> file is a module. Import it to reuse functions, classes, and constants elsewhere. Custom modules like <code>data_utils.py</code> hold shared ETL helpers.</p>
+
+      <h3>Import Styles</h3>
+      <ul>
+        <li><code>import math</code> — access via <code>math.sqrt(16)</code></li>
+        <li><code>from math import sqrt, pi</code> — import specific names directly</li>
+        <li><code>import datetime as dt</code> — alias for shorter references</li>
+      </ul>
+
+      <h3>Standard Library Highlights</h3>
+      <table>
+        <thead><tr><th>Module</th><th>Data Analytics Use</th></tr></thead>
+        <tbody>
+          <tr><td><code>math</code></td><td>Statistical calculations, rounding, hypotenuse for geo-distance</td></tr>
+          <tr><td><code>random</code></td><td>Sample customer segments for A/B tests</td></tr>
+          <tr><td><code>datetime</code></td><td>Timestamp ETL runs and parse feed dates</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Syntax Reference</h2>
+      <p><code>import module</code> brings in the whole module; every use is prefixed with the module name — verbose but unambiguous.</p>
+      <div class="code-block"><div class="code-header">import — whole-module style</div><pre><code><span class="keyword">import</span> math
+
+print(math.ceil(4.2))       <span class="comment"># Output: 5 — round up inventory units</span>
+print(math.hypot(3, 4))     <span class="comment"># Output: 5.0 — straight-line distance</span>
+print(round(math.pi, 2))    <span class="comment"># Output: 3.14</span></code></pre></div>
+
+      <p><code>from module import name</code> pulls specific names into your namespace — shorter calls, but be careful not to shadow your own variables.</p>
+      <div class="code-block"><div class="code-header">from ... import — specific names</div><pre><code><span class="keyword">from</span> math <span class="keyword">import</span> sqrt, pi
+
+print(sqrt(144))     <span class="comment"># Output: 12.0 — no math. prefix needed</span>
+print(round(pi, 4))  <span class="comment"># Output: 3.1416</span></code></pre></div>
+
+      <p>The <code>random</code> module supplies sampling tools — random integers, random picks from a sequence.</p>
+      <div class="code-block"><div class="code-header">random module — randint and choice</div><pre><code><span class="keyword">from</span> random <span class="keyword">import</span> randint, choice
+
+sample_id = randint(1, 100)
+region = choice([<span class="string">&quot;North&quot;</span>, <span class="string">&quot;South&quot;</span>, <span class="string">&quot;East&quot;</span>])
+
+print(sample_id)    <span class="comment"># Output: e.g. 42 — different every run</span>
+print(region)       <span class="comment"># Output: e.g. South</span></code></pre></div>
+
+      <p>Aliasing with <code>as</code> shortens long module names — <code>dt</code> for <code>datetime</code> is a common convention (as are <code>np</code> and <code>pd</code>, coming in the NumPy/Pandas hours).</p>
+      <div class="code-block"><div class="code-header">import ... as — aliases</div><pre><code><span class="keyword">import</span> datetime <span class="keyword">as</span> dt
+
+run_started = dt.datetime(2026, 7, 15, 2, 0)
+print(run_started)    <span class="comment"># Output: 2026-07-15 02:00:00</span></code></pre></div>
+
+      <p>A <strong>custom module</strong> is just a <code>.py</code> file in your project. Define shared helpers once, import them everywhere.</p>
+      <div class="code-block"><div class="code-header">Custom module — retail_utils.py</div><pre><code><span class="comment"># --- retail_utils.py ---</span>
+<span class="keyword">def</span> calc_avg_order_value(revenue, order_count):
+    <span class="keyword">if</span> order_count == 0:
+        <span class="keyword">return</span> 0.0
+    <span class="keyword">return</span> round(revenue / order_count, 2)
+
+<span class="comment"># --- main_pipeline.py ---</span>
+<span class="keyword">from</span> retail_utils <span class="keyword">import</span> calc_avg_order_value
+
+print(calc_avg_order_value(842000, 1000))   <span class="comment"># Output: 842.0</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>ETL projects</strong> — Separate <code>extract.py</code>, <code>transform.py</code>, <code>load.py</code> modules imported by a main Airflow task.</li>
+        <li><strong>Data systems</strong> — <code>uuid</code> module generates unique transaction reference IDs.</li>
+        <li><strong>Testing</strong> — Custom modules can be unit-tested independently before integration.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Print a random choice from a list of product categories using <code>choice()</code>.</li>
+        <li>Calculate the hypotenuse of a triangle with legs 3 and 4 using <code>math.hypot</code>.</li>
+        <li>Create <code>my_math.py</code> with add/subtract functions and import them in your notebook.</li>
+        <li>Compare <code>import math</code> vs <code>from math import sqrt</code> call syntax.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>Modules organize code into reusable files — essential as projects scale.</li>
+        <li>Python's standard library covers math, randomness, dates, and much more.</li>
+        <li>Custom modules are ordinary <code>.py</code> files in your project path.</li>
+        <li>Prefer explicit imports; avoid <code>from module import *</code> in production code.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-33-modules.html">Hour 33 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-32-csv-handling.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← CSV Handling</span></a><a href="hour-34-date-and-time.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Date and Time →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

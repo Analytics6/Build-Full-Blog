@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>CREATE TABLE and Data Types | Edukron</title>
+ <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+ <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+ <nav class="nav">
+ <a href="../../blog/index.html" >Blog</a>
+ <a href="../../learn/python/index.html" >Python</a>
+ <a href="../../learn/sql/index.html" class="active">SQL</a>
+ <a href="../../assignments/index.html" >Assignments</a>
+ </nav>
+ </div></header>
+<main class="page"><div class="container">
+ <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Sql Path</a><span>/</span><span class="current">Topic 7</span></nav>
+ <div class="lesson-layout">
+ <article class="prose">
+ <header class="article-header">
+ <p class="article-meta">Sql · Topic 7 of 30 · 30 min</p>
+ <h1>CREATE TABLE and Data Types</h1>
+ <p class="article-excerpt">Define schemas and choose column types — the foundation every database developer lays before loading HR datasets.</p>
+ <p style="margin-top:1rem;"><a href="../../assignments/sql-07-create-table.html" class="btn btn-outline">Go to Assignment →</a></p>
+ </header>
+
+ <p>Before a single row lands in the employees table or the job_history table, someone defines the schema: column names, data types, and constraints. <code>CREATE TABLE</code> is DDL (Data Definition Language) — it shapes the structure that all downstream SELECT and INSERT statements depend on.</p>
+
+ <h2>Schema design flow</h2>
+ 
+
+ <h2>Common SQL data types</h2>
+ <table><thead><tr><th>Type</th><th>the departments table</th><th>Example</th></tr></thead><tbody>
+ <tr><td><code>INTEGER</code></td><td>whole numbers</td><td><code>employee_id</code>, <code>department_id</code></td></tr>
+ <tr><td><code>REAL</code> / <code>DECIMAL</code></td><td>decimals</td><td><code>salary</code>, <code>salary</code></td></tr>
+ <tr><td><code>TEXT</code> / <code>VARCHAR</code></td><td>strings</td><td><code>job_title</code>, <code>email</code></td></tr>
+ <tr><td><code>DATE</code> / <code>TIMESTAMP</code></td><td>dates and times</td><td><code>hire_date</code>, <code>submitted_at</code></td></tr>
+ <tr><td><code>BOOLEAN</code></td><td>true/false</td><td><code>is_active</code></td></tr>
+ </tbody></table>
+
+ <h2>Create the job title catalog</h2>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="keyword">CREATE TABLE</span> hr.jobs (
+  job_id   <span class="keyword">INTEGER PRIMARY KEY</span>,
+  job_title <span class="keyword">TEXT NOT NULL</span>,
+  min_salary   <span class="keyword">REAL</span>,
+  salary   <span class="keyword">DECIMAL</span>(10, 2) <span class="keyword">NOT NULL</span>,
+  job_id          <span class="keyword">TEXT</span>,
+  created_at   <span class="keyword">TIMESTAMP DEFAULT</span> CURRENT_TIMESTAMP
+);</code></pre></div>
+
+ <h2>Create related tables</h2>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="keyword">CREATE TABLE</span> hr.employees (
+  employee_id      <span class="keyword">INTEGER PRIMARY KEY</span>,
+  hire_date    <span class="keyword">DATE NOT NULL</span>,
+  department_id     <span class="keyword">INTEGER NOT NULL</span>,
+  employee_id  <span class="keyword">INTEGER</span>,
+  salary <span class="keyword">DECIMAL</span>(12, 2),
+  status       <span class="keyword">TEXT DEFAULT</span> 'completed'
+);
+
+<span class="keyword">CREATE TABLE</span> hr.job_history (
+  item_id      <span class="keyword">INTEGER PRIMARY KEY</span>,
+  employee_id      <span class="keyword">INTEGER NOT NULL</span>,
+  job_id   <span class="keyword">INTEGER NOT NULL</span>,
+  department_id     <span class="keyword">INTEGER NOT NULL</span>,
+  salary   <span class="keyword">DECIMAL</span>(10, 2)
+);</code></pre></div>
+
+ <h2>sample schema example</h2>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="keyword">CREATE TABLE</span> hr.employees (
+  employee_id    <span class="keyword">INTEGER PRIMARY KEY</span>,
+  employee_id   <span class="keyword">INTEGER NOT NULL</span>,
+  job_title  <span class="keyword">TEXT NOT NULL</span>,
+  salary       <span class="keyword">DECIMAL</span>(15, 2) <span class="keyword">DEFAULT</span> 0.00,
+  opened_at     <span class="keyword">DATE</span>
+);
+
+<span class="keyword">CREATE TABLE</span> hr.job_history (
+  employee_id <span class="keyword">INTEGER PRIMARY KEY</span>,
+  employee_id     <span class="keyword">INTEGER NOT NULL</span>,
+  job_id       <span class="keyword">TEXT NOT NULL</span>,
+  salary         <span class="keyword">DECIMAL</span>(15, 2) <span class="keyword">NOT NULL</span>,
+  hire_date       <span class="keyword">TIMESTAMP DEFAULT</span> CURRENT_TIMESTAMP
+);</code></pre></div>
+
+ <h2>Choosing the right type</h2>
+ <ul>
+ <li>Use <code>DECIMAL</code> for money — never <code>REAL</code>/<code>FLOAT</code> (floating-point rounding errors).</li>
+ <li>Use <code>INTEGER</code> for IDs and counts; <code>TEXT</code> for open-ended strings.</li>
+ <li>Pick <code>TIMESTAMP</code> when time-of-day matters; <code>DATE</code> for calendar dates only.</li>
+ <li><code>NOT NULL</code> on required fields prevents silent data-quality gaps in ETL.</li>
+ </ul>
+
+ <h2>Real-world context</h2>
+ <ul>
+ <li><strong>ETL</strong> — Schema definitions live in migration scripts version-controlled alongside Python ETL code.</li>
+ <li><strong>Warehouse design</strong> — Snowflake and BigQuery map these types to their own equivalents during ingestion.</li>
+ <li><strong>Analytics</strong> — Correct types ensure pandas reads amounts as numeric, not strings, when exported via SQL.</li>
+ </ul>
+
+ <h2>Practice</h2>
+ <ol>
+ <li>Create a the job_history table with id, employee_id, requested_amount, salary, status, and submitted_at.</li>
+ <li>Explain why <code>salary</code> should be DECIMAL, not REAL.</li>
+ <li>Add a <code>DEFAULT</code> value for <code>status</code> on new loan applications.</li>
+ </ol>
+
+ <h2>Key takeaways</h2>
+ <ul>
+ <li><code>CREATE TABLE</code> defines column names, types, and inline constraints.</li>
+ <li>Choose types that match the data and prevent precision loss (DECIMAL for money).</li>
+ <li><code>NOT NULL</code> and <code>DEFAULT</code> enforce data quality at insert time.</li>
+ <li>Schema design precedes every ETL pipeline loading HR data.</li>
+ </ul>
+
+ </article>
+ </div>
+ <div class="lesson-nav-buttons"><a href="06-dml.html" class="nav-btn"><span class="label">Previous</span><span class="title">INSERT, UPDATE, DELETE</span></a><a href="08-keys.html" class="nav-btn next"><span class="label">Next</span><span class="title">Primary Keys and Foreign Keys</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+ <p>&copy; 2026 Edukron — Learn, build, share.</p>
+ <div class="footer-links">
+ <a href="../../learn/python/index.html">Python Path</a>
+ <a href="../../learn/sql/index.html">SQL Path</a>
+ <a href="../../assignments/index.html">Assignments</a>
+ </div>
+ </div></footer>
+ <script src="../../js/auth.js"></script>
+</body>
+</html>

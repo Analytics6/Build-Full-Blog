@@ -1,0 +1,167 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 21: Tuples | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 21</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 21 of 45 — 45-Hour Python Sprint</p>
+        <h1>Tuples</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> Tuple creation, immutability, packing/unpacking, count(), index(), tuple(), len/min/max</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-21-tuples.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Immutable Records</h2>
+      <p>A <strong>tuple</strong> is an ordered sequence that can never change after creation — a list with the mutability removed. That restriction is a feature: a tuple says &quot;this is a fixed record,&quot; like a coordinate pair, a database row, or a (year, month, day) date. Because tuples are immutable and hashable, they can serve as dictionary keys, which lists cannot.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <h3>Why Choose a Tuple over a List?</h3>
+      <ul>
+        <li><strong>Safety</strong> — downstream code cannot accidentally modify a tuple; passing one to a function guarantees the caller's data survives intact.</li>
+        <li><strong>Intent</strong> — a tuple signals a fixed-shape record (positions have meaning); a list signals a homogeneous, growable collection.</li>
+        <li><strong>Hashability</strong> — tuples of immutable values can key dictionaries and live in sets.</li>
+        <li><strong>Performance</strong> — tuples are slightly smaller and faster to create than lists.</li>
+      </ul>
+
+      <h2>Syntax Reference</h2>
+      <p>Create tuples with parentheses — or nothing at all: it is actually the <em>comma</em> that makes a tuple. Indexing and slicing work exactly as with lists.</p>
+      <div class="code-block"><div class="code-header">Creating tuples — ( ) literals</div><pre><code>store_location = (40.7128, -74.0060)      <span class="comment"># a lat/lon pair</span>
+txn_record = (<span class="string">&quot;TXN-8842&quot;</span>, <span class="string">&quot;DEBIT&quot;</span>, 4500.00)
+
+print(store_location[0])     <span class="comment"># Output: 40.7128 — indexing works like lists</span>
+print(txn_record[-1])        <span class="comment"># Output: 4500.0</span>
+print(type(txn_record))      <span class="comment"># Output: &lt;class 'tuple'&gt;</span></code></pre></div>
+
+      <p>A single-element tuple needs a trailing comma — without it, the parentheses are just grouping and you get a plain value.</p>
+      <div class="code-block"><div class="code-header">Single-element tuples — the trailing comma</div><pre><code>single = (42,)         <span class="comment"># a one-element tuple</span>
+not_a_tuple = (42)     <span class="comment"># just the integer 42 in parentheses</span>
+
+print(type(single))        <span class="comment"># Output: &lt;class 'tuple'&gt;</span>
+print(type(not_a_tuple))   <span class="comment"># Output: &lt;class 'int'&gt;</span></code></pre></div>
+
+      <p>Tuples are immutable — any attempt to assign into one raises <code>TypeError</code>. To &quot;change&quot; a tuple you build a new one.</p>
+      <div class="code-block"><div class="code-header">Immutability — tuples cannot change</div><pre><code>applied_date = (2026, 7, 16)       <span class="comment"># year, month, day</span>
+
+<span class="comment"># applied_date[0] = 2027    &lt;-- TypeError: 'tuple' object does not support item assignment</span>
+
+updated = (2027,) + applied_date[1:]   <span class="comment"># build a new tuple instead</span>
+print(updated)                         <span class="comment"># Output: (2027, 7, 16)</span></code></pre></div>
+
+      <p><strong>Packing</strong> collects values into a tuple; <strong>unpacking</strong> spreads a tuple across variables. The variable count must match the element count.</p>
+      <div class="code-block"><div class="code-header">Packing and unpacking — one-line assignment</div><pre><code>txn = <span class="string">&quot;TXN-8842&quot;</span>, <span class="string">&quot;DEBIT&quot;</span>, 4500.00     <span class="comment"># packing — the comma builds a tuple</span>
+
+txn_id, txn_type, amount = txn         <span class="comment"># unpacking — three names at once</span>
+
+print(txn_id)     <span class="comment"># Output: TXN-8842</span>
+print(txn_type)   <span class="comment"># Output: DEBIT</span>
+print(amount)     <span class="comment"># Output: 4500.0</span></code></pre></div>
+
+      <p>Functions that &quot;return multiple values&quot; really return one tuple — the caller unpacks it. This idiom is everywhere in Python.</p>
+      <div class="code-block"><div class="code-header">Multiple return values — tuples in disguise</div><pre><code><span class="keyword">def</span> get_txn_summary():
+    <span class="keyword">return</span> 1500.00, <span class="string">&quot;DEBIT&quot;</span>, <span class="string">&quot;TXN-8842&quot;</span>    <span class="comment"># packs into one tuple</span>
+
+amount, txn_type, txn_id = get_txn_summary()   <span class="comment"># unpack at the call site</span>
+
+print(amount)                 <span class="comment"># Output: 1500.0</span>
+print(get_txn_summary())      <span class="comment"># Output: (1500.0, 'DEBIT', 'TXN-8842')</span></code></pre></div>
+
+      <p><code>count(value)</code> returns how many times a value appears in the tuple — one of only two tuple methods.</p>
+      <div class="code-block"><div class="code-header">tuple.count() — count occurrences</div><pre><code>daily_statuses = (<span class="string">&quot;OK&quot;</span>, <span class="string">&quot;OK&quot;</span>, <span class="string">&quot;FAIL&quot;</span>, <span class="string">&quot;OK&quot;</span>)
+
+print(daily_statuses.count(<span class="string">&quot;OK&quot;</span>))     <span class="comment"># Output: 3</span>
+print(daily_statuses.count(<span class="string">&quot;FAIL&quot;</span>))   <span class="comment"># Output: 1</span></code></pre></div>
+
+      <p><code>index(value)</code> returns the position of the first match, raising <code>ValueError</code> when the value is absent — the other tuple method.</p>
+      <div class="code-block"><div class="code-header">tuple.index() — find a position</div><pre><code>daily_statuses = (<span class="string">&quot;OK&quot;</span>, <span class="string">&quot;OK&quot;</span>, <span class="string">&quot;FAIL&quot;</span>, <span class="string">&quot;OK&quot;</span>)
+
+print(daily_statuses.index(<span class="string">&quot;FAIL&quot;</span>))   <span class="comment"># Output: 2 — first failure of the day</span>
+<span class="comment"># daily_statuses.index(&quot;CRASH&quot;)       &lt;-- ValueError: tuple.index(x): x not in tuple</span></code></pre></div>
+
+      <p><code>tuple()</code> converts any iterable into a tuple — the standard way to &quot;freeze&quot; a list so it cannot be changed afterwards.</p>
+      <div class="code-block"><div class="code-header">tuple() — freeze a list</div><pre><code>order_items = [<span class="string">&quot;SKU-1&quot;</span>, <span class="string">&quot;SKU-2&quot;</span>, <span class="string">&quot;SKU-3&quot;</span>]
+
+frozen_cart = tuple(order_items)     <span class="comment"># locked at checkout for the audit trail</span>
+
+print(frozen_cart)           <span class="comment"># Output: ('SKU-1', 'SKU-2', 'SKU-3')</span>
+<span class="comment"># frozen_cart.append(...)    &lt;-- AttributeError: no append on tuples</span></code></pre></div>
+
+      <p>The generic sequence built-ins all work on tuples: <code>len()</code>, <code>min()</code>, <code>max()</code>, <code>sum()</code>, and the <code>in</code> operator.</p>
+      <div class="code-block"><div class="code-header">len() / min() / max() — built-ins on tuples</div><pre><code>weekly_sales = (1250, 980, 1450, 875, 1620, 1100, 990)
+
+print(len(weekly_sales))    <span class="comment"># Output: 7</span>
+print(min(weekly_sales))    <span class="comment"># Output: 875</span>
+print(max(weekly_sales))    <span class="comment"># Output: 1620</span>
+print(sum(weekly_sales))    <span class="comment"># Output: 8265</span>
+print(1450 <span class="keyword">in</span> weekly_sales) <span class="comment"># Output: True</span></code></pre></div>
+
+      <h2>Edge Cases &amp; Gotchas</h2>
+      <p>Immutability is <em>shallow</em>: a tuple's slots cannot be reassigned, but a mutable object stored inside one can still be changed.</p>
+      <div class="code-block"><div class="code-header">Gotcha — mutable objects inside tuples</div><pre><code>record = (<span class="string">&quot;ACC-8842&quot;</span>, [1500.00, 2300.00])   <span class="comment"># a list inside a tuple</span>
+
+record[1].append(999.00)      <span class="comment"># legal! the tuple slot still holds the SAME list</span>
+print(record)                 <span class="comment"># Output: ('ACC-8842', [1500.0, 2300.0, 999.0])</span>
+
+<span class="comment"># record[1] = []              &lt;-- TypeError: the slot itself cannot be reassigned</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>Databases</strong> — SQL drivers return each row as a tuple: safe, fixed-shape records.</li>
+        <li><strong>Function design</strong> — returning <code>(value, status)</code> pairs is cleaner than out-parameters.</li>
+        <li><strong>Dictionary keys</strong> — <code>(store_id, date)</code> tuples key daily sales lookups.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Create a <code>(year, month, day)</code> tuple and unpack it into three variables.</li>
+        <li>Show that <code>(42)</code> is an int and <code>(42,)</code> is a tuple using <code>type()</code>.</li>
+        <li>Write a function returning three values; unpack them at the call site.</li>
+        <li>Use <code>count()</code> and <code>index()</code> on a tuple of statuses.</li>
+        <li>Freeze a list with <code>tuple()</code> and confirm <code>append</code> no longer exists.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>Tuples are ordered and immutable; the comma (not the parentheses) creates them.</li>
+        <li>Single-element tuples require a trailing comma: <code>(5,)</code>.</li>
+        <li>Packing/unpacking powers multi-assignment and multiple return values.</li>
+        <li>Only two methods exist — <code>count()</code> and <code>index()</code> — plus all the generic built-ins.</li>
+        <li>Immutability is shallow: a list inside a tuple can still be mutated.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-21-tuples.html">Hour 21 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-20-list-indexing-and-slicing.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← List Indexing &amp; Slicing</span></a><a href="hour-22-sets.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Sets →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

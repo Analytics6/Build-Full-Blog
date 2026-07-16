@@ -1,0 +1,170 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 27: Function Arguments | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 27</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 27 of 45 — 45-Hour Python Sprint</p>
+        <h1>Function Arguments</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> Positional arguments, keyword arguments, default arguments, variable-length arguments (*args, **kwargs)</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-27-function-arguments.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>One Function, Many Call Styles</h2>
+      <p>Real inputs vary: some invoices carry a discount, most do not; one report aggregates 3 stores, another 30. Python's argument system — positional, keyword, default, and variable-length — lets a single function absorb that variety gracefully. These are also the patterns behind every library signature you will read, from <code>sorted(key=..., reverse=...)</code> to Pandas.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <h3>The Four Kinds</h3>
+      <ul>
+        <li><strong>Positional</strong> — matched by order: <code>calc(500, 0.18)</code>.</li>
+        <li><strong>Keyword</strong> — matched by name, order-independent: <code>calc(rate=0.18, amount=500)</code>.</li>
+        <li><strong>Default</strong> — parameters with fallback values in the definition; callers may omit them.</li>
+        <li><strong>Variable-length</strong> — <code>*args</code> collects extra positional values into a tuple; <code>**kwargs</code> collects extra named values into a dict.</li>
+      </ul>
+      <p><strong>Definition order is fixed:</strong> required parameters → defaults → <code>*args</code> → <code>**kwargs</code>. Defaults may never precede required parameters.</p>
+
+      <h2>Syntax Reference</h2>
+      <p>Positional arguments bind strictly by position — swap them and the function silently computes the wrong thing.</p>
+      <div class="code-block"><div class="code-header">Positional arguments — order matters</div><pre><code><span class="keyword">def</span> apply_discount(amount, rate):
+    <span class="keyword">return</span> round(amount * (1 - rate), 2)
+
+print(apply_discount(500, 0.10))    <span class="comment"># Output: 450.0 — correct</span>
+print(apply_discount(0.10, 500))    <span class="comment"># Output: -49.99 — swapped, silently wrong!</span></code></pre></div>
+
+      <p>Keyword arguments bind by name, so the order no longer matters and the call documents itself.</p>
+      <div class="code-block"><div class="code-header">Keyword arguments — bind by name</div><pre><code><span class="keyword">def</span> apply_discount(amount, rate):
+    <span class="keyword">return</span> round(amount * (1 - rate), 2)
+
+print(apply_discount(amount=500, rate=0.10))    <span class="comment"># Output: 450.0</span>
+print(apply_discount(rate=0.10, amount=500))    <span class="comment"># Output: 450.0 — order-proof</span></code></pre></div>
+
+      <p>Default parameters give a fallback value. Callers override only what differs from the common case.</p>
+      <div class="code-block"><div class="code-header">Default parameters — optional with fallbacks</div><pre><code><span class="keyword">def</span> calc_invoice(amount, tax_rate=0.18, discount=0.0):
+    subtotal = amount * (1 - discount)
+    <span class="keyword">return</span> round(subtotal * (1 + tax_rate), 2)
+
+print(calc_invoice(500))                    <span class="comment"># Output: 590.0 — both defaults used</span>
+print(calc_invoice(500, discount=0.05))     <span class="comment"># Output: 560.5 — override one by name</span>
+print(calc_invoice(500, 0.08, 0.10))        <span class="comment"># Output: 486.0 — all positional</span></code></pre></div>
+
+      <p><code>*args</code> gathers any number of extra positional arguments into a tuple — ideal when the caller decides how many values to pass.</p>
+      <div class="code-block"><div class="code-header">*args — variable positional arguments</div><pre><code><span class="keyword">def</span> total_daily_sales(*amounts):
+    print(type(amounts))            <span class="comment"># inside, amounts is a tuple</span>
+    <span class="keyword">return</span> sum(amounts)
+
+result = total_daily_sales(1200, 980, 1450)
+<span class="comment"># Output: &lt;class 'tuple'&gt;</span>
+
+print(result)                       <span class="comment"># Output: 3630 — three stores</span>
+print(total_daily_sales(500))       <span class="comment"># Output: &lt;class 'tuple'&gt; then 500 — one store works too</span></code></pre></div>
+
+      <p><code>**kwargs</code> gathers extra keyword arguments into a dict — the pattern behind flexible metadata and option forwarding.</p>
+      <div class="code-block"><div class="code-header">**kwargs — variable keyword arguments</div><pre><code><span class="keyword">def</span> log_customer_event(event_type, **metadata):
+    print(<span class="string">f&quot;Event: {event_type}&quot;</span>)
+    <span class="keyword">for</span> key, value <span class="keyword">in</span> metadata.items():
+        print(<span class="string">f&quot;  {key}: {value}&quot;</span>)
+
+log_customer_event(<span class="string">&quot;purchase&quot;</span>, customer_id=1042, category=<span class="string">&quot;Electronics&quot;</span>, amount=92.50)
+
+<span class="comment"># Output:</span>
+<span class="comment"># Event: purchase</span>
+<span class="comment">#   customer_id: 1042</span>
+<span class="comment">#   category: Electronics</span>
+<span class="comment">#   amount: 92.5</span></code></pre></div>
+
+      <p>A full signature combines all four kinds — in the mandatory order: required, defaults, <code>*args</code>, <code>**kwargs</code>.</p>
+      <div class="code-block"><div class="code-header">Full signature — all four kinds together</div><pre><code><span class="keyword">def</span> pipeline_step(source, target=<span class="string">&quot;warehouse&quot;</span>, *extra_paths, **options):
+    print(source)          <span class="comment"># required positional</span>
+    print(target)          <span class="comment"># default</span>
+    print(extra_paths)     <span class="comment"># tuple of extras</span>
+    print(options)         <span class="comment"># dict of named options</span>
+
+pipeline_step(<span class="string">&quot;pos.csv&quot;</span>, <span class="string">&quot;staging&quot;</span>, <span class="string">&quot;backup.csv&quot;</span>, encoding=<span class="string">&quot;utf-8&quot;</span>, skip_rows=1)
+
+<span class="comment"># Output:</span>
+<span class="comment"># pos.csv</span>
+<span class="comment"># staging</span>
+<span class="comment"># ('backup.csv',)</span>
+<span class="comment"># {'encoding': 'utf-8', 'skip_rows': 1}</span></code></pre></div>
+
+      <h2>Edge Cases &amp; Gotchas</h2>
+      <p>The most infamous Python trap: a <strong>mutable default</strong> (like <code>[]</code>) is created <em>once</em> at definition time and shared across every call. Use <code>None</code> as the default and create the list inside.</p>
+      <div class="code-block"><div class="code-header">Gotcha — mutable default arguments</div><pre><code><span class="keyword">def</span> add_txn_bad(txn, batch=[]):        <span class="comment"># ONE shared list for all calls!</span>
+    batch.append(txn)
+    <span class="keyword">return</span> batch
+
+print(add_txn_bad(<span class="string">&quot;TXN-1&quot;</span>))    <span class="comment"># Output: ['TXN-1']</span>
+print(add_txn_bad(<span class="string">&quot;TXN-2&quot;</span>))    <span class="comment"># Output: ['TXN-1', 'TXN-2'] — leaked!</span>
+
+<span class="keyword">def</span> add_txn_good(txn, batch=<span class="keyword">None</span>):
+    <span class="keyword">if</span> batch <span class="keyword">is</span> <span class="keyword">None</span>:
+        batch = []                     <span class="comment"># fresh list per call</span>
+    batch.append(txn)
+    <span class="keyword">return</span> batch
+
+print(add_txn_good(<span class="string">&quot;TXN-1&quot;</span>))   <span class="comment"># Output: ['TXN-1']</span>
+print(add_txn_good(<span class="string">&quot;TXN-2&quot;</span>))   <span class="comment"># Output: ['TXN-2'] — independent</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>Billing</strong> — <code>calc_invoice(amount, tax_rate=0.18)</code> serves multiple tax jurisdictions with one function.</li>
+        <li><strong>Wrappers</strong> — <code>load_table(name, **db_options)</code> forwards timeouts and batch sizes to the database driver untouched.</li>
+        <li><strong>Frameworks</strong> — web frameworks and Airflow operators lean on <code>*args, **kwargs</code> so middleware can inject context.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Call the same billing function three ways: all positional, mixed, all keyword.</li>
+        <li>Write <code>average_amount(*amounts)</code> that handles any number of transactions.</li>
+        <li>Build <code>print_profile(**kwargs)</code> printing every key-value pair passed to it.</li>
+        <li>Define a full four-part signature and print each captured group.</li>
+        <li>Reproduce the mutable-default bug, then fix it with the <code>None</code> pattern.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>Positional arguments bind by order; keyword arguments bind by name and self-document.</li>
+        <li>Defaults make parameters optional; they must follow required parameters.</li>
+        <li><code>*args</code> → tuple of extra positionals; <code>**kwargs</code> → dict of extra keywords.</li>
+        <li>Signature order: required → defaults → <code>*args</code> → <code>**kwargs</code>.</li>
+        <li>Never use a mutable value as a default — use <code>None</code> and create it inside.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-27-function-arguments.html">Hour 27 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-26-functions-basics.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Functions Basics</span></a><a href="hour-28-lambda-functions.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Lambda Functions →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

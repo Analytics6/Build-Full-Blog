@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 31: File Handling | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 31</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 31 of 45 — 45-Hour Python Sprint</p>
+        <h1>File Handling</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> opening files (open()), read/write/append modes (&#x27;r&#x27;, &#x27;w&#x27;, &#x27;a&#x27;), with statement (context managers), reading lines (read, readline, readlines)</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-31-file-handling.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Why File Handling Matters in Data Analytics</h2>
+      <p>Before data lands in a warehouse or Pandas DataFrame, it lives in files — nightly source systems dumps, audit logs, warehouse stock snapshots. Python's <code>open()</code> function and the <code>with</code> statement are how ETL scripts read raw feeds, write transformed output, and append pipeline log entries without leaking file handles.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <h3>File Modes</h3>
+      <table>
+        <thead><tr><th>Mode</th><th>Behavior</th><th>Data Analytics Use Case</th></tr></thead>
+        <tbody>
+          <tr><td><code>"r"</code></td><td>Read (default)</td><td>Load incoming CSV/text feed</td></tr>
+          <tr><td><code>"w"</code></td><td>Write (overwrites)</td><td>Generate cleaned export file</td></tr>
+          <tr><td><code>"a"</code></td><td>Append</td><td>Add lines to ETL log without erasing history</td></tr>
+        </tbody>
+      </table>
+
+      <h3>The with Statement</h3>
+      <p>A <strong>context manager</strong> that automatically closes the file when the block exits — even if an exception occurs. Always prefer <code>with open(...) as f:</code> over manual <code>f.close()</code>.</p>
+
+      <h3>Reading Strategies</h3>
+      <ul>
+        <li><code>f.read()</code> — entire file as one string</li>
+        <li><code>f.readline()</code> — one line at a time</li>
+        <li><code>f.readlines()</code> — all lines as a list</li>
+        <li><code>for line in f:</code> — memory-efficient iteration (best for large logs)</li>
+      </ul>
+
+      <h2>Syntax Reference</h2>
+      <p>Mode <code>&quot;w&quot;</code> creates the file (or wipes it if it exists) and writes fresh content. Remember the explicit <code>\n</code> — <code>write()</code> adds no newline on its own.</p>
+      <div class="code-block"><div class="code-header">open(&quot;w&quot;) — write a new file</div><pre><code><span class="keyword">with</span> open(<span class="string">&quot;etl_log.txt&quot;</span>, <span class="string">&quot;w&quot;</span>) <span class="keyword">as</span> f:
+    f.write(<span class="string">&quot;2026-07-15 02:00 — Started retail ingest\n&quot;</span>)
+
+<span class="comment"># etl_log.txt now contains exactly one line.</span>
+<span class="comment"># Running this again would ERASE the file and start over.</span></code></pre></div>
+
+      <p>Mode <code>&quot;a&quot;</code> appends to the end without touching existing content — the right mode for logs that must keep their history.</p>
+      <div class="code-block"><div class="code-header">open(&quot;a&quot;) — append without erasing</div><pre><code><span class="keyword">with</span> open(<span class="string">&quot;etl_log.txt&quot;</span>, <span class="string">&quot;a&quot;</span>) <span class="keyword">as</span> f:
+    f.write(<span class="string">&quot;2026-07-15 02:05 — Loaded 14,230 rows\n&quot;</span>)
+
+<span class="comment"># etl_log.txt now has two lines — the first one survived.</span></code></pre></div>
+
+      <p>Mode <code>&quot;r&quot;</code> reads. Iterating the file object line by line is the memory-safe pattern — only one line is in memory at a time, so gigabyte logs are no problem.</p>
+      <div class="code-block"><div class="code-header">open(&quot;r&quot;) — read line by line</div><pre><code><span class="keyword">with</span> open(<span class="string">&quot;etl_log.txt&quot;</span>, <span class="string">&quot;r&quot;</span>) <span class="keyword">as</span> f:
+    <span class="keyword">for</span> line <span class="keyword">in</span> f:
+        print(line.strip())          <span class="comment"># strip() removes the trailing \n</span>
+
+<span class="comment"># Output:</span>
+<span class="comment"># 2026-07-15 02:00 — Started retail ingest</span>
+<span class="comment"># 2026-07-15 02:05 — Loaded 14,230 rows</span></code></pre></div>
+
+      <p>Filtering while reading: scan a log for failure markers and surface only the matching lines.</p>
+      <div class="code-block"><div class="code-header">Line scan — find FAILED transactions</div><pre><code><span class="keyword">with</span> open(<span class="string">&quot;transactions.log&quot;</span>, <span class="string">&quot;r&quot;</span>) <span class="keyword">as</span> f:
+    <span class="keyword">for</span> line <span class="keyword">in</span> f:
+        <span class="keyword">if</span> <span class="string">&quot;FAILED&quot;</span> <span class="keyword">in</span> line:
+            print(<span class="string">f&quot;Alert: {line.strip()}&quot;</span>)
+
+<span class="comment"># Output (example):</span>
+<span class="comment"># Alert: TXN-8842 FAILED — insufficient funds</span></code></pre></div>
+
+      <p><code>read()</code> pulls the whole file into one string — fine for small files, and convenient for whole-text operations like word counts.</p>
+      <div class="code-block"><div class="code-header">read() — whole file at once</div><pre><code><span class="keyword">with</span> open(<span class="string">&quot;txn_log.txt&quot;</span>, <span class="string">&quot;r&quot;</span>) <span class="keyword">as</span> f:
+    content = f.read()               <span class="comment"># one big string</span>
+
+word_count = len(content.split())
+print(<span class="string">f&quot;Words in log: {word_count}&quot;</span>)
+<span class="comment"># Output: Words in log: 42 (depends on the file)</span></code></pre></div>
+
+      <p><code>readline()</code> returns one line per call; <code>readlines()</code> returns all lines as a list. Both are occasionally handy, but the <code>for line in f:</code> loop covers most needs.</p>
+      <div class="code-block"><div class="code-header">readline() / readlines() — the other readers</div><pre><code><span class="keyword">with</span> open(<span class="string">&quot;etl_log.txt&quot;</span>, <span class="string">&quot;r&quot;</span>) <span class="keyword">as</span> f:
+    first = f.readline()             <span class="comment"># just the first line</span>
+    rest = f.readlines()             <span class="comment"># remaining lines as a list</span>
+
+print(first.strip())    <span class="comment"># Output: 2026-07-15 02:00 — Started retail ingest</span>
+print(len(rest))        <span class="comment"># Output: 1 — one line left after readline()</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>ETL logging</strong> — Append timestamped status lines to <code>pipeline.log</code> after each stage completes.</li>
+        <li><strong>Data feeds</strong> — Read fixed-width or plain-text POS dumps line-by-line before CSV normalization.</li>
+        <li><strong>Config files</strong> — Parse <code>.env</code> or <code>.conf</code> settings that control ETL job parameters.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Write five store city names to a text file, then read and print each line.</li>
+        <li>Create a log file with a timestamp message, then append a second status line.</li>
+        <li>Count words in a text file using <code>read()</code> and <code>split()</code>.</li>
+        <li>Compare reading with <code>readlines()</code> vs iterating <code>for line in f</code> on a multi-line file.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>Use <code>with open(...)</code> so files close automatically — critical in long-running jobs.</li>
+        <li>Choose the right mode: read, write (overwrite), or append.</li>
+        <li>For large files, iterate line-by-line instead of loading everything into memory.</li>
+        <li>File I/O is the first step in most structured data pipelines before CSV/Pandas processing.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-31-file-handling.html">Hour 31 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-30-exception-handling.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Exception Handling</span></a><a href="hour-32-csv-handling.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">CSV Handling →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

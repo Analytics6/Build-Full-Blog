@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>WHERE Clause Practice | Edukron</title>
+ <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+ <header class="site-header"><div class="container header-inner">
+ <a href="../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+ <nav class="nav"><a href="../blog/index.html">Blog</a><a href="../learn/python/index.html">Python</a><a href="../learn/sql/index.html">SQL</a><a href="index.html" class="active">Assignments</a></nav>
+ </div></header>
+ <main class="page"><div class="container container-narrow">
+ <nav class="breadcrumb"><a href="../index.html">Home</a><span>/</span><a href="index.html">Assignments</a><span>/</span><span class="current">WHERE Practice</span></nav>
+ <article>
+ <header class="article-header">
+ <span class="card-badge badge-sql">SQL</span>
+ <p class="article-meta">Beginner · Topic 2 — Filtering with WHERE</p>
+ <h1>WHERE Clause Practice</h1>
+ <p class="article-excerpt">Write queries that filter data using WHERE, AND, OR, LIKE, and IN.</p>
+ </header>
+ <div class="prose">
+ <p><strong>Related tutorial:</strong> <a href="../learn/sql/02-filtering-where.html">Filtering with WHERE</a></p>
+ <h2>Setup</h2>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="keyword">CREATE TABLE</span> hr.employees (
+    employee_id   <span class="keyword">INTEGER PRIMARY KEY</span>,
+    first_name    <span class="keyword">TEXT</span>,
+    last_name     <span class="keyword">TEXT</span>,
+    department_id <span class="keyword">INTEGER</span>,
+    salary        <span class="keyword">REAL</span>,
+    hire_date     <span class="keyword">TEXT</span>
+);
+
+<span class="keyword">INSERT INTO</span> hr.employees (first_name, last_name, department_id, salary, hire_date) <span class="keyword">VALUES</span>
+    (<span class="string">'Steven'</span>, <span class="string">'King'</span>, <span class="number">90</span>, <span class="number">24000</span>, <span class="string">'2003-06-17'</span>),
+    (<span class="string">'Neena'</span>, <span class="string">'Kochhar'</span>, <span class="number">90</span>, <span class="number">17000</span>, <span class="string">'2005-09-21'</span>),
+    (<span class="string">'Lex'</span>, <span class="string">'De Haan'</span>, <span class="number">90</span>, <span class="number">17000</span>, <span class="string">'2001-01-13'</span>),
+    (<span class="string">'Alexander'</span>, <span class="string">'Hunold'</span>, <span class="number">60</span>, <span class="number">9000</span>, <span class="string">'2006-01-03'</span>);</code></pre></div>
+ <h2>Tasks</h2>
+ <div class="notebook notebook-sql"><div class="notebook-cell">
+ <div class="cell-header"><span class="cell-prompt">In [1]:</span></div>
+ <div class="cell-body">
+ <p class="cell-question">Find all employees in department_id 90.</p>
+ <div class="cell-workspace">
+ <span class="cell-hint">-- Write your SQL query here</span>
+ </div>
+ </div>
+</div><div class="notebook-cell">
+ <div class="cell-header"><span class="cell-prompt">In [2]:</span></div>
+ <div class="cell-body">
+ <p class="cell-question">Find the employees table with salary greater than 15000.</p>
+ <div class="cell-workspace">
+ <span class="cell-hint">-- Write your SQL query here</span>
+ </div>
+ </div>
+</div><div class="notebook-cell">
+ <div class="cell-header"><span class="cell-prompt">In [3]:</span></div>
+ <div class="cell-body">
+ <p class="cell-question">Find the employees table hired before 2005 (<code>hire_date &lt; '2005-01-01'</code>).</p>
+ <div class="cell-workspace">
+ <span class="cell-hint">-- Write your SQL query here</span>
+ </div>
+ </div>
+</div><div class="notebook-cell">
+ <div class="cell-header"><span class="cell-prompt">In [4]:</span></div>
+ <div class="cell-body">
+ <p class="cell-question">Find the employees table whose last_name contains "King".</p>
+ <div class="cell-workspace">
+ <span class="cell-hint">-- Write your SQL query here</span>
+ </div>
+ </div>
+</div><div class="notebook-cell">
+ <div class="cell-header"><span class="cell-prompt">In [5]:</span></div>
+ <div class="cell-body">
+ <p class="cell-question">Find the employees table in department_id 60 or 90 using <code>IN</code>.</p>
+ <div class="cell-workspace">
+ <span class="cell-hint">-- Write your SQL query here</span>
+ </div>
+ </div>
+</div></div>
+ <h2>Submission</h2>
+ <p>Save your queries in <code>where_practice.sql</code> with a comment above each query.</p>
+ </div>
+ </article>
+ </div></main>
+ <footer class="site-footer"><div class="container footer-inner"><p>&copy; 2026 Edukron — Learn, build, share.</p></div></footer>
+ <script src="../js/auth.js"></script>
+</body>
+</html>

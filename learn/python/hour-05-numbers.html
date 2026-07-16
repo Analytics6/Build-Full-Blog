@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 5: Numbers | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 5</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 5 of 45 — 45-Hour Python Sprint</p>
+        <h1>Numbers</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> Integers, Floats, Arithmetic operators (+, -, *, /, //, %, **), numeric built-ins</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-05-numbers.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Working with Numbers</h2>
+      <p>Nearly every program computes something: totals, averages, percentages, remainders. Python gives you two numeric workhorses — <strong>integers</strong> for whole numbers and <strong>floats</strong> for decimals — plus seven arithmetic operators and a family of built-in functions. This hour walks through each of them individually, with a runnable example for every one.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <h3>Integer (int)</h3>
+      <p>Whole numbers with <strong>arbitrary precision</strong> — a Python int can grow as large as memory allows, so <code>2 ** 1000</code> just works. Use ints for counts, IDs, and quantities.</p>
+      <h3>Float (float)</h3>
+      <p>Decimal numbers stored as 64-bit binary doubles. Because binary cannot represent every decimal fraction exactly, floats carry tiny rounding errors: <code>0.1 + 0.2</code> is not exactly <code>0.3</code>. For analytics this is fine — compare with a tolerance or round for display. Production financial systems use the <code>decimal</code> module for exact arithmetic.</p>
+      <h3>Operator Precedence</h3>
+      <p>Highest to lowest: parentheses → <code>**</code> → <code>* / // %</code> → <code>+ -</code>. When in doubt, add parentheses — clarity beats memorized precedence tables.</p>
+
+      <h2>Arithmetic Operators</h2>
+      <p>Addition, subtraction, and multiplication behave exactly as you expect from arithmetic. They keep ints as ints and produce floats as soon as one operand is a float.</p>
+      <div class="code-block"><div class="code-header">Operators + - * — basic arithmetic</div><pre><code><span class="comment"># Daily revenue math for one store</span>
+morning_sales = 1250
+evening_sales = 980
+
+total_sales = morning_sales + evening_sales
+print(total_sales)              <span class="comment"># Output: 2230</span>
+
+print(total_sales - 230)        <span class="comment"># Output: 2000</span>
+print(total_sales * 2)          <span class="comment"># Output: 4460</span></code></pre></div>
+
+      <p>True division <code>/</code> <em>always</em> returns a float, even when the result is a whole number. This surprises many beginners: <code>10 / 5</code> is <code>2.0</code>, not <code>2</code>.</p>
+      <div class="code-block"><div class="code-header">Operator / — division always returns float</div><pre><code><span class="comment"># Average transaction value</span>
+total_amount = 4500
+txn_count = 4
+
+print(total_amount / txn_count)   <span class="comment"># Output: 1125.0</span>
+print(10 / 5)                     <span class="comment"># Output: 2.0 — float even when exact</span></code></pre></div>
+
+      <p>Floor division <code>//</code> divides and rounds <em>down</em> to the nearest whole number. Careful with negatives: it floors toward negative infinity, so <code>-7 // 2</code> is <code>-4</code>, not <code>-3</code>.</p>
+      <div class="code-block"><div class="code-header">Operator // — floor division</div><pre><code><span class="comment"># How many full batches of 500 fit into 4230 transactions?</span>
+transactions = 4230
+batch_size = 500
+
+print(transactions // batch_size)   <span class="comment"># Output: 8</span>
+print(-7 // 2)                      <span class="comment"># Output: -4 — floors toward negative infinity</span></code></pre></div>
+
+      <p>Modulo <code>%</code> returns the remainder after division. Paired with <code>//</code> it answers &quot;how many full groups, and how much is left over?&quot;</p>
+      <div class="code-block"><div class="code-header">Operator % — modulo (remainder)</div><pre><code><span class="comment"># Rows left over after packing into batches of 500</span>
+transactions = 4230
+batch_size = 500
+
+print(transactions % batch_size)   <span class="comment"># Output: 230</span>
+print(17 % 5)                      <span class="comment"># Output: 2</span>
+print(10 % 2)                      <span class="comment"># Output: 0 — even numbers have remainder 0</span></code></pre></div>
+
+      <p>Exponentiation <code>**</code> raises a number to a power. It binds tighter than multiplication, so <code>3 * 2 ** 2</code> is <code>12</code>, not <code>36</code>.</p>
+      <div class="code-block"><div class="code-header">Operator ** — exponentiation</div><pre><code><span class="comment"># Compound interest: 5% per year for 3 years</span>
+principal = 10000.00
+growth_factor = (1 + 0.05) ** 3
+
+print(round(growth_factor, 4))            <span class="comment"># Output: 1.1576</span>
+print(round(principal * growth_factor, 2)) <span class="comment"># Output: 11576.25</span></code></pre></div>
+
+      <h2>Numeric Built-in Functions</h2>
+      <p><code>int()</code> converts a value to an integer. From a float it <strong>truncates toward zero</strong> (it never rounds); from a string it requires plain integer text.</p>
+      <div class="code-block"><div class="code-header">int() — convert to integer</div><pre><code>print(int(49.99))     <span class="comment"># Output: 49 — truncated, not rounded</span>
+print(int(-49.99))    <span class="comment"># Output: -49 — truncates toward zero</span>
+print(int(<span class="string">&quot;120&quot;</span>))     <span class="comment"># Output: 120 — string of digits is fine</span>
+
+<span class="comment"># int(&quot;49.99&quot;)        &lt;-- ValueError: go through float() first</span>
+print(int(float(<span class="string">&quot;49.99&quot;</span>)))   <span class="comment"># Output: 49</span></code></pre></div>
+
+      <p><code>float()</code> converts a value to a decimal number — the standard first step when a CSV column of amounts arrives as text.</p>
+      <div class="code-block"><div class="code-header">float() — convert to decimal</div><pre><code>raw_amount = <span class="string">&quot;1549.99&quot;</span>          <span class="comment"># str straight from a store_sales CSV</span>
+
+sale_amount = float(raw_amount)
+print(sale_amount)               <span class="comment"># Output: 1549.99</span>
+print(float(12))                 <span class="comment"># Output: 12.0</span>
+print(sale_amount * 2)           <span class="comment"># Output: 3099.98 — now math works</span></code></pre></div>
+
+      <p><code>abs()</code> returns the absolute value — the distance from zero. Use it to measure the size of a change regardless of direction, such as a debit vs a credit.</p>
+      <div class="code-block"><div class="code-header">abs() — absolute value</div><pre><code><span class="comment"># A negative amount means money left the account</span>
+balance_change = -750.25
+
+print(abs(balance_change))   <span class="comment"># Output: 750.25</span>
+print(abs(300))              <span class="comment"># Output: 300 — positives pass through unchanged</span></code></pre></div>
+
+      <p><code>round()</code> rounds to a given number of decimal places (default 0). Note that Python uses banker's rounding on exact halves — it rounds to the nearest <em>even</em> number.</p>
+      <div class="code-block"><div class="code-header">round() — round to a precision</div><pre><code>avg_basket = 47.8567
+
+print(round(avg_basket, 2))   <span class="comment"># Output: 47.86</span>
+print(round(avg_basket))      <span class="comment"># Output: 48 — no digits means whole number</span>
+
+<span class="comment"># Banker's rounding: exact halves go to the nearest EVEN number</span>
+print(round(2.5))             <span class="comment"># Output: 2</span>
+print(round(3.5))             <span class="comment"># Output: 4</span></code></pre></div>
+
+      <p><code>pow()</code> is the function form of <code>**</code>. Its three-argument form <code>pow(base, exp, mod)</code> computes <code>(base ** exp) % mod</code> efficiently — used in cryptography.</p>
+      <div class="code-block"><div class="code-header">pow() — power function</div><pre><code>print(pow(2, 10))       <span class="comment"># Output: 1024 — same as 2 ** 10</span>
+print(pow(9, 0.5))      <span class="comment"># Output: 3.0 — fractional exponent = square root</span>
+print(pow(7, 2, 5))     <span class="comment"># Output: 4 — (7**2) % 5, computed efficiently</span></code></pre></div>
+
+      <p><code>divmod()</code> returns the quotient and the remainder in one call — a tuple of <code>(a // b, a % b)</code>. Perfect for splitting totals into units.</p>
+      <div class="code-block"><div class="code-header">divmod() — quotient and remainder together</div><pre><code><span class="comment"># Convert 4230 seconds of batch runtime into minutes and seconds</span>
+minutes, seconds = divmod(4230, 60)
+
+print(minutes)    <span class="comment"># Output: 70</span>
+print(seconds)    <span class="comment"># Output: 30</span>
+print(divmod(17, 5))   <span class="comment"># Output: (3, 2)</span></code></pre></div>
+
+      <p><code>min()</code> and <code>max()</code> return the smallest and largest of their arguments — or of a single iterable like a list.</p>
+      <div class="code-block"><div class="code-header">min() / max() — smallest and largest</div><pre><code>daily_sales = [1250, 980, 1450, 875, 1620]
+
+print(min(daily_sales))       <span class="comment"># Output: 875 — worst day</span>
+print(max(daily_sales))       <span class="comment"># Output: 1620 — best day</span>
+print(max(300, 120, 950))     <span class="comment"># Output: 950 — works on plain arguments too</span></code></pre></div>
+
+      <p><code>sum()</code> adds up every number in an iterable. Its optional second argument is a starting value.</p>
+      <div class="code-block"><div class="code-header">sum() — total of a sequence</div><pre><code>daily_sales = [1250, 980, 1450, 875, 1620]
+
+print(sum(daily_sales))          <span class="comment"># Output: 6175</span>
+print(sum(daily_sales) / len(daily_sales))   <span class="comment"># Output: 1235.0 — the average</span>
+print(sum(daily_sales, 1000))    <span class="comment"># Output: 7175 — starts counting from 1000</span></code></pre></div>
+
+      <p>The <code>math</code> module adds scientific functions beyond the built-ins: square roots, ceilings, floors, and constants like <code>pi</code>.</p>
+      <div class="code-block"><div class="code-header">math module — sqrt, ceil, floor, pi</div><pre><code><span class="keyword">import</span> math
+
+print(math.sqrt(144))      <span class="comment"># Output: 12.0</span>
+print(math.ceil(4.01))     <span class="comment"># Output: 5 — always rounds UP</span>
+print(math.floor(4.99))    <span class="comment"># Output: 4 — always rounds DOWN</span>
+print(round(math.pi, 4))   <span class="comment"># Output: 3.1416</span></code></pre></div>
+
+      <h2>Edge Cases &amp; Gotchas</h2>
+      <p>Floating-point rounding is the classic numeric trap. Never compare floats for exact equality — round first or use a tolerance.</p>
+      <div class="code-block"><div class="code-header">Gotcha — floating-point precision</div><pre><code>print(0.1 + 0.2)              <span class="comment"># Output: 0.30000000000000004</span>
+print(0.1 + 0.2 == 0.3)       <span class="comment"># Output: False!</span>
+
+<span class="comment"># Fix 1: round before comparing</span>
+print(round(0.1 + 0.2, 2) == 0.3)      <span class="comment"># Output: True</span>
+
+<span class="comment"># Fix 2: compare with a tolerance</span>
+<span class="keyword">import</span> math
+print(math.isclose(0.1 + 0.2, 0.3))    <span class="comment"># Output: True</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>Inventory</strong> — <code>divmod()</code> splits a stock count into full pallets plus leftover units in one call.</li>
+        <li><strong>Banking</strong> — <code>**</code> models compound interest; <code>math.isclose()</code> prevents one-cent reconciliation bugs.</li>
+        <li><strong>Analytics</strong> — <code>sum() / len()</code> is the simplest average; <code>min()</code>/<code>max()</code> find best and worst performing days.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Calculate the area of a circle with radius 7 using <code>math.pi</code>.</li>
+        <li>Use <code>divmod(4230, 60)</code> to convert seconds to minutes and seconds.</li>
+        <li>Find the min, max, sum, and average of <code>[1250, 980, 1450, 875, 1620]</code>.</li>
+        <li>Print <code>0.1 + 0.2</code> and fix the comparison with <code>round()</code> or <code>math.isclose()</code>.</li>
+        <li>Compare <code>int(2.99)</code>, <code>round(2.99)</code>, <code>math.floor(2.99)</code>, and <code>math.ceil(2.99)</code>.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li><code>/</code> always returns a float; <code>//</code> floors; <code>%</code> gives the remainder; <code>divmod()</code> returns both at once.</li>
+        <li><code>int()</code> truncates toward zero — use <code>round()</code> when you want rounding.</li>
+        <li><code>min()</code>, <code>max()</code>, and <code>sum()</code> work directly on lists — the foundation of quick analytics.</li>
+        <li>The <code>math</code> module adds <code>sqrt</code>, <code>ceil</code>, <code>floor</code>, and <code>pi</code>.</li>
+        <li>Never compare floats with <code>==</code>; use <code>round()</code> or <code>math.isclose()</code>.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-05-numbers.html">Hour 5 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-04-data-types-overview.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Data Types Overview</span></a><a href="hour-06-strings-basics.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Strings Basics →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

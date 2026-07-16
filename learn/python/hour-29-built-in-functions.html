@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 29: Built-in Functions | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 29</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 29 of 45 — 45-Hour Python Sprint</p>
+        <h1>Built-in Functions</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> len(), type(), isinstance(), range(), enumerate(), zip(), map(), filter(), sorted(), reversed(), any(), all(), input(), print() options</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-29-built-in-functions.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Always Available, Always Useful</h2>
+      <p>Python ships with several dozen functions that need no import — they are simply <em>there</em>, in every script and notebook. Before reaching for Pandas or NumPy, these built-ins handle the everyday work: counting, inspecting, pairing, transforming, filtering, and validating. This hour covers each of the important ones individually.</p>
+
+      <h2>Inspection</h2>
+      <p><code>len()</code> counts the elements of any sequence or collection — characters in a string, items in a list, pairs in a dict.</p>
+      <div class="code-block"><div class="code-header">len() — count elements</div><pre><code>transactions = [1500.00, 250.75, 4500.00]
+
+print(len(transactions))       <span class="comment"># Output: 3</span>
+print(len(<span class="string">&quot;ACC-8842&quot;</span>))         <span class="comment"># Output: 8 — characters in a string</span>
+print(len({<span class="string">&quot;a&quot;</span>: 1, <span class="string">&quot;b&quot;</span>: 2}))   <span class="comment"># Output: 2 — key-value pairs</span></code></pre></div>
+
+      <p><code>type()</code> reveals the exact class of any value — the first thing to check when a calculation misbehaves.</p>
+      <div class="code-block"><div class="code-header">type() — inspect a value's class</div><pre><code>amount = <span class="string">&quot;4500.00&quot;</span>     <span class="comment"># looks numeric, but is it?</span>
+
+print(type(amount))         <span class="comment"># Output: &lt;class 'str'&gt; — aha, needs casting</span>
+print(type(float(amount)))  <span class="comment"># Output: &lt;class 'float'&gt;</span></code></pre></div>
+
+      <p><code>isinstance(value, type)</code> tests whether a value is of a given type (or a subclass). Prefer it over <code>type(x) == ...</code> in real code — it reads better and respects inheritance.</p>
+      <div class="code-block"><div class="code-header">isinstance() — type checking done right</div><pre><code>amount = 4500.00
+
+print(isinstance(amount, float))          <span class="comment"># Output: True</span>
+print(isinstance(amount, str))            <span class="comment"># Output: False</span>
+print(isinstance(amount, (int, float)))   <span class="comment"># Output: True — accepts a tuple of types</span></code></pre></div>
+
+      <h2>Iteration Helpers</h2>
+      <p><code>range(start, stop, step)</code> generates a sequence of integers — the engine behind counted loops. The stop value is excluded, matching slice behavior.</p>
+      <div class="code-block"><div class="code-header">range() — generate number sequences</div><pre><code>print(list(range(5)))          <span class="comment"># Output: [0, 1, 2, 3, 4]</span>
+print(list(range(1, 6)))       <span class="comment"># Output: [1, 2, 3, 4, 5]</span>
+print(list(range(0, 20, 5)))   <span class="comment"># Output: [0, 5, 10, 15] — step of 5</span></code></pre></div>
+
+      <p><code>enumerate(iterable, start)</code> yields <code>(index, value)</code> pairs as you loop — no manual counter variable needed. Use <code>start=1</code> for human-friendly numbering.</p>
+      <div class="code-block"><div class="code-header">enumerate() — loop with an index</div><pre><code>categories = [<span class="string">&quot;Electronics&quot;</span>, <span class="string">&quot;Clothing&quot;</span>, <span class="string">&quot;Groceries&quot;</span>]
+
+<span class="keyword">for</span> num, category <span class="keyword">in</span> enumerate(categories, start=1):
+    print(<span class="string">f&quot;{num}. {category}&quot;</span>)
+
+<span class="comment"># Output:</span>
+<span class="comment"># 1. Electronics</span>
+<span class="comment"># 2. Clothing</span>
+<span class="comment"># 3. Groceries</span></code></pre></div>
+
+      <p><code>zip(a, b)</code> pairs elements from parallel iterables, stopping at the shortest. Feeding it to <code>dict()</code> builds a lookup table in one line.</p>
+      <div class="code-block"><div class="code-header">zip() — pair parallel lists</div><pre><code>store_ids = [<span class="string">&quot;S001&quot;</span>, <span class="string">&quot;S002&quot;</span>, <span class="string">&quot;S003&quot;</span>]
+revenues = [42000, 38500, 51200]
+
+<span class="keyword">for</span> store, revenue <span class="keyword">in</span> zip(store_ids, revenues):
+    print(<span class="string">f&quot;{store}: ${revenue:,}&quot;</span>)
+<span class="comment"># Output:</span>
+<span class="comment"># S001: $42,000</span>
+<span class="comment"># S002: $38,500</span>
+<span class="comment"># S003: $51,200</span>
+
+store_revenue = dict(zip(store_ids, revenues))
+print(store_revenue[<span class="string">&quot;S002&quot;</span>])    <span class="comment"># Output: 38500</span></code></pre></div>
+
+      <h2>Transforming &amp; Filtering</h2>
+      <p><code>map(function, iterable)</code> applies a function to every element, returning a lazy iterator — wrap in <code>list()</code> to see the results.</p>
+      <div class="code-block"><div class="code-header">map() — apply a function to every element</div><pre><code>raw_amounts = [<span class="string">&quot;1500.00&quot;</span>, <span class="string">&quot;250.75&quot;</span>, <span class="string">&quot;4500.00&quot;</span>]   <span class="comment"># strings from a CSV</span>
+
+amounts = list(map(float, raw_amounts))
+
+print(amounts)        <span class="comment"># Output: [1500.0, 250.75, 4500.0]</span>
+print(sum(amounts))   <span class="comment"># Output: 6250.75 — now math works</span></code></pre></div>
+
+      <p><code>filter(function, iterable)</code> keeps only the elements for which the function returns a truthy value — also lazy, also wrapped in <code>list()</code> to materialize.</p>
+      <div class="code-block"><div class="code-header">filter() — keep matching elements</div><pre><code>amounts = [1500.00, 250.75, 4500.00, 89.99]
+
+large_txns = list(filter(<span class="keyword">lambda</span> a: a &gt; 1000, amounts))
+
+print(large_txns)   <span class="comment"># Output: [1500.0, 4500.0]</span></code></pre></div>
+
+      <p><code>sorted(iterable, key=, reverse=)</code> returns a <em>new</em> sorted list from any iterable, leaving the source untouched. The <code>key</code> parameter sorts by a computed value.</p>
+      <div class="code-block"><div class="code-header">sorted() — new sorted list, with key=</div><pre><code>products = [(<span class="string">&quot;Mouse&quot;</span>, 29.99), (<span class="string">&quot;Monitor&quot;</span>, 199.00), (<span class="string">&quot;Keyboard&quot;</span>, 49.99)]
+
+by_price = sorted(products, key=<span class="keyword">lambda</span> p: p[1], reverse=<span class="keyword">True</span>)
+
+print(by_price)
+<span class="comment"># Output: [('Monitor', 199.0), ('Keyboard', 49.99), ('Mouse', 29.99)]</span></code></pre></div>
+
+      <p><code>reversed(sequence)</code> iterates a sequence backwards without copying or modifying it.</p>
+      <div class="code-block"><div class="code-header">reversed() — iterate backwards</div><pre><code>steps = [<span class="string">&quot;extract&quot;</span>, <span class="string">&quot;transform&quot;</span>, <span class="string">&quot;load&quot;</span>]
+
+<span class="keyword">for</span> step <span class="keyword">in</span> reversed(steps):
+    print(step)
+
+<span class="comment"># Output:</span>
+<span class="comment"># load</span>
+<span class="comment"># transform</span>
+<span class="comment"># extract</span></code></pre></div>
+
+      <h2>Boolean Aggregators</h2>
+      <p><code>any(iterable)</code> returns <code>True</code> if <em>at least one</em> element is truthy — perfect for &quot;did anything fail?&quot; checks.</p>
+      <div class="code-block"><div class="code-header">any() — is at least one True?</div><pre><code>failed_checks = [<span class="keyword">False</span>, <span class="keyword">False</span>, <span class="keyword">True</span>, <span class="keyword">False</span>]
+
+<span class="keyword">if</span> any(failed_checks):
+    print(<span class="string">&quot;At least one check failed — send alert&quot;</span>)
+
+<span class="comment"># Output: At least one check failed — send alert</span>
+print(any([<span class="keyword">False</span>, <span class="keyword">False</span>]))   <span class="comment"># Output: False</span></code></pre></div>
+
+      <p><code>all(iterable)</code> returns <code>True</code> only when <em>every</em> element is truthy — the natural quality gate. Note: <code>all([])</code> is <code>True</code> (an empty checklist &quot;passes&quot;).</p>
+      <div class="code-block"><div class="code-header">all() — is every element True?</div><pre><code>qa_checks = [<span class="keyword">True</span>, <span class="keyword">True</span>, <span class="keyword">True</span>, <span class="keyword">False</span>]
+
+<span class="keyword">if</span> all(qa_checks):
+    print(<span class="string">&quot;Pipeline approved for production&quot;</span>)
+<span class="keyword">else</span>:
+    print(<span class="string">&quot;Blocked — review failures&quot;</span>)
+
+<span class="comment"># Output: Blocked — review failures</span>
+print(all([]))   <span class="comment"># Output: True — empty iterable passes!</span></code></pre></div>
+
+      <h2>Input &amp; Output</h2>
+      <p><code>input(prompt)</code> pauses the program, shows a prompt, and returns whatever the user types — <em>always as a string</em>, so cast before doing math.</p>
+      <div class="code-block"><div class="code-header">input() — read from the user (always str)</div><pre><code>raw = input(<span class="string">&quot;Enter withdrawal amount: &quot;</span>)   <span class="comment"># user types: 500</span>
+
+amount = float(raw)          <span class="comment"># cast before arithmetic</span>
+print(amount * 2)            <span class="comment"># Output: 1000.0</span>
+print(raw * 2)               <span class="comment"># Output: 500500 — string repetition without the cast!</span></code></pre></div>
+
+      <p><code>print()</code> accepts multiple values plus two formatting parameters: <code>sep</code> (between values) and <code>end</code> (after the last one).</p>
+      <div class="code-block"><div class="code-header">print() — sep and end options</div><pre><code>print(<span class="string">&quot;ACC-8842&quot;</span>, <span class="string">&quot;DEBIT&quot;</span>, 1500.0, sep=<span class="string">&quot; | &quot;</span>)
+<span class="comment"># Output: ACC-8842 | DEBIT | 1500.0</span>
+
+print(<span class="string">&quot;Processing&quot;</span>, end=<span class="string">&quot; &quot;</span>)
+print(<span class="string">&quot;complete.&quot;</span>)
+<span class="comment"># Output: Processing complete.</span></code></pre></div>
+
+      <h2>Edge Cases &amp; Gotchas</h2>
+      <p><code>map()</code> and <code>filter()</code> return one-shot iterators: once consumed, they are empty. Convert to a list if you need the results more than once.</p>
+      <div class="code-block"><div class="code-header">Gotcha — map/filter iterators are single-use</div><pre><code>amounts = map(float, [<span class="string">&quot;10&quot;</span>, <span class="string">&quot;20&quot;</span>])
+
+print(sum(amounts))     <span class="comment"># Output: 30.0 — iterator consumed here</span>
+print(sum(amounts))     <span class="comment"># Output: 0 — nothing left!</span>
+
+amounts = list(map(float, [<span class="string">&quot;10&quot;</span>, <span class="string">&quot;20&quot;</span>]))   <span class="comment"># materialize once</span>
+print(sum(amounts), sum(amounts))            <span class="comment"># Output: 30.0 30.0</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>ETL</strong> — <code>map(float, ...)</code> casts CSV columns; <code>zip()</code> reunites header and row lists into dicts.</li>
+        <li><strong>Quality gates</strong> — <code>all(checks)</code> blocks deployment; <code>any(failures)</code> triggers alerts.</li>
+        <li><strong>Reporting</strong> — <code>sorted(..., key=..., reverse=True)</code> plus slicing produces every top-N ranking.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Combine parallel ID and revenue lists into a dict with <code>zip()</code>.</li>
+        <li>Print a numbered menu with <code>enumerate(..., start=1)</code>.</li>
+        <li>Cast a list of amount strings with <code>map(float, ...)</code>, then filter those above 1000.</li>
+        <li>Sort a list of (name, price) tuples by price with a <code>key</code> function.</li>
+        <li>Verify <code>all()</code> and <code>any()</code> on an empty list and explain the results.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li><code>len</code>, <code>type</code>, <code>isinstance</code> inspect data; prefer <code>isinstance</code> for type checks.</li>
+        <li><code>range</code>, <code>enumerate</code>, <code>zip</code> power clean loops without manual counters.</li>
+        <li><code>map</code>/<code>filter</code> transform lazily and are single-use; <code>sorted</code>/<code>reversed</code> never touch the original.</li>
+        <li><code>any</code>/<code>all</code> compress validation loops into one readable call — and <code>all([])</code> is <code>True</code>.</li>
+        <li><code>input()</code> always returns a string; <code>print()</code> takes <code>sep</code> and <code>end</code>.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-29-built-in-functions.html">Hour 29 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-28-lambda-functions.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Lambda Functions</span></a><a href="hour-30-exception-handling.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Exception Handling →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

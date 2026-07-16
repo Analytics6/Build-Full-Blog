@@ -1,0 +1,152 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 37: Methods in Class | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 37</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 37 of 45 — 45-Hour Python Sprint</p>
+        <h1>Methods in Class</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> Instance methods, accessing instance attributes inside methods, modifying attribute values via methods, returning values from methods</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-37-methods-in-class.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Why Class Methods Matter in Data Analytics</h2>
+      <p>Attributes store what an object <em>is</em>; methods define what it <em>does</em>. A <code>BankAccount</code> doesn't just hold a balance — it can <code>deposit()</code>, <code>withdraw()</code>, and <code>get_statement()</code>. Methods bundle behavior with data, so domain logic stays organized: call <code>account.deposit()</code> instead of scattering updates across procedural scripts.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <h3>Instance Methods</h3>
+      <p>Functions defined inside a class. The first parameter is always <code>self</code>, giving access to the object's attributes and other methods.</p>
+
+      <h3>Reading vs Mutating State</h3>
+      <ul>
+        <li><strong>Getter-style</strong> — return computed values without changing state: <code>get_tax()</code></li>
+        <li><strong>Mutator-style</strong> — modify attributes: <code>deposit(amount)</code> updates <code>self.balance</code></li>
+      </ul>
+
+      <h3>Method Calls</h3>
+      <p>Call via the instance: <code>account.deposit(500)</code>. Python passes <code>self</code> automatically.</p>
+
+      <h2>Syntax Reference</h2>
+      <p>A <strong>mutator</strong> method changes the object's state — here, <code>deposit()</code> updates <code>self.balance</code> and returns the new value.</p>
+      <div class="code-block"><div class="code-header">Mutator method — deposit() changes state</div><pre><code><span class="keyword">class</span> BankAccount:
+    <span class="keyword">def</span> __init__(self, account_id, balance=0.0):
+        self.account_id = account_id
+        self.balance = balance
+
+    <span class="keyword">def</span> deposit(self, amount):
+        self.balance += amount        <span class="comment"># mutate the instance</span>
+        <span class="keyword">return</span> self.balance
+
+acct = BankAccount(<span class="string">&quot;ACC-8842&quot;</span>, 1000.0)
+acct.deposit(250.0)
+
+print(acct.balance)    <span class="comment"># Output: 1250.0</span></code></pre></div>
+
+      <p>Methods can enforce business rules — <code>withdraw()</code> refuses to overdraw the account, keeping the rule in exactly one place.</p>
+      <div class="code-block"><div class="code-header">Guarded method — withdraw() with a rule</div><pre><code><span class="keyword">class</span> BankAccount:
+    <span class="keyword">def</span> __init__(self, account_id, balance=0.0):
+        self.account_id = account_id
+        self.balance = balance
+
+    <span class="keyword">def</span> withdraw(self, amount):
+        <span class="keyword">if</span> amount &gt; self.balance:
+            <span class="keyword">return</span> <span class="string">&quot;DECLINED — insufficient funds&quot;</span>
+        self.balance -= amount
+        <span class="keyword">return</span> self.balance
+
+acct = BankAccount(<span class="string">&quot;ACC-8842&quot;</span>, 500.0)
+
+print(acct.withdraw(200.0))    <span class="comment"># Output: 300.0</span>
+print(acct.withdraw(900.0))    <span class="comment"># Output: DECLINED — insufficient funds</span></code></pre></div>
+
+      <p>A <strong>getter-style</strong> method computes and returns a value without touching state — <code>get_tax()</code> derives tax from the balance each time it is called.</p>
+      <div class="code-block"><div class="code-header">Getter method — get_tax() computes a value</div><pre><code><span class="keyword">class</span> Employee:
+    <span class="keyword">def</span> __init__(self, name, salary):
+        self.name = name
+        self.salary = salary
+
+    <span class="keyword">def</span> get_tax(self):
+        <span class="keyword">return</span> round(self.salary * 0.10, 2)      <span class="comment"># reads, never writes</span>
+
+emp = Employee(<span class="string">&quot;Alice&quot;</span>, 75000)
+
+print(emp.get_tax())    <span class="comment"># Output: 7500.0</span>
+print(emp.salary)       <span class="comment"># Output: 75000 — unchanged</span></code></pre></div>
+
+      <p>Methods can call other methods on the same object through <code>self</code> — composing small behaviors into summaries.</p>
+      <div class="code-block"><div class="code-header">Methods calling methods — self.get_tax()</div><pre><code><span class="keyword">class</span> Employee:
+    <span class="keyword">def</span> __init__(self, name, salary):
+        self.name = name
+        self.salary = salary
+
+    <span class="keyword">def</span> get_tax(self):
+        <span class="keyword">return</span> round(self.salary * 0.10, 2)
+
+    <span class="keyword">def</span> profile(self):
+        <span class="keyword">return</span> <span class="string">f&quot;{self.name} — salary ${self.salary}, tax ${self.get_tax()}&quot;</span>
+
+emp = Employee(<span class="string">&quot;Alice&quot;</span>, 75000)
+print(emp.profile())
+<span class="comment"># Output: Alice — salary $75000, tax $7500.0</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>User models</strong> — <code>account.verify_pin()</code>, <code>account.upgrade_tier()</code> in a web portal.</li>
+        <li><strong>Inventory data</strong> — <code>product.reduce_stock(qty)</code> enforces business rules in one place.</li>
+        <li><strong>Data validation</strong> — <code>transaction.is_suspicious()</code> encapsulates fraud-check logic.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Add <code>get_tax()</code> to <code>Employee</code> returning 10% of balance.</li>
+        <li>Build <code>BankAccount</code> with <code>deposit()</code> and <code>withdraw()</code> methods.</li>
+        <li>Write a <code>profile()</code> method returning a formatted string summary of the object.</li>
+        <li>Create <code>Learner.complete_module()</code> that increments <code>modules_completed</code>.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>Methods are functions bound to objects; <code>self</code> is always the first parameter.</li>
+        <li>Methods can read state, compute values, or mutate attributes.</li>
+        <li>Encapsulating behavior in methods keeps data analysis domain logic maintainable.</li>
+        <li>Call methods on instances: <code>obj.method()</code> — Python handles <code>self</code>.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-37-methods-in-class.html">Hour 37 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-36-constructor.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Constructor</span></a><a href="hour-38-inheritance.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Inheritance →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

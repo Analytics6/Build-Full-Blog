@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>INSERT, UPDATE, DELETE | Edukron</title>
+ <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+ <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+ <nav class="nav">
+ <a href="../../blog/index.html" >Blog</a>
+ <a href="../../learn/python/index.html" >Python</a>
+ <a href="../../learn/sql/index.html" class="active">SQL</a>
+ <a href="../../assignments/index.html" >Assignments</a>
+ </nav>
+ </div></header>
+<main class="page"><div class="container">
+ <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Sql Path</a><span>/</span><span class="current">Topic 6</span></nav>
+ <div class="lesson-layout">
+ <article class="prose">
+ <header class="article-header">
+ <p class="article-meta">Sql · Topic 6 of 30 · 30 min</p>
+ <h1>INSERT, UPDATE, DELETE</h1>
+ <p class="article-excerpt">Modify data with DML statements — the operations DBAs run daily to load, correct, and purge records.</p>
+ <p style="margin-top:1rem;"><a href="../../assignments/sql-06-dml.html" class="btn btn-outline">Go to Assignment →</a></p>
+ </header>
+
+ <p>SELECT reads data; DML (Data Manipulation Language) writes it. When a nightly ETL job lands new rows in the employees table, corrects a typo in the jobs table, or purges test the job_history table from the job_history table, it uses INSERT, UPDATE, and DELETE.</p>
+
+ <h2>DML in the data pipeline</h2>
+ 
+
+ <h2>INSERT — add rows</h2>
+ <p>Specify the target table and column list, then provide values. Omit columns with defaults or auto-generated keys.</p>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="comment">-- Insert a new job row</span>
+<span class="keyword">INSERT INTO</span> hr.jobs (job_title, category, salary, job_id)
+<span class="keyword">VALUES</span> ('USB-C Hub', 'Sales', 45.00, 'EL-USB42');
+
+<span class="comment">-- Bulk insert multiple sales rows</span>
+<span class="keyword">INSERT INTO</span> hr.employees (hire_date, department_id, employee_id, salary)
+<span class="keyword">VALUES</span> ('2026-07-15', 101, 1001, 185000),
+       ('2026-07-15', 102, 1002, 565000);
+
+<span class="comment">-- Insert from a query (common in ETL)</span>
+<span class="keyword">INSERT INTO</span> hr.job_history (employee_id, job_id, department_id, salary)
+<span class="keyword">SELECT</span> employee_id, job_id, qty, qty * salary
+<span class="keyword">FROM</span> staging_job_history;</code></pre></div>
+
+ <h2>UPDATE — change existing rows</h2>
+ <p>Always include a <code>WHERE</code> clause unless you intend to modify every row. Missing WHERE is a common production incident.</p>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="comment">-- Update a salary value</span>
+<span class="keyword">UPDATE</span> hr.jobs
+<span class="keyword">SET</span> salary = 39.99
+<span class="keyword">WHERE</span> job_id = 'EL-USB42';
+
+<span class="comment">-- Mark loan applications as reviewed</span>
+<span class="keyword">UPDATE</span> hr.job_history
+<span class="keyword">SET</span> status = 'under_review',
+    reviewed_at = '2026-07-15'
+<span class="keyword">WHERE</span> status = 'pending'
+  <span class="keyword">AND</span> submitted_at &lt; '2026-07-01';</code></pre></div>
+
+ <h2>DELETE — remove rows</h2>
+ <div class="code-block"><div class="code-header">SQL</div><pre><code><span class="comment">-- Remove test rows (always filter!)</span>
+<span class="keyword">DELETE FROM</span> hr.job_history
+<span class="keyword">WHERE</span> employee_id <span class="keyword">IN</span> (
+  <span class="keyword">SELECT</span> employee_id <span class="keyword">FROM</span> hr.employees <span class="keyword">WHERE</span> job_title = 'test'
+);
+
+<span class="comment">-- Purge cancelled order line items</span>
+<span class="keyword">DELETE FROM</span> hr.job_history
+<span class="keyword">WHERE</span> employee_id <span class="keyword">IN</span> (
+  <span class="keyword">SELECT</span> employee_id <span class="keyword">FROM</span> hr.employees <span class="keyword">WHERE</span> status = 'cancelled'
+);</code></pre></div>
+
+ <h2>Safety patterns for production</h2>
+ <ul>
+ <li><strong>Preview first</strong> — Run the WHERE clause as a SELECT before UPDATE or DELETE.</li>
+ <li><strong>Transactions</strong> — Wrap multi-step DML in BEGIN/COMMIT so you can ROLLBACK on error (covered in Lesson 28).</li>
+ <li><strong>Soft deletes</strong> — Many teams set <code>is_deleted = 1</code> instead of DELETE to preserve audit history.</li>
+ </ul>
+
+ <h2>Real-world context</h2>
+ <ul>
+ <li><strong>ETL</strong> — INSERT…SELECT loads transformed staging data into production tables.</li>
+ <li><strong>Data quality</strong> — UPDATE fixes bad category mappings discovered during validation.</li>
+ <li><strong>Compliance</strong> — DELETE (or anonymize) sensitive rows on data erasure requests.</li>
+ </ul>
+
+ <h2>Practice</h2>
+ <ol>
+ <li>INSERT a new employee and their first Finance department employee.</li>
+ <li>UPDATE all jobs rows where the title contains IT to increase max_salary by 10%.</li>
+ <li>Write a SELECT that previews rows before DELETE of job_history rows older than seven years.</li>
+ </ol>
+
+ <h2>Key takeaways</h2>
+ <ul>
+ <li>INSERT adds rows; UPDATE modifies them; DELETE removes them.</li>
+ <li>Always use WHERE on UPDATE and DELETE unless you mean to affect every row.</li>
+ <li>INSERT…SELECT is the 30 ETL pattern for loading transformed data.</li>
+ <li>Preview with SELECT, then execute DML inside a transaction when payrollsible.</li>
+ </ul>
+
+ </article>
+ </div>
+ <div class="lesson-nav-buttons"><a href="05-aggregations.html" class="nav-btn"><span class="label">Previous</span><span class="title">Aggregations and GROUP BY</span></a><a href="07-create-table.html" class="nav-btn next"><span class="label">Next</span><span class="title">CREATE TABLE and Data Types</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+ <p>&copy; 2026 Edukron — Learn, build, share.</p>
+ <div class="footer-links">
+ <a href="../../learn/python/index.html">Python Path</a>
+ <a href="../../learn/sql/index.html">SQL Path</a>
+ <a href="../../assignments/index.html">Assignments</a>
+ </div>
+ </div></footer>
+ <script src="../../js/auth.js"></script>
+</body>
+</html>

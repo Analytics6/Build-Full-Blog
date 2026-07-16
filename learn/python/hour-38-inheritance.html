@@ -1,0 +1,163 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 38: Inheritance | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 38</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 38 of 45 — 45-Hour Python Sprint</p>
+        <h1>Inheritance</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> Parent vs child class, super() function, method overriding, polymorphism basics</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-38-inheritance.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Why Inheritance Matters in Data Analytics</h2>
+      <p>Organizations model many entity types that share common traits: every customer has a name and ID; savings and checking accounts both hold balances but behave differently. <strong>Inheritance</strong> lets a child class reuse a parent class's attributes and methods, then customize or extend behavior — reducing duplication across industries domain models.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <h3>Parent and Child Classes</h3>
+      <ul>
+        <li><strong>Parent (superclass)</strong> — general blueprint: <code>class Person</code></li>
+        <li><strong>Child (subclass)</strong> — specialized version: <code>class SavingsAccount(BankAccount)</code></li>
+      </ul>
+
+      <h3>super()</h3>
+      <p>Calls the parent class constructor or methods: <code>super().__init__(name)</code> ensures parent attributes are initialized before adding child-specific ones.</p>
+
+      <h3>Method Overriding</h3>
+      <p>Define a method in the child with the same name as the parent to replace behavior. The child version runs when called on child instances.</p>
+
+      <h2>Syntax Reference</h2>
+      <p>The basic inheritance syntax: <code>class Child(Parent)</code>. The child automatically gains every attribute and method the parent defines.</p>
+      <div class="code-block"><div class="code-header">Inheritance — child reuses parent behavior</div><pre><code><span class="keyword">class</span> BankAccount:
+    <span class="keyword">def</span> __init__(self, account_id, balance):
+        self.account_id = account_id
+        self.balance = balance
+
+    <span class="keyword">def</span> describe(self):
+        <span class="keyword">return</span> <span class="string">f&quot;Account {self.account_id}: ${self.balance}&quot;</span>
+
+<span class="keyword">class</span> SavingsAccount(BankAccount):    <span class="comment"># inherits everything</span>
+    <span class="keyword">pass</span>
+
+acct = SavingsAccount(<span class="string">&quot;ACC-8842&quot;</span>, 1500.00)
+print(acct.describe())    <span class="comment"># Output: Account ACC-8842: $1500.0 — parent method works</span></code></pre></div>
+
+      <p><code>super().__init__()</code> runs the parent constructor first, so the child can add its own attributes on top of a fully initialized base.</p>
+      <div class="code-block"><div class="code-header">super() — extend the parent constructor</div><pre><code><span class="keyword">class</span> BankAccount:
+    <span class="keyword">def</span> __init__(self, account_id, balance):
+        self.account_id = account_id
+        self.balance = balance
+
+<span class="keyword">class</span> SavingsAccount(BankAccount):
+    <span class="keyword">def</span> __init__(self, account_id, balance, interest_rate):
+        super().__init__(account_id, balance)    <span class="comment"># parent sets id + balance</span>
+        self.interest_rate = interest_rate       <span class="comment"># child adds its own field</span>
+
+acct = SavingsAccount(<span class="string">&quot;ACC-8842&quot;</span>, 1500.00, 0.04)
+
+print(acct.balance)          <span class="comment"># Output: 1500.0 — from the parent</span>
+print(acct.interest_rate)    <span class="comment"># Output: 0.04 — from the child</span></code></pre></div>
+
+      <p><strong>Method overriding</strong>: define a method with the parent's name in the child, and the child's version wins for child instances.</p>
+      <div class="code-block"><div class="code-header">Overriding — replace parent behavior</div><pre><code><span class="keyword">class</span> BankAccount:
+    <span class="keyword">def</span> monthly_fee(self):
+        <span class="keyword">return</span> 10.00
+
+<span class="keyword">class</span> SavingsAccount(BankAccount):
+    <span class="keyword">def</span> monthly_fee(self):          <span class="comment"># override — savings accounts are free</span>
+        <span class="keyword">return</span> 0.00
+
+regular = BankAccount()
+savings = SavingsAccount()
+
+print(regular.monthly_fee())    <span class="comment"># Output: 10.0</span>
+print(savings.monthly_fee())    <span class="comment"># Output: 0.0 — child version wins</span></code></pre></div>
+
+      <p>An override can still reuse the parent's logic by calling <code>super().method()</code> — extend rather than replace.</p>
+      <div class="code-block"><div class="code-header">super() in overrides — extend, not replace</div><pre><code><span class="keyword">class</span> Vehicle:
+    <span class="keyword">def</span> __init__(self, brand):
+        self.brand = brand
+
+    <span class="keyword">def</span> start_engine(self):
+        <span class="keyword">return</span> <span class="string">f&quot;{self.brand} engine started&quot;</span>
+
+<span class="keyword">class</span> DeliveryVan(Vehicle):
+    <span class="keyword">def</span> start_engine(self):
+        parent_msg = super().start_engine()      <span class="comment"># run the parent version first</span>
+        <span class="keyword">return</span> <span class="string">f&quot;{parent_msg} — ready for delivery route&quot;</span>
+
+van = DeliveryVan(<span class="string">&quot;Toyota&quot;</span>)
+print(van.start_engine())
+<span class="comment"># Output: Toyota engine started — ready for delivery route</span></code></pre></div>
+
+      <p><strong>Polymorphism</strong>: code that calls a shared method works with any subclass — each object responds in its own way.</p>
+      <div class="code-block"><div class="code-header">Polymorphism — one call, many behaviors</div><pre><code>accounts = [BankAccount(), SavingsAccount()]
+
+<span class="keyword">for</span> acct <span class="keyword">in</span> accounts:
+    print(acct.monthly_fee())    <span class="comment"># same call, class-specific answer</span>
+
+<span class="comment"># Output:</span>
+<span class="comment"># 10.0</span>
+<span class="comment"># 0.0</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>Payment types</strong> — Base <code>Payment</code> class; <code>CreditCardPayment</code> and <code>BankTransfer</code> override <code>process()</code>.</li>
+        <li><strong>ETL validators</strong> — Base <code>RecordValidator</code>; child classes add domain-specific validation rules.</li>
+        <li><strong>Framework patterns</strong> — Django model inheritance for shared timestamp fields on all tables.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Create parent <code>Vehicle</code> and child <code>Car</code> classes with shared <code>brand</code> attribute.</li>
+        <li>Override <code>start_engine()</code> in <code>Car</code> with a specialized message.</li>
+        <li>Use <code>super()</code> inside the overridden method to call the parent version first.</li>
+        <li>Model <code>Transaction</code> base class with child <code>SalesTransaction</code> adding <code>store_id</code>.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>Inheritance reuses parent attributes and methods in child classes.</li>
+        <li><code>super()</code> initializes or calls parent behavior from the child.</li>
+        <li>Method overriding customizes behavior while keeping a shared interface.</li>
+        <li>Hierarchies model "is-a" relationships: a SavingsAccount is a BankAccount.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-38-inheritance.html">Hour 38 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-37-methods-in-class.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Methods in Class</span></a><a href="hour-39-numpy-introduction.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">NumPy Introduction →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

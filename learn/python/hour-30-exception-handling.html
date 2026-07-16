@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 30: Exception Handling | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 30</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 30 of 45 — 45-Hour Python Sprint</p>
+        <h1>Exception Handling</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> try block, except block, catching specific exceptions (ZeroDivisionError, ValueError, FileNotFoundError), else block, finally block</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-30-exception-handling.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Why Exception Handling Matters in Data Analytics</h2>
+      <p>Nightly ETL jobs read thousands of files — source systems exports, transaction feeds, and warehouse stock updates. Not every file arrives perfectly formatted. A missing CSV, a division-by-zero in a metric calculation, or invalid user input should <strong>not</strong> crash the entire pipeline. Exception handling lets scripts fail gracefully, log errors, and continue processing remaining batches.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <h3>try / except</h3>
+      <p>Wrap risky code in <code>try</code>. If an exception occurs, Python jumps to the matching <code>except</code> block instead of terminating the program.</p>
+
+      <h3>Catching Specific Exceptions</h3>
+      <p>Always catch the narrowest exception type you expect:</p>
+      <ul>
+        <li><code>ValueError</code> — bad conversion (e.g., <code>int("abc")</code>)</li>
+        <li><code>ZeroDivisionError</code> — dividing by zero in ratio calculations</li>
+        <li><code>FileNotFoundError</code> — missing input file in an ETL stage</li>
+        <li><code>KeyError</code> — missing dictionary key in parsed JSON</li>
+      </ul>
+
+      <h3>else and finally</h3>
+      <ul>
+        <li><code>else</code> — runs only when the <code>try</code> block succeeds (no exception raised).</li>
+        <li><code>finally</code> — always runs, ideal for closing files, DB connections, or writing audit trail entries.</li>
+      </ul>
+
+      <h2>Syntax Reference</h2>
+      <p>The full four-part structure: risky code in <code>try</code>, error handling in <code>except</code>, success-only code in <code>else</code>, and guaranteed cleanup in <code>finally</code>.</p>
+      <div class="code-block"><div class="code-header">try / except / else / finally — safe numeric conversion</div><pre><code><span class="keyword">try</span>:
+    amount = float(<span class="string">&quot;149.99&quot;</span>)             <span class="comment"># risky: could be non-numeric text</span>
+    fee = amount * 0.02
+<span class="keyword">except</span> ValueError:
+    print(<span class="string">&quot;Invalid amount — expected a number&quot;</span>)
+<span class="keyword">else</span>:
+    print(<span class="string">f&quot;Processing fee: {fee:.2f}&quot;</span>)   <span class="comment"># runs only on success</span>
+<span class="keyword">finally</span>:
+    print(<span class="string">&quot;Validation step complete&quot;</span>)     <span class="comment"># always runs</span>
+
+<span class="comment"># Output:</span>
+<span class="comment"># Processing fee: 3.00</span>
+<span class="comment"># Validation step complete</span></code></pre></div>
+
+      <p>When the risky code <em>does</em> fail, execution jumps straight to the matching <code>except</code> — the rest of the <code>try</code> block is skipped and the program keeps running.</p>
+      <div class="code-block"><div class="code-header">except ValueError — catching the failure path</div><pre><code><span class="keyword">try</span>:
+    amount = float(<span class="string">&quot;abc&quot;</span>)                 <span class="comment"># raises ValueError immediately</span>
+    fee = amount * 0.02                   <span class="comment"># never reached</span>
+<span class="keyword">except</span> ValueError:
+    print(<span class="string">&quot;Invalid amount — expected a number&quot;</span>)
+
+print(<span class="string">&quot;Script continues normally&quot;</span>)
+
+<span class="comment"># Output:</span>
+<span class="comment"># Invalid amount — expected a number</span>
+<span class="comment"># Script continues normally</span></code></pre></div>
+
+      <p>A missing input file is an expected event in ETL — catch <code>FileNotFoundError</code> and skip the stage instead of killing the whole job.</p>
+      <div class="code-block"><div class="code-header">FileNotFoundError — a resilient ETL stage</div><pre><code><span class="keyword">try</span>:
+    <span class="keyword">with</span> open(<span class="string">&quot;retail_orders_20260715.csv&quot;</span>, <span class="string">&quot;r&quot;</span>) <span class="keyword">as</span> f:
+        header = f.readline()
+<span class="keyword">except</span> FileNotFoundError:
+    print(<span class="string">&quot;Feed not arrived — skipping retail stage&quot;</span>)
+<span class="keyword">else</span>:
+    print(<span class="string">f&quot;Loaded header: {header.strip()}&quot;</span>)
+
+<span class="comment"># Output (when the file is missing):</span>
+<span class="comment"># Feed not arrived — skipping retail stage</span></code></pre></div>
+
+      <p>Multiple <code>except</code> blocks handle different failures differently — here a ratio calculator distinguishes bad input from a zero denominator.</p>
+      <div class="code-block"><div class="code-header">Multiple except blocks — one handler per error</div><pre><code><span class="keyword">def</span> safe_ratio(numerator_text, denominator_text):
+    <span class="keyword">try</span>:
+        <span class="keyword">return</span> float(numerator_text) / float(denominator_text)
+    <span class="keyword">except</span> ValueError:
+        <span class="keyword">return</span> <span class="string">&quot;ERROR: not a number&quot;</span>
+    <span class="keyword">except</span> ZeroDivisionError:
+        <span class="keyword">return</span> <span class="string">&quot;ERROR: denominator is zero&quot;</span>
+
+print(safe_ratio(<span class="string">&quot;500&quot;</span>, <span class="string">&quot;40&quot;</span>))    <span class="comment"># Output: 12.5</span>
+print(safe_ratio(<span class="string">&quot;500&quot;</span>, <span class="string">&quot;abc&quot;</span>))   <span class="comment"># Output: ERROR: not a number</span>
+print(safe_ratio(<span class="string">&quot;500&quot;</span>, <span class="string">&quot;0&quot;</span>))     <span class="comment"># Output: ERROR: denominator is zero</span></code></pre></div>
+
+      <p>Wrapping risky access in a small helper that returns <code>None</code> on failure is a common defensive pattern.</p>
+      <div class="code-block"><div class="code-header">IndexError — safe list access helper</div><pre><code><span class="keyword">def</span> safe_get(records, index):
+    <span class="keyword">try</span>:
+        <span class="keyword">return</span> records[index]
+    <span class="keyword">except</span> IndexError:
+        <span class="keyword">return</span> <span class="keyword">None</span>
+
+customers = [<span class="string">&quot;Alice&quot;</span>, <span class="string">&quot;Bob&quot;</span>]
+
+print(safe_get(customers, 0))    <span class="comment"># Output: Alice</span>
+print(safe_get(customers, 5))    <span class="comment"># Output: None — no crash</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>ETL resilience</strong> — The ingest script catches <code>FileNotFoundError</code> per store and alerts ops instead of halting all 200 stores.</li>
+        <li><strong>Data validation</strong> — <code>ValueError</code> on malformed IBAN strings routes rows to a quarantine table.</li>
+        <li><strong>API services</strong> — <code>finally</code> closes database connections even when queries fail mid-transaction.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Wrap <code>int(user_input)</code> in try/except and handle <code>ValueError</code>.</li>
+        <li>Build <code>read_index(lst, idx)</code> that returns the element or a friendly message on <code>IndexError</code>.</li>
+        <li>Simulate closing a connection in a <code>finally</code> block that always prints a cleanup message.</li>
+        <li>Chain multiple <code>except</code> blocks for <code>ValueError</code> and <code>ZeroDivisionError</code> in a ratio calculator.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>Exceptions are runtime errors; handling them keeps production pipelines alive.</li>
+        <li>Catch specific exception types — avoid bare <code>except:</code> that hides bugs.</li>
+        <li><code>else</code> runs on success; <code>finally</code> always runs for cleanup.</li>
+        <li>Robust ETL scripts expect bad data and recover instead of crashing.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-30-exception-handling.html">Hour 30 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-29-built-in-functions.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Built-in Functions</span></a><a href="hour-31-file-handling.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">File Handling →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 14: Nested Conditions | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 14</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 14 of 45 — 45-Hour Python Sprint</p>
+        <h1>Nested Conditions</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> if statements inside if statements, complex logical conditions</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-14-nested-conditions.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Decisions Inside Decisions</h2>
+      <p>Real business rules rarely fit a single <code>if</code>. Loan underwriting checks the credit score, <em>then</em> the income, <em>then</em> the debt ratio — each check only meaningful after the previous one passed. Placing an <code>if</code> inside another <code>if</code> expresses exactly this gating. The craft lies in knowing when to nest and when to <em>flatten</em> the logic with <code>and</code>/<code>or</code> instead, because deep nesting quickly becomes unreadable.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <h3>How Nesting Works</h3>
+      <p>An inner <code>if</code> is just another statement inside the outer block, indented one more level (8 spaces total). It is evaluated only when the outer condition is true. Each level of nesting has its own optional <code>else</code>, so error messages can be specific about <em>which</em> gate failed.</p>
+      <h3>Nest or Flatten?</h3>
+      <ul>
+        <li><strong>Nest</strong> when the inner check depends on the outer one — checking a password only makes sense after the username exists.</li>
+        <li><strong>Flatten</strong> with <code>and</code> when conditions are independent and only one combined outcome matters.</li>
+        <li>More than two or three levels is the &quot;pyramid of doom&quot; — refactor with combined conditions or early exits.</li>
+      </ul>
+
+      <h2>Syntax Reference</h2>
+      <p>A three-gate underwriting rule: each inner check runs only after the outer one passes, and each gate has its own rejection message.</p>
+      <div class="code-block"><div class="code-header">Nested if — loan underwriting gates</div><pre><code>credit_score = 720
+annual_income = 850000
+loan_amount = 500000
+
+<span class="keyword">if</span> credit_score &gt;= 650:                      <span class="comment"># gate 1: creditworthiness</span>
+    <span class="keyword">if</span> annual_income &gt;= 300000:              <span class="comment"># gate 2: income (only if gate 1 passed)</span>
+        dti = loan_amount / annual_income    <span class="comment"># gate 3: debt-to-income</span>
+        <span class="keyword">if</span> dti &lt;= 0.6:
+            decision = <span class="string">&quot;APPROVED&quot;</span>
+        <span class="keyword">else</span>:
+            decision = <span class="string">&quot;REVIEW — high DTI&quot;</span>
+    <span class="keyword">else</span>:
+        decision = <span class="string">&quot;REJECTED — low income&quot;</span>
+<span class="keyword">else</span>:
+    decision = <span class="string">&quot;REJECTED — low credit score&quot;</span>
+
+print(decision)   <span class="comment"># Output: APPROVED</span></code></pre></div>
+
+      <p>Nesting is the right shape for login-style checks: the inner question (&quot;does the password match?&quot;) is meaningless unless the outer one (&quot;does the user exist?&quot;) already passed.</p>
+      <div class="code-block"><div class="code-header">Nested if — access control</div><pre><code>username_exists = <span class="keyword">True</span>
+password_match = <span class="keyword">False</span>
+
+<span class="keyword">if</span> username_exists:
+    <span class="keyword">if</span> password_match:
+        print(<span class="string">&quot;Access granted — loading account statement&quot;</span>)
+    <span class="keyword">else</span>:
+        print(<span class="string">&quot;Invalid password&quot;</span>)      <span class="comment"># specific: we know the user exists</span>
+<span class="keyword">else</span>:
+    print(<span class="string">&quot;User not found&quot;</span>)
+
+<span class="comment"># Output: Invalid password</span></code></pre></div>
+
+      <p>When conditions are independent, flattening with <code>and</code> reads far better than nesting — compare this shipping rule to the pyramid it replaces.</p>
+      <div class="code-block"><div class="code-header">Flattened logic — and instead of nesting</div><pre><code>country = <span class="string">&quot;IN&quot;</span>
+weight_kg = 2.5
+is_local = country == <span class="string">&quot;IN&quot;</span>
+
+<span class="keyword">if</span> is_local <span class="keyword">and</span> weight_kg &lt;= 5:
+    shipping_cost = 49
+<span class="keyword">elif</span> is_local <span class="keyword">and</span> weight_kg &gt; 5:
+    shipping_cost = 99
+<span class="keyword">else</span>:
+    shipping_cost = 499               <span class="comment"># international orders</span>
+
+print(<span class="string">f&quot;Shipping: {shipping_cost}&quot;</span>)   <span class="comment"># Output: Shipping: 49</span></code></pre></div>
+
+      <p>A third option for deeply nested validation: <strong>early exits</strong>. Handle each failure immediately and let the happy path continue unindented — common in functions (Hour 26).</p>
+      <div class="code-block"><div class="code-header">Early exits — flat validation chain</div><pre><code>balance = 4500
+withdrawal = 800
+card_active = <span class="keyword">True</span>
+
+<span class="keyword">if</span> <span class="keyword">not</span> card_active:
+    print(<span class="string">&quot;Card blocked&quot;</span>)
+<span class="keyword">elif</span> withdrawal &gt; balance:
+    print(<span class="string">&quot;Insufficient funds&quot;</span>)
+<span class="keyword">else</span>:
+    balance -= withdrawal              <span class="comment"># happy path — no nesting needed</span>
+    print(<span class="string">f&quot;Dispensed {withdrawal}. New balance: {balance}&quot;</span>)
+
+<span class="comment"># Output: Dispensed 800. New balance: 3700</span></code></pre></div>
+
+      <h2>Edge Cases &amp; Gotchas</h2>
+      <p>With nested blocks, an <code>else</code> pairs with the nearest unmatched <code>if</code> at the <em>same indentation level</em>. Misaligning it silently attaches it to the wrong condition.</p>
+      <div class="code-block"><div class="code-header">Gotcha — which if does this else belong to?</div><pre><code>amount = 500
+is_verified = <span class="keyword">False</span>
+
+<span class="keyword">if</span> amount &gt; 100:
+    <span class="keyword">if</span> is_verified:
+        print(<span class="string">&quot;Process large payment&quot;</span>)
+    <span class="keyword">else</span>:                                  <span class="comment"># pairs with the INNER if</span>
+        print(<span class="string">&quot;Verification required&quot;</span>)
+
+<span class="comment"># Output: Verification required</span>
+<span class="comment"># Outdent the else by 4 spaces and it would pair with the OUTER if,</span>
+<span class="comment"># completely changing when it runs.</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>Underwriting</strong> — layered credit, income, and collateral gates with gate-specific rejection reasons.</li>
+        <li><strong>Access control</strong> — existence checks before credential checks, so error messages never leak information accidentally.</li>
+        <li><strong>ETL routing</strong> — outer branch on source system, inner branch on record type.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Write the three-gate loan example and test all four outcomes by varying the inputs.</li>
+        <li>Flatten a two-level nest into a single <code>and</code> condition and confirm identical behavior.</li>
+        <li>Rewrite a nested validation as an early-exit <code>elif</code> chain.</li>
+        <li>Shift an <code>else</code> between nesting levels and observe how the output changes.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>An inner <code>if</code> runs only when its outer condition is true — perfect for dependent checks.</li>
+        <li>Flatten independent conditions with <code>and</code>/<code>or</code>; nest only when the inner check requires the outer gate.</li>
+        <li>Early-exit chains keep the happy path unindented and readable.</li>
+        <li>Beyond two levels of nesting, refactor — the pyramid of doom hides bugs.</li>
+        <li>An <code>else</code> pairs with the nearest <code>if</code> at its own indentation level.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-14-nested-conditions.html">Hour 14 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-13-conditional-statements.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Conditional Statements</span></a><a href="hour-15-for-loop.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">For Loop →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

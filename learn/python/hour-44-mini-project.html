@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hour 44: Mini Project | Edukron</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+    <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+    <nav class="nav">
+      <a href="../../blog/index.html">Blog</a>
+      <a href="index.html" class="active">Python</a>
+      <a href="../sql/index.html">SQL</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </nav>
+  </div></header>
+<main class="page"><div class="container">
+  <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Python Path</a><span>/</span><span class="current">Hour 44</span></nav>
+  <div class="lesson-layout">
+    <article class="prose">
+      <header class="article-header">
+        <p class="article-meta">Hour 44 of 45 — 45-Hour Python Sprint</p>
+        <h1>Mini Project</h1>
+        <p class="article-excerpt"><strong>Subtopics:</strong> Data integration, reading files, cleaning, filtering, performing calculations, aggregation and grouping (groupby), outputting report</p>
+        <p style="margin-top:1rem;"><a href="../../assignments/hour-44-mini-project.html" class="btn btn-outline">Go to Assignment →</a></p>
+      </header>
+
+      <h2>Mini Project: End-to-End Sales Analytics Pipeline</h2>
+      <p>Put your sprint skills together: load a sample CSV, clean missing values, filter relevant records, aggregate with <code>groupby</code>, and export a summary report. This mirrors a real data analytics workflow — from raw <code>store_sales</code> ingest to stakeholder-ready output.</p>
+
+      <h2>Theory &amp; Concepts</h2>
+      <h3>ETL Stages</h3>
+      <ol>
+        <li><strong>Extract</strong> — <code>pd.read_csv()</code></li>
+        <li><strong>Transform</strong> — clean, filter, <code>groupby().agg()</code></li>
+        <li><strong>Load</strong> — <code>df.to_csv()</code> export</li>
+      </ol>
+      <h3>groupby()</h3>
+      <p>Split by a column (e.g., <code>store_id</code>), apply aggregations (sum, mean, count), combine into a summary table.</p>
+
+      <h2>ETL Pipeline Steps</h2>
+      
+
+      <h2>Syntax Reference</h2>
+      <p>Stage 1 — Extract: load the raw file and check its size before touching anything.</p>
+      <div class="code-block"><div class="code-header">Extract — load the raw CSV</div><pre><code><span class="keyword">import</span> pandas <span class="keyword">as</span> pd
+
+df = pd.read_csv(<span class="string">&quot;store_sales.csv&quot;</span>)
+
+print(df.shape)    <span class="comment"># Output (example): (5200, 6) — raw row count</span></code></pre></div>
+
+      <p>Stage 2 — Clean: drop rows with missing amounts and remove refunds or bad records with non-positive values.</p>
+      <div class="code-block"><div class="code-header">Clean — drop nulls and invalid rows</div><pre><code>df = df.dropna(subset=[<span class="string">&quot;amount&quot;</span>])
+df = df[df[<span class="string">&quot;amount&quot;</span>] &gt; 0]
+
+print(df.shape)    <span class="comment"># Output (example): (5108, 6) — after cleaning</span></code></pre></div>
+
+      <p>Stage 3 — Aggregate: <code>groupby()</code> splits the rows by store, <code>agg()</code> computes several statistics per group in one call.</p>
+      <div class="code-block"><div class="code-header">groupby().agg() — summary per store</div><pre><code>summary = df.groupby(<span class="string">&quot;store_id&quot;</span>)[<span class="string">&quot;amount&quot;</span>].agg([<span class="string">&quot;sum&quot;</span>, <span class="string">&quot;mean&quot;</span>, <span class="string">&quot;count&quot;</span>])
+summary.columns = [<span class="string">&quot;total_revenue&quot;</span>, <span class="string">&quot;avg_sale&quot;</span>, <span class="string">&quot;txn_count&quot;</span>]
+
+print(summary.head(2))
+<span class="comment"># Output (example):</span>
+<span class="comment">#           total_revenue  avg_sale  txn_count</span>
+<span class="comment"># store_id</span>
+<span class="comment"># S-01           84210.50    412.80        204</span>
+<span class="comment"># S-02           61055.25    377.50        162</span></code></pre></div>
+
+      <p>Stage 4 — Load: export the summary to a new CSV for stakeholders.</p>
+      <div class="code-block"><div class="code-header">to_csv() — export the report</div><pre><code>summary.to_csv(<span class="string">&quot;store_summary_report.csv&quot;</span>)
+
+print(<span class="string">&quot;Report saved&quot;</span>)    <span class="comment"># Output: Report saved</span></code></pre></div>
+
+      <h2>Real-World Application</h2>
+      <ul>
+        <li><strong>Daily summary reports</strong> — Aggregate sales by store; email CSV to regional managers.</li>
+        <li><strong>Data summaries</strong> — Group transactions by account type; compute total volume.</li>
+        <li><strong>dashboards</strong> — Weekly store revenue summary feeds the analytics API.</li>
+      </ul>
+
+      <h2>Notebook &amp; Practice</h2>
+      <ul>
+        <li>Group an inventory DataFrame by category and calculate total valuation (<code>price * stock</code>).</li>
+        <li>Build a function that accepts a raw DataFrame and returns a cleaned, aggregated summary.</li>
+        <li>Export the summary to CSV with <code>index=False</code>.</li>
+        <li>Document each pipeline stage with comments: Extract, Transform, Load.</li>
+      </ul>
+
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li>Full pipeline: load → clean → filter → aggregate → export.</li>
+        <li><code>groupby().agg()</code> produces summary statistics per group.</li>
+        <li><code>.to_csv(index=False)</code> for clean output files.</li>
+      </ul>
+
+      <h2>Practice Before Assignment</h2>
+      <p>Complete the notebook exercises above, then work through the <a href="../../assignments/hour-44-mini-project.html">Hour 44 assignment</a> (10 Questions).</p>
+    </article>
+  </div>
+  <div class="lesson-nav-buttons"><a href="hour-43-pandas-filtering.html" class="nav-btn">
+          <span class="label">Previous lesson</span>
+          <span class="title">← Pandas Filtering</span></a><a href="hour-45-final-assessment.html" class="nav-btn next">
+          <span class="label">Next lesson</span>
+          <span class="title">Final Assessment →</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+    <p>&copy; 2026 Edukron — Learn, build, share.</p>
+    <div class="footer-links">
+      <a href="index.html">Python Path</a>
+      <a href="../sql/index.html">SQL Path</a>
+      <a href="../../assignments/index.html">Assignments</a>
+    </div>
+  </div></footer>
+  <script src="../../js/auth.js"></script>
+</body>
+</html>

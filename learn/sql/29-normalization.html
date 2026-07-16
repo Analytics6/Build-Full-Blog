@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Database Normalization | Edukron</title>
+ <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="container header-inner">
+ <a href="../../index.html" class="logo"><span class="logo-icon">E</span><span class="logo-text">Edukron</span></a>
+ <nav class="nav">
+ <a href="../../blog/index.html" >Blog</a>
+ <a href="../../learn/python/index.html" >Python</a>
+ <a href="../../learn/sql/index.html" class="active">SQL</a>
+ <a href="../../assignments/index.html" >Assignments</a>
+ </nav>
+ </div></header>
+<main class="page"><div class="container">
+ <nav class="breadcrumb"><a href="../../index.html">Home</a><span>/</span><a href="index.html">Sql Path</a><span>/</span><span class="current">Topic 29</span></nav>
+ <div class="lesson-layout">
+ <article class="prose">
+ <header class="article-header">
+ <p class="article-meta">Sql · Topic 29 of 30 · 35 min</p>
+ <h1>Database Normalization</h1>
+ <p class="article-excerpt">1NF, 2NF, 3NF and reducing redundancy — design clean schemas that avoid update anomalies and data drift.</p>
+ <p style="margin-top:1rem;"><a href="../../assignments/sql-29-normalization.html" class="btn btn-outline">Go to Assignment →</a></p>
+ </header>
+
+ <h2>Why Normalize?</h2>
+ <p>Imagine a single denormalized table storing an identifier, a person name, an email, a job title, and a salary on every row. If the email changes, you must update every row where it appears. If you miss one, reports show conflicting data. <strong>Normalization</strong> splits data into related tables so each fact is stored exactly once.</p>
+
+ <h2>Theory: Normal Forms</h2>
+ <table>
+ <thead><tr><th>Form</th><th>Rule</th><th>Fixes</th></tr></thead>
+ <tbody>
+ <tr><td><strong>1NF</strong></td><td>Atomic values; no repeating groups</td><td>No comma-separated value lists in one cell</td></tr>
+ <tr><td><strong>2NF</strong></td><td>1NF + no partial dependencies on composite keys</td><td>Product name depends only on job_id, not order_id+job_id</td></tr>
+ <tr><td><strong>3NF</strong></td><td>2NF + no transitive dependencies</td><td>Store city depends on department_id, not employee_id</td></tr>
+ </tbody>
+ </table>
+
+ <h2>Before: Denormalized Order Table</h2>
+ <div class="code-block"><div class="code-header">SQL — Problematic flat table</div><pre><code><span class="comment">-- BAD: everything in one table</span>
+<span class="keyword">CREATE TABLE</span> flat_employees (
+    history_id       <span class="keyword">INTEGER</span>,
+    employee_name  <span class="keyword">TEXT</span>,
+    email <span class="keyword">TEXT</span>,
+    job_title   <span class="keyword">TEXT</span>,
+    salary  <span class="keyword">DECIMAL</span>,
+    department_id       <span class="keyword">INTEGER</span>
+);
+<span class="comment">-- Update anomaly: change email → update many rows</span>
+<span class="comment">-- Insert anomaly: can't add child without parent</span>
+<span class="comment">-- Delete anomaly: delete last child → lose parent ref</span></code></pre></div>
+
+ <h2>After: Normalized schema (3NF)</h2>
+ <div class="code-block"><div class="code-header">SQL — Normalized schema (3NF)</div><pre><code><span class="keyword">CREATE TABLE</span> hr.employees (
+    employee_id <span class="keyword">INTEGER PRIMARY KEY</span>,
+    name        <span class="keyword">TEXT NOT NULL</span>,
+    email       <span class="keyword">TEXT UNIQUE</span>
+);
+
+<span class="keyword">CREATE TABLE</span> hr.jobs (
+    job_id   <span class="keyword">INTEGER PRIMARY KEY</span>,
+    job_id          <span class="keyword">TEXT UNIQUE</span>,
+    job_title <span class="keyword">TEXT</span>,
+    salary   <span class="keyword">DECIMAL</span>
+);
+
+<span class="keyword">CREATE TABLE</span> hr.job_history (
+    history_id    <span class="keyword">INTEGER PRIMARY KEY</span>,
+    employee_id <span class="keyword">INTEGER REFERENCES</span> hr.employees(employee_id),
+    start_date  <span class="keyword">TIMESTAMP</span>,
+    status      <span class="keyword">TEXT</span>
+);
+
+<span class="keyword">CREATE TABLE</span> hr.job_history (
+    history_id   <span class="keyword">INTEGER REFERENCES</span> hr.job_history(history_id),
+    job_id <span class="keyword">INTEGER REFERENCES</span> hr.jobs(job_id),
+    department_id   <span class="keyword">INTEGER</span>,
+    salary <span class="keyword">DECIMAL</span>,
+    <span class="keyword">PRIMARY KEY</span> (history_id, job_id)
+);</code></pre></div>
+
+ <h2>Example: Normalizing Branch Data</h2>
+ <div class="code-block"><div class="code-header">SQL — Separate branch attributes from hr.employees</div><pre><code><span class="comment">-- 3NF: location stored once in departments, not repeated per employee</span>
+<span class="keyword">CREATE TABLE</span> hr.departments (
+    department_id   <span class="keyword">INTEGER PRIMARY KEY</span>,
+    branch_name <span class="keyword">TEXT</span>,
+    city        <span class="keyword">TEXT</span>,
+    region      <span class="keyword">TEXT</span>
+);
+
+<span class="keyword">CREATE TABLE</span> hr.employees (
+    employee_id     <span class="keyword">INTEGER PRIMARY KEY</span>,
+    account_number <span class="keyword">TEXT UNIQUE</span>,
+    employee_id    <span class="keyword">INTEGER</span>,
+    department_id      <span class="keyword">INTEGER REFERENCES</span> hr.departments(department_id),
+    salary        <span class="keyword">DECIMAL</span>
+);</code></pre></div>
+
+ <h2>Normalization Decision Flow</h2>
+ 
+
+ <h2>Real-World Notes</h2>
+ <ul>
+ <li><strong>OLTP vs OLAP</strong> — Normalize operational databases (OLTP source systems); denormalize data warehouses for query speed.</li>
+ <li><strong>Surrogate keys</strong> — Use integer IDs as PKs even when natural keys (SKU, account number) exist — simplifies FK relationships.</li>
+ <li><strong>Historical prices</strong> — Store <code>salary</code> on the job_history table (not just in catalog) to preserve price at time of sale.</li>
+ <li><strong>Over-normalization</strong> — Splitting every attribute into its own table hurts JOIN performance; 3NF is the practical sweet spot for OLTP.</li>
+ </ul>
+
+ <h2>Key Takeaways</h2>
+ <ul>
+ <li>Normalization eliminates redundancy and update/insert/delete anomalies.</li>
+ <li>1NF: atomic values; 2NF: no partial key dependencies; 3NF: no transitive dependencies.</li>
+ <li>Normalized designs use separate entity and junction tables.</li>
+ <li>Denormalize deliberately in analytics warehouses, not in source systems.</li>
+ </ul>
+
+ <h2>Practice Before Assignment</h2>
+ <p>Identify 3NF violations in a denormalized order table and sketch the corrected schema. Then complete the <a href="../../assignments/sql-29-normalization.html">Topic 29 assignment</a>.</p>
+
+ </article>
+ </div>
+ <div class="lesson-nav-buttons"><a href="28-transactions.html" class="nav-btn"><span class="label">Previous</span><span class="title">Transactions and ACID</span></a><a href="30-explain.html" class="nav-btn next"><span class="label">Next</span><span class="title">Query Performance and EXPLAIN</span></a></div>
+</div></main>
+<footer class="site-footer"><div class="container footer-inner">
+ <p>&copy; 2026 Edukron — Learn, build, share.</p>
+ <div class="footer-links">
+ <a href="../../learn/python/index.html">Python Path</a>
+ <a href="../../learn/sql/index.html">SQL Path</a>
+ <a href="../../assignments/index.html">Assignments</a>
+ </div>
+ </div></footer>
+ <script src="../../js/auth.js"></script>
+</body>
+</html>
